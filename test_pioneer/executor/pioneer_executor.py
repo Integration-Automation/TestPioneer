@@ -1,0 +1,228 @@
+import logging
+import time
+import webbrowser
+from logging import Logger
+from typing import Union
+
+import je_load_density
+import je_api_testka
+import je_auto_control
+import je_web_runner
+import yaml
+
+from test_pioneer.exception.exceptions import WrongInputException, YamlException, ExecutorException
+from test_pioneer.logging.loggin_instance import TestPioneerHandler, step_log_check, test_pioneer_logger
+from test_pioneer.process.execute_process import ExecuteProcess
+from test_pioneer.process.process_manager import process_manager_instance
+
+
+def execute_yaml(stream: str):
+    try:
+        yaml_data = yaml.safe_load(stream=stream)
+    except Exception as error:
+        raise WrongInputException("Wrong input: " + repr(error))
+    # Variable
+    enable_logging: bool = False
+    # Pre check
+    if isinstance(yaml_data, dict) is False:
+        raise YamlException("Not a dict")
+    if "pioneer_log" in yaml_data.keys():
+        enable_logging = True
+        filename = yaml_data.get("pioneer_log")
+        file_handler = TestPioneerHandler(filename=filename)
+        test_pioneer_logger.addHandler(file_handler)
+
+    if "jobs" not in yaml_data.keys():
+        raise YamlException("No jobs tag")
+    if isinstance(yaml_data.get("jobs"), dict) is False:
+        raise YamlException("jobs not a dict")
+    steps = yaml_data.get("jobs").get("steps", None)
+    if steps is None or len(steps) <= 0:
+        raise YamlException("Steps tag is empty")
+
+    pre_check_failed: bool = False
+
+    # Pre-check name have duplicate or not
+    for step in steps:
+        if step.get("name", None) is None:
+            step_log_check(
+                enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
+                message=f"Step need name tag")
+            break
+        name = step.get("name")
+        if name in process_manager_instance.name_set:
+            step_log_check(
+                enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
+                message=f"job name duplicated: {name}")
+            pre_check_failed = True
+            break
+        else:
+            process_manager_instance.name_set.add(name)
+
+    for step in steps:
+        if pre_check_failed:
+            break
+        name = step.get("name")
+        if "run" in step.keys():
+            if step.get("with", None) is None:
+                step_log_check(
+                    enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
+                    message=f"Step need with tag")
+                break
+            with_tag = step.get("with")
+            if not isinstance(with_tag, str):
+                step_log_check(
+                    enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
+                    message=f"The 'with' parameter is not an str type: {with_tag}")
+                break
+            try:
+                step_log_check(
+                    enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
+                    message=f"Run with: {step.get('with')}, path: {step.get('run')}")
+                execute_with = {
+                    "gui-runner": je_auto_control.execute_files,
+                    "web-runner": je_web_runner.execute_files,
+                    "api-runner": je_api_testka.execute_files,
+                    "load-runner": je_load_density.execute_files
+                }.get(with_tag)
+                if execute_with is None:
+                    step_log_check(
+                        enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
+                        message=f"with using the wrong runner tag: {step.get('with')}")
+                    break
+            except ExecutorException as error:
+                step_log_check(
+                    enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
+                    message=f"Run with: {step.get('with')}, path: {step.get('run')}, error: {repr(error)}")
+                break
+
+        if "open_url" in step.keys():
+            if not isinstance(step.get("open_url"), str):
+                step_log_check(
+                    enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
+                    message=f"The 'open_url' parameter is not an str type: {step.get('open_url')}")
+                break
+            step_log_check(
+                enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
+                message=f"Open url: {step.get('open_url')}")
+            try:
+                open_url = step.get("open_url")
+                url_open_method = step.get("url_open_method")
+                url_open_method = {
+                    "open": webbrowser.open,
+                    "open_new": webbrowser.open_new,
+                    "open_new_tab": webbrowser.open_new_tab,
+                }.get(url_open_method)
+                if url_open_method is None:
+                    step_log_check(
+                        enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
+                        message=f"Using wrong url_open_method tag: {step.get('with')}")
+                    break
+                url_open_method(url=open_url)
+            except ExecutorException as error:
+                step_log_check(
+                    enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
+                    message=f"Open URL {step.get('open_url')}, error: {repr(error)}")
+
+        if "wait" in step.keys():
+            if not isinstance(step.get("wait"), int):
+                step_log_check(
+                    enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
+                    message=f"The 'wait' parameter is not an int type: {step.get('wait')}")
+                break
+            step_log_check(
+                enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
+                message=f"Wait seconds: {step.get('wait')}")
+            time.sleep((step.get("wait")))
+
+        if "open_program" in step.keys():
+            if not isinstance(step.get("open_program"), str):
+                step_log_check(
+                    enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
+                    message=f"The 'open_program' parameter is not an str type: {step.get('open_program')}")
+                break
+            step_log_check(
+                enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
+                message=f"Open program: {step.get('open_program')}")
+
+            redirect_stdout = None
+            redirect_error = None
+
+            if "redirect_stdout" in step.keys():
+                if not isinstance(step.get("redirect_stdout"), str):
+                    step_log_check(
+                        enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
+                        message=f"The 'redirect_stdout' parameter is not an str type: {step.get('redirect_stdout')}")
+                    break
+                step_log_check(
+                    enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
+                    message=f"Redirect stdout to: {step.get('redirect_stdout')}")
+                redirect_stdout = step.get("redirect_stdout")
+
+            if "redirect_stderr" in step.keys():
+                if not isinstance(step.get("redirect_stderr"), str):
+                    step_log_check(
+                        enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
+                        message=f"The 'redirect_stderr' parameter is not an str type: {step.get('redirect_stderr')}")
+                    break
+                step_log_check(
+                    enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
+                    message=f"Redirect stderr to: {step.get('redirect_stderr')}")
+                redirect_error = step.get("redirect_stdout")
+
+            execute_process = ExecuteProcess()
+            process_manager_instance.process_dict.update({name: execute_process})
+
+            if redirect_error:
+                execute_process.redirect_stdout = redirect_stdout
+
+            if redirect_error:
+                execute_process.redirect_stderr = redirect_error
+
+            execute_process.start_process(step.get("open_program"))
+
+        if "close_program" in step.keys():
+            if not isinstance(step.get("close_program"), str):
+                step_log_check(
+                    enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
+                    message=f"The 'close_program' parameter is not an str type: {step.get('close_program')}")
+                break
+            step_log_check(
+                enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
+                message=f"Close program: {step.get('close_program')}")
+            close_program = step.get("close_program")
+            process_manager_instance.close_process(close_program)
+
+
+
+if __name__ == '__main__':
+    execute_yaml(
+        """
+pioneer_log: "test_pioneer.log"
+jobs:
+    steps:
+        - name: run_test_script_1
+          run: test/test1.json
+          with: gui-runner
+        - name: run_test_script_2
+          run: test/test2.json
+          with: web-runner
+        - name: run_test_script_3
+          run: test/test3.json
+          with: api-runner
+        - name: run_test_script_4
+          run: test/test4.json
+          with: load-runner
+        - name: open_test_program
+          open_program: notepad.exe
+          redirect_stdout: "test_std.txt"
+          redirect_stderr: "test_err.txt"
+        - name: wait_seconds
+          wait: 5
+        - name: open_test_url
+          open_url: https://www.google.com
+          url_open_method: open_new_tab
+        - name: close_test_program
+          close_program: open_test_program
+        """
+    )
