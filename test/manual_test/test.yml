@@ -1,0 +1,26 @@
+pioneer_log: "test_pioneer.log"
+jobs:
+    steps:
+        - name: run_test_script_1
+          run: test/test1.json
+          with: gui-runner
+        - name: run_test_script_2
+          run: test/test2.json
+          with: web-runner
+        - name: run_test_script_3
+          run: test/test3.json
+          with: api-runner
+        - name: run_test_script_4
+          run: test/test4.json
+          with: load-runner
+        - name: open_test_program
+          open_program: notepad.exe
+          redirect_stdout: "test_std.txt"
+          redirect_stderr: "test_err.txt"
+        - name: wait_seconds
+          wait: 5
+        - name: open_test_url
+          open_url: https://www.google.com
+          url_open_method: open_new_tab
+        - name: close_test_program
+          close_program: open_test_program
