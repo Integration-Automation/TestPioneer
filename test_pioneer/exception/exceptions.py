@@ -8,3 +8,4 @@ class YamlException(Exception):
 
 class WrongInputException(Exception):
     pass
+
