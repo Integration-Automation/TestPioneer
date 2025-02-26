@@ -1,0 +1,8 @@
+pyyaml
+psutil
+je_auto_control
+je_web_runner
+je_load_density
+je_api_testka
+je-mail-thunder
+automation-file
