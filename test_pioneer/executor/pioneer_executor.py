@@ -1,7 +1,8 @@
 import io
 import time
 import webbrowser
-from typing import Union
+from pathlib import Path
+from typing import Union, Tuple
 
 import je_load_density
 import je_api_testka
@@ -15,15 +16,49 @@ from test_pioneer.process.execute_process import ExecuteProcess
 from test_pioneer.process.process_manager import process_manager_instance
 
 
-def execute_yaml(stream: Union[str, io.FileIO]):
-    if isinstance(stream, io.FileIO):
-        try:
-            yaml_data = yaml.safe_load(stream=stream)
-        except Exception as error:
-            raise WrongInputException("Wrong input: " + repr(error))
-    elif isinstance(stream, str):
+def check_with(step: dict, enable_logging: bool) -> Tuple[bool,
+    Union[je_auto_control.execute_files, je_web_runner.execute_files,
+    je_api_testka.execute_files, je_load_density.execute_files, None]]:
+    if step.get("with", None) is None:
+        step_log_check(
+            enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
+            message=f"Step need with tag")
+        return False, None
+    with_tag = step.get("with")
+    if not isinstance(with_tag, str):
+        step_log_check(
+            enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
+            message=f"The 'with' parameter is not an str type: {with_tag}")
+        return False, None
+    try:
+        step_log_check(
+            enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
+            message=f"Run with: {step.get('with')}, path: {step.get('run')}")
+        execute_with = {
+            "gui-runner": je_auto_control.execute_files,
+            "web-runner": je_web_runner.execute_files,
+            "api-runner": je_api_testka.execute_files,
+            "load-runner": je_load_density.execute_files
+        }.get(with_tag)
+        if execute_with is None:
+            step_log_check(
+                enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
+                message=f"with using the wrong runner tag: {step.get('with')}")
+            return False, None
+    except ExecutorException as error:
+        step_log_check(
+            enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
+            message=f"Run with: {step.get('with')}, path: {step.get('run')}, error: {repr(error)}")
+        return False, None
+    return True, execute_with
+
+
+def execute_yaml(stream: str, yaml_type: str = "File"):
+    if yaml_type == "File":
         file = open(stream, "r").read()
         yaml_data = yaml.safe_load(stream=file)
+    elif yaml_type == "String":
+        yaml_data = yaml.safe_load(stream=stream)
     else:
         raise WrongInputException("Wrong input: " + repr(stream))
     # Variable
@@ -70,38 +105,25 @@ def execute_yaml(stream: Union[str, io.FileIO]):
             if pre_check_failed:
                 break
             name = step.get("name")
+
             if "run" in step.keys():
-                if step.get("with", None) is None:
+                check_with_data = check_with(step, enable_logging=enable_logging)
+                if check_with_data[0] is False:
+                    break
+                else:
+                    execute_with = check_with_data[1]
+                file = step.get("run")
+                if file is None:
                     step_log_check(
                         enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
-                        message=f"Step need with tag")
+                        message=f"run param need file path: {step.get('run')}")
                     break
-                with_tag = step.get("with")
-                if not isinstance(with_tag, str):
+                if Path(file).is_file() is False and Path(file).is_dir() is False:
                     step_log_check(
                         enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
-                        message=f"The 'with' parameter is not an str type: {with_tag}")
+                        message=f"not file path or dir: {step.get('run')}")
                     break
-                try:
-                    step_log_check(
-                        enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
-                        message=f"Run with: {step.get('with')}, path: {step.get('run')}")
-                    execute_with = {
-                        "gui-runner": je_auto_control.execute_files,
-                        "web-runner": je_web_runner.execute_files,
-                        "api-runner": je_api_testka.execute_files,
-                        "load-runner": je_load_density.execute_files
-                    }.get(with_tag)
-                    if execute_with is None:
-                        step_log_check(
-                            enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
-                            message=f"with using the wrong runner tag: {step.get('with')}")
-                        break
-                except ExecutorException as error:
-                    step_log_check(
-                        enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
-                        message=f"Run with: {step.get('with')}, path: {step.get('run')}, error: {repr(error)}")
-                    break
+                execute_with(file)
 
             if "open_url" in step.keys():
                 if not isinstance(step.get("open_url"), str):
