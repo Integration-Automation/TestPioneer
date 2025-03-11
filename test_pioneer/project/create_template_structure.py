@@ -40,8 +40,3 @@ def create_template_dir(project_path: str = None, parent_name: str = ".TestPione
         project_path: str = str(Path.cwd())
     create_dir(project_path + "/" + parent_name)
     create_template(parent_name)
-
-
-
-if __name__ == "__main__":
-    create_template_dir()

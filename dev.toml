@@ -6,17 +6,17 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "test_pioneer_dev"
-version = "0.0.35"
+version = "0.1.5"
 authors = [
     { name = "JE-Chen", email = "jechenmailman@gmail.com" },
 ]
-description = "AutomationEditor for multi automation"
+description = "Test framework for CI/CD"
 requires-python = ">=3.9"
 license = { text = "MIT" }
 dependencies = [
     "je_auto_control", "je_web_runner",
     "je_load_density", "je_api_testka", "je-mail-thunder",
-    "automation-file", "psutil"
+    "automation-file", "psutil", "pyyaml"
 ]
 classifiers = [
     "Programming Language :: Python :: 3.9",
