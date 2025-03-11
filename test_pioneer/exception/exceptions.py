@@ -9,3 +9,6 @@ class YamlException(Exception):
 class WrongInputException(Exception):
     pass
 
+
+class ProjectException(Exception):
+    pass
