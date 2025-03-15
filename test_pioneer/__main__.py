@@ -16,4 +16,4 @@ if __name__ == "__main__":
         execute_yaml(args.get("execute_yaml"))
     else:
         raise ExecutorException(
-            f"execute_yaml have no argument right way to use: python -m test_pioneer. -e filepath")
+            f"execute_yaml have no argument right way to use: python -m test_pioneer. -e filepath or -e string")
