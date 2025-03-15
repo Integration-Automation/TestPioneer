@@ -9,8 +9,8 @@ import psutil
 class ExecuteProcess(object):
     def __init__(
             self,
-            redirect_stdout: Union[str, subprocess.PIPE] = subprocess.PIPE,
-            redirect_stderr: Union[str, subprocess.PIPE] = subprocess.PIPE,
+            redirect_stdout: Union[str, int] = subprocess.PIPE,
+            redirect_stderr: Union[str, int] = subprocess.PIPE,
     ):
         super().__init__()
         self.process: [subprocess.Popen, None] = None
