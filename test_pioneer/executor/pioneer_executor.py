@@ -26,10 +26,10 @@ def check_with(step: dict, enable_logging: bool):
         step_log_check(
             enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
             message=f"Run with: {step.get('with')}, path: {step.get('run')}")
+        import je_load_density
         import je_auto_control
         import je_web_runner
         import je_api_testka
-        import je_load_density
         execute_with = {
             "gui-runner": je_auto_control.execute_files,
             "web-runner": je_web_runner.execute_files,
