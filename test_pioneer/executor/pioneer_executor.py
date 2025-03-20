@@ -1,6 +1,7 @@
 import time
 import webbrowser
 from pathlib import Path
+from typing import Tuple, Callable, Union
 
 import yaml
 
@@ -10,7 +11,7 @@ from test_pioneer.process.execute_process import ExecuteProcess
 from test_pioneer.process.process_manager import process_manager_instance
 
 
-def check_with(step: dict, enable_logging: bool):
+def check_with(step: dict, enable_logging: bool) -> Tuple[bool, Union[Callable, None]]:
     if step.get("with", None) is None:
         step_log_check(
             enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
