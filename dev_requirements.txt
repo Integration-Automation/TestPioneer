@@ -9,3 +9,4 @@ automation-file
 auto-py-to-exe
 twine
 build
+gevent

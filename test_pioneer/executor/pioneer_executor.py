@@ -1,3 +1,6 @@
+import json
+import os
+
 import time
 import webbrowser
 from pathlib import Path
@@ -5,6 +8,8 @@ from typing import Tuple, Callable, Union
 
 import yaml
 
+
+from je_auto_control import RecordingThread
 from test_pioneer.exception.exceptions import WrongInputException, YamlException, ExecutorException
 from test_pioneer.logging.loggin_instance import TestPioneerHandler, step_log_check, test_pioneer_logger
 from test_pioneer.process.execute_process import ExecuteProcess
@@ -27,15 +32,17 @@ def check_with(step: dict, enable_logging: bool) -> Tuple[bool, Union[Callable, 
         step_log_check(
             enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
             message=f"Run with: {step.get('with')}, path: {step.get('run')}")
-        import je_load_density
-        import je_auto_control
-        import je_web_runner
-        import je_api_testka
+        from gevent.monkey import patch_all
+        patch_all()
+        from je_load_density import execute_action as load_runner
+        from je_auto_control import execute_action as gui_runner
+        from je_api_testka import execute_action as api_runner
+        from je_web_runner import execute_action as web_runner
         execute_with = {
-            "gui-runner": je_auto_control.execute_files,
-            "web-runner": je_web_runner.execute_files,
-            "api-runner": je_api_testka.execute_files,
-            "load-runner": je_load_density.execute_files
+            "gui-runner": gui_runner,
+            "web-runner": api_runner,
+            "api-runner": web_runner,
+            "load-runner": load_runner
         }.get(with_tag)
         if execute_with is None:
             step_log_check(
@@ -60,21 +67,37 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
         raise WrongInputException("Wrong input: " + repr(stream))
     # Variable
     enable_logging: bool = False
-    # Pre check
+    # Pre-check data structure
     if isinstance(yaml_data, dict) is False:
         raise YamlException(f"Not a dict: {yaml_data}")
+
+    # Pre-check log or no
     if "pioneer_log" in yaml_data.keys():
         enable_logging = True
         filename = yaml_data.get("pioneer_log")
         file_handler = TestPioneerHandler(filename=filename)
         test_pioneer_logger.addHandler(file_handler)
 
-    try:
+    recoder= None
+    recording: bool = False
+    # Pre-check recoding or no
+    if "recording_path" in yaml_data.keys():
+        if isinstance(yaml_data.get("recording_path"), str) is False:
+            raise ExecutorException(f"recording_path not a str: {yaml_data.get('recording_path')}")
+        recording = True
+        recoder = RecordingThread()
+        recoder.video_name = yaml_data.get("recording_path")
+        recoder.daemon = True
+        recoder.start()
 
+    try:
+        # Pre-check jobs
         if "jobs" not in yaml_data.keys():
             raise YamlException("No jobs tag")
         if isinstance(yaml_data.get("jobs"), dict) is False:
             raise YamlException("jobs not a dict")
+
+        # Pre-check steps
         steps = yaml_data.get("jobs").get("steps", None)
         if steps is None or len(steps) <= 0:
             raise YamlException("Steps tag is empty")
@@ -98,6 +121,7 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
             else:
                 process_manager_instance.name_set.add(name)
 
+        # Execute step action
         for step in steps:
             if pre_check_failed:
                 break
@@ -110,16 +134,18 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
                 else:
                     execute_with = check_with_data[1]
                 file = step.get("run")
+                file = str(Path(os.getcwd() + file).absolute())
                 if file is None:
                     step_log_check(
                         enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
                         message=f"run param need file path: {step.get('run')}")
                     break
-                if Path(file).is_file() is False and Path(file).is_dir() is False:
+                if (Path(file).is_file() is False and Path(file).is_dir() is False) or not Path(file).exists():
                     step_log_check(
                         enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
                         message=f"not file path or dir: {step.get('run')}")
                     break
+                file = json.loads(Path(file).read_text())
                 execute_with(file)
 
             if "open_url" in step.keys():
@@ -222,4 +248,6 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
         step_log_check(
             enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
             message=f"Error: {repr(error)}")
+        if recording and recoder is not None:
+            recoder.set_recoding_flag(False)
         raise error
