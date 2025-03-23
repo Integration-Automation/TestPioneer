@@ -5,14 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f39b62f7-4d55-4cd4-9ab6-db462852dcca" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/test_pioneer/downloading/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test_pioneer/downloading/file.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/TestPioneer.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/TestPioneer.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AutoControlGUI/je_auto_control/utils/cv2_utils/video_recording.py" beforeDir="false" afterPath="$PROJECT_DIR$/../AutoControlGUI/je_auto_control/utils/cv2_utils/video_recording.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/dev.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dev_requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dev_requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/manual_test/test.yml" beforeDir="false" afterPath="$PROJECT_DIR$/test/manual_test/test.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/manual_test/test/test1.json" beforeDir="false" afterPath="$PROJECT_DIR$/.github/dev_python3_9.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/manual_test/test/test2.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/manual_test/test/test3.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/manual_test/test/test4.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_pioneer/executor/pioneer_executor.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_pioneer/executor/pioneer_executor.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,37 +52,37 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.create_project_structure.executor&quot;: &quot;Run&quot;,
-    &quot;Python.create_template_structure (1).executor&quot;: &quot;Run&quot;,
-    &quot;Python.create_template_structure.executor&quot;: &quot;Run&quot;,
-    &quot;Python.mouse_info.executor&quot;: &quot;Run&quot;,
-    &quot;Python.pioneer_executor.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test.executor&quot;: &quot;Run&quot;,
-    &quot;Python.yaml.executor&quot;: &quot;Run&quot;,
-    &quot;Python.yaml_file (1).executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;dev&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/CodeWorkspace/Python/JEDITOR&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.create_project_structure.executor": "Run",
+    "Python.create_template_structure (1).executor": "Run",
+    "Python.create_template_structure.executor": "Run",
+    "Python.mouse_info.executor": "Run",
+    "Python.pioneer_executor.executor": "Run",
+    "Python.test.executor": "Run",
+    "Python.yaml.executor": "Run",
+    "Python.yaml_file (1).executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "dev",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/CodeWorkspace/Python/LoadDensity",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\CodeWorkspace\Python\TestPioneer\test_pioneer\process" />
       <recent name="C:\CodeWorkspace\Python\TestPioneer" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.mouse_info">
+  <component name="RunManager" selected="Python.test">
     <configuration name="create_template_structure (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="TestPioneer" />
       <option name="ENV_FILES" value="" />
@@ -198,11 +200,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.test" />
         <item itemvalue="Python.mouse_info" />
         <item itemvalue="Python.create_template_structure (1)" />
         <item itemvalue="Python.pioneer_executor" />
         <item itemvalue="Python.create_template_structure" />
-        <item itemvalue="Python.test" />
       </list>
     </recent_temporary>
   </component>
@@ -239,7 +241,7 @@
       <workItem from="1741675024037" duration="18565000" />
       <workItem from="1742052361505" duration="594000" />
       <workItem from="1742365223988" duration="4686000" />
-      <workItem from="1742721335179" duration="2511000" />
+      <workItem from="1742721335179" duration="11519000" />
     </task>
     <servers />
   </component>
@@ -249,7 +251,7 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/TestPioneer$yaml_file__1_.coverage" NAME="yaml_file (1) Coverage Results" MODIFIED="1739766827589" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test_pioneer/yaml" />
     <SUITE FILE_PATH="coverage/TestPioneer$mouse_info.coverage" NAME="mouse_info Coverage Results" MODIFIED="1742714189750" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../AutoControlGUI/test/unit_test/get_info" />
-    <SUITE FILE_PATH="coverage/TestPioneer$test.coverage" NAME="test Coverage Results" MODIFIED="1740643520981" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test/manual_test" />
+    <SUITE FILE_PATH="coverage/TestPioneer$test.coverage" NAME="test Coverage Results" MODIFIED="1742733479245" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test/manual_test" />
     <SUITE FILE_PATH="coverage/TestPioneer$create_project_structure.coverage" NAME="create_project_structure Coverage Results" MODIFIED="1741659060268" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test_pioneer/project" />
     <SUITE FILE_PATH="coverage/TestPioneer$create_template_structure.coverage" NAME="create_template_structure Coverage Results" MODIFIED="1741680102305" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test_pioneer/project" />
     <SUITE FILE_PATH="coverage/TestPioneer$pioneer_executor.coverage" NAME="pioneer_executor Coverage Results" MODIFIED="1741680528820" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test_pioneer/executor" />

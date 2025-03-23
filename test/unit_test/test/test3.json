@@ -1,0 +1,17 @@
+[
+  [
+    "WR_get_webdriver_manager",
+    {
+      "webdriver_name": "firefox"
+    }
+  ],
+  [
+    "WR_to_url",
+    {
+      "url": "https://www.google.com"
+    }
+  ],
+  [
+    "WR_quit"
+  ]
+]

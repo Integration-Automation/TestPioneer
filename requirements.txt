@@ -6,3 +6,4 @@ je_load_density
 je_api_testka
 je-mail-thunder
 automation-file
+gevent
