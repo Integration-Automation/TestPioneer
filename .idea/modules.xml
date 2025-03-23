@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../AutoControlGUI/.idea/AutoControl.iml" filepath="$PROJECT_DIR$/../AutoControlGUI/.idea/AutoControl.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/TestPioneer.iml" filepath="$PROJECT_DIR$/.idea/TestPioneer.iml" />
     </modules>
   </component>
