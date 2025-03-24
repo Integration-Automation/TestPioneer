@@ -27,3 +27,8 @@ jobs:
           pip install -r dev_requirements.txt
       - name: Test execute yaml
         run: python ./test/unit_test/test.py
+      - name: Save Test video
+        uses: actions/upload-artifact@v4
+        with:
+          name: test_video
+          path: test_video.mp4
