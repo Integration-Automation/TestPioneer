@@ -10,3 +10,4 @@ auto-py-to-exe
 twine
 build
 gevent
+test_pioneer_dev
