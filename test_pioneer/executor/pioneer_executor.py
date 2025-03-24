@@ -251,3 +251,5 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
         if recording and recoder is not None:
             recoder.set_recoding_flag(False)
         raise error
+    if recording and recoder is not None:
+        recoder.set_recoding_flag(False)
