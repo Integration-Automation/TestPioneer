@@ -1,15 +1,13 @@
 import json
 import os
-
 import time
 import webbrowser
 from pathlib import Path
 from typing import Tuple, Callable, Union
 
 import yaml
-
-
 from je_auto_control import RecordingThread
+
 from test_pioneer.exception.exceptions import WrongInputException, YamlException, ExecutorException
 from test_pioneer.logging.loggin_instance import TestPioneerHandler, step_log_check, test_pioneer_logger
 from test_pioneer.process.execute_process import ExecuteProcess
@@ -84,6 +82,11 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
     if "recording_path" in yaml_data.keys():
         if isinstance(yaml_data.get("recording_path"), str) is False:
             raise ExecutorException(f"recording_path not a str: {yaml_data.get('recording_path')}")
+        import sys
+        if 'threading' in sys.modules:
+            del sys.modules['threading']
+        from gevent.monkey import patch_thread
+        patch_thread()
         recording = True
         recoder = RecordingThread()
         recoder.video_name = yaml_data.get("recording_path")
@@ -250,6 +253,10 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
             message=f"Error: {repr(error)}")
         if recording and recoder is not None:
             recoder.set_recoding_flag(False)
+            while recoder.is_alive():
+                time.sleep(0.1)
         raise error
     if recording and recoder is not None:
         recoder.set_recoding_flag(False)
+        while recoder.is_alive():
+            time.sleep(0.1)
