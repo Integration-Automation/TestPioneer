@@ -31,4 +31,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test_video
-          path: ./test/unit_test/test_video.mp4
+          path: test_video.mp4
