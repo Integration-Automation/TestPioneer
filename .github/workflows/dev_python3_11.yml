@@ -32,3 +32,8 @@ jobs:
         with:
           name: test_video
           path: test_video.mp4
+      - name: Save log file
+        uses: actions/upload-artifact@v4
+        with:
+          name: test_log
+          path: test_pioneer.log
