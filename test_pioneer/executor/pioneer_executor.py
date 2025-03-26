@@ -30,12 +30,12 @@ def check_with(step: dict, enable_logging: bool) -> Tuple[bool, Union[Callable, 
         step_log_check(
             enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
             message=f"Run with: {step.get('with')}, path: {step.get('run')}")
+        from je_web_runner import execute_action as web_runner
         from gevent.monkey import patch_all
         patch_all()
         from je_load_density import execute_action as load_runner
         from je_auto_control import execute_action as gui_runner
         from je_api_testka import execute_action as api_runner
-        from je_web_runner import execute_action as web_runner
         execute_with = {
             "gui-runner": gui_runner,
             "web-runner": api_runner,
