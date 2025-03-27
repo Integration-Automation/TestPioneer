@@ -7,3 +7,4 @@ je_api_testka
 je-mail-thunder
 automation-file
 gevent
+test_pioneer

@@ -2,7 +2,7 @@
   [
     "WR_get_webdriver_manager",
     {
-      "webdriver_name": "firefox"
+      "webdriver_name": "edge"
     }
   ],
   [
