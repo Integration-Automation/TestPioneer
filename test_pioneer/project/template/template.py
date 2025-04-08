@@ -36,5 +36,8 @@ jobs:
         # close program that open use {name}
         - name: close_test_program
           close_program: open_test_program
+        - name: run_folder_1
+          run: /test/unit_test/run_folder/test
+          with: gui-runner # you can only choose one runner to run folder
 
 """
