@@ -141,12 +141,3 @@ dmypy.json
 
 # Driver
 **/.wdm/*
-
-# Mailthunder
-**/mail_thunder_content.json
-
-# JEditor
-.jeditor
-**/.jeditor
-**/user_setting.*
-bing_cookies.*

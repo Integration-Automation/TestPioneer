@@ -1,0 +1,7 @@
+pioneer_log: "test_pioneer.log"
+recording_path: "test_video"
+jobs:
+    steps:
+        - name: run_folder_1
+          run_folder: /test
+          with: gui-runner

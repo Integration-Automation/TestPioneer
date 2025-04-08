@@ -26,4 +26,4 @@ jobs:
           python -m pip install --upgrade pip wheel
           pip install -r requirements.txt
       - name: Test execute yaml
-        run: python ./test/unit_test/test.py
+        run: python ./test/unit_test/run_multi_time/test_run_multi_time.py

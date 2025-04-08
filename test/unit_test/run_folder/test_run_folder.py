@@ -1,3 +1,3 @@
 from test_pioneer import execute_yaml
 
-execute_yaml("test.yml")
+execute_yaml("test_run_folder.yml")
