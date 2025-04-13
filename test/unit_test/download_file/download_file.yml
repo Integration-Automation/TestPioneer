@@ -1,0 +1,6 @@
+pioneer_log: "test_pioneer.log"
+jobs:
+  steps:
+    - name: download_test_file
+      download_file: "http://212.183.159.230/512MB.zip"
+      file_name: "test_512MB.zip"

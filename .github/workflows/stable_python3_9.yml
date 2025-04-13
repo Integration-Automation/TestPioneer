@@ -27,3 +27,5 @@ jobs:
           pip install -r requirements.txt
       - name: Test execute yaml
         run: python ./test/unit_test/run_multi_time/test_run_multi_time.py
+      - name: Test download yaml
+        run: python ./test/unit_test/run_folder/test_run_folder.py

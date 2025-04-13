@@ -1,6 +1,5 @@
 import json
 import os
-import sys
 import time
 import webbrowser
 from pathlib import Path
@@ -166,7 +165,7 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
                 file = json.loads(Path(file).read_text())
                 execute_with(file)
 
-            if "run_folder" in step.keys():
+            elif "run_folder" in step.keys():
                 check_with_data = select_with_runner(step, enable_logging=enable_logging, mode="run_folder")
                 if check_with_data[0] is False:
                     break
@@ -194,7 +193,7 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
                         message=f"Folder is empty: {step.get('run_folder')}")
                     break
 
-            if "open_url" in step.keys():
+            elif "open_url" in step.keys():
                 if not isinstance(step.get("open_url"), str):
                     step_log_check(
                         enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
@@ -222,7 +221,23 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
                         enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
                         message=f"Open URL {step.get('open_url')}, error: {repr(error)}")
 
-            if "wait" in step.keys():
+            elif "download_file" in step.keys():
+                file_url = step.get("download_file")
+                file_name = step.get("file_name")
+                from automation_file import download_file
+                if file_url is None or file_name is None:
+                    step_log_check(
+                        enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
+                        message=f"Please provide the file_url and download_file: {name}")
+                    break
+                if isinstance(file_url, str) is False or isinstance(file_name, str) is False:
+                    step_log_check(
+                        enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
+                        message=f"Both file_url and download need to be of type str: {name}")
+                    break
+                download_file(file_url=file_url, file_name=file_name)
+
+            elif "wait" in step.keys():
                 if not isinstance(step.get("wait"), int):
                     step_log_check(
                         enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
@@ -233,7 +248,7 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
                     message=f"Wait seconds: {step.get('wait')}")
                 time.sleep((step.get("wait")))
 
-            if "open_program" in step.keys():
+            elif "open_program" in step.keys():
                 if not isinstance(step.get("open_program"), str):
                     step_log_check(
                         enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
@@ -279,7 +294,7 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
 
                 execute_process.start_process(step.get("open_program"))
 
-            if "close_program" in step.keys():
+            elif "close_program" in step.keys():
                 if not isinstance(step.get("close_program"), str):
                     step_log_check(
                         enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
@@ -290,6 +305,7 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
                     message=f"Close program: {step.get('close_program')}")
                 close_program = step.get("close_program")
                 process_manager_instance.close_process(close_program)
+
     except Exception as error:
         step_log_check(
             enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
