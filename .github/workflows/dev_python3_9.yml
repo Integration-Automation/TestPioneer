@@ -25,7 +25,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip wheel
           pip install -r dev_requirements.txt
-      - name: Test execute yaml
+      - name: Test run yaml that execute multi scrip
         run: python ./test/unit_test/run_multi_time/test_run_multi_time.py
-      - name: Test download yaml
+      - name: Test yaml that script in folder
         run: python ./test/unit_test/run_folder/test_run_folder.py
+      - name: Test yaml that download file yaml
+        run: python ./test/unit_test/download_file/test_run_download_file.py
