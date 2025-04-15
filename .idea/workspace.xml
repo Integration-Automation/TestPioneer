@@ -5,13 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f39b62f7-4d55-4cd4-9ab6-db462852dcca" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/dev_python3_10.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/dev_python3_10.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/dev_python3_11.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/dev_python3_11.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/dev_python3_9.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/dev_python3_9.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/stable_python3_10.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/stable_python3_10.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/stable_python3_11.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/stable_python3_11.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/stable_python3_9.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/stable_python3_9.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stable.toml" beforeDir="false" afterPath="$PROJECT_DIR$/dev.toml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,7 +80,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "settings.editor.selected.configurable": "discord-application",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -261,7 +257,7 @@
       <workItem from="1743406676273" duration="6783000" />
       <workItem from="1744373911999" duration="4448000" />
       <workItem from="1744542609381" duration="2683000" />
-      <workItem from="1744554214084" duration="16237000" />
+      <workItem from="1744554214084" duration="23023000" />
     </task>
     <servers />
   </component>
