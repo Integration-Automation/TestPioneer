@@ -3,5 +3,5 @@ recording_path: "test_video"
 jobs:
     steps:
         - name: run_folder_1
-          run_folder: /test
+          run_folder: /test/unit_test/run_folder/test
           with: gui-runner
