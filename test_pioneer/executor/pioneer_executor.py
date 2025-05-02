@@ -8,6 +8,7 @@ from test_pioneer.exception.exceptions import WrongInputException, YamlException
 from test_pioneer.executor.run.executor_run import run
 from test_pioneer.executor.run.executor_run_folder import run_folder
 from test_pioneer.executor.test_recorder.logger import set_logger
+from test_pioneer.executor.test_recorder.video_recoder import set_recoder
 from test_pioneer.logging.loggin_instance import step_log_check, test_pioneer_logger
 from test_pioneer.process.execute_process import ExecuteProcess
 from test_pioneer.process.process_manager import process_manager_instance
@@ -28,7 +29,7 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
     # Pre-check save log or not
     enable_logging = set_logger(yaml_data=yaml_data)
     # Pre-check recording or not
-    recording, recoder = set_logger(yaml_data=yaml_data)
+    recording, recoder = set_recoder(yaml_data=yaml_data)
 
     try:
         # Pre-check jobs
