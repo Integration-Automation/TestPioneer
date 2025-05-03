@@ -5,6 +5,7 @@ import yaml
 from je_auto_control import RecordingThread
 
 from test_pioneer.exception.exceptions import WrongInputException, YamlException, ExecutorException
+from test_pioneer.executor.browser.url import open_url
 from test_pioneer.executor.run.executor_run import run
 from test_pioneer.executor.run.executor_run_folder import run_folder
 from test_pioneer.executor.test_recorder.logger import set_logger
@@ -45,7 +46,7 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
 
         pre_check_failed: bool = False
 
-        # Pre-check the jobs name has duplicate or not
+        # Pre-check the job name has a duplicate or not
         for step in steps:
             if step.get("name", None) is None:
                 step_log_check(
@@ -69,40 +70,16 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
             name = step.get("name")
 
             if "run" in step.keys():
-                if run(step, enable_logging=enable_logging) is False:
+                if run(step=step, enable_logging=enable_logging) is False:
                     break
 
             elif "run_folder" in step.keys():
-                if run_folder(step, enable_logging=enable_logging, mode="run_folder") is False:
+                if run_folder(step=step, enable_logging=enable_logging, mode="run_folder") is False:
                     break
 
             elif "open_url" in step.keys():
-                if not isinstance(step.get("open_url"), str):
-                    step_log_check(
-                        enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
-                        message=f"The 'open_url' parameter is not an str type: {step.get('open_url')}")
+                if open_url(step=step, enable_logging=enable_logging):
                     break
-                step_log_check(
-                    enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
-                    message=f"Open url: {step.get('open_url')}")
-                try:
-                    open_url = step.get("open_url")
-                    url_open_method = step.get("url_open_method")
-                    url_open_method = {
-                        "open": webbrowser.open,
-                        "open_new": webbrowser.open_new,
-                        "open_new_tab": webbrowser.open_new_tab,
-                    }.get(url_open_method)
-                    if url_open_method is None:
-                        step_log_check(
-                            enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
-                            message=f"Using wrong url_open_method tag: {step.get('with')}")
-                        break
-                    url_open_method(url=open_url)
-                except ExecutorException as error:
-                    step_log_check(
-                        enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
-                        message=f"Open URL {step.get('open_url')}, error: {repr(error)}")
 
             elif "download_file" in step.keys():
                 file_url = step.get("download_file")
