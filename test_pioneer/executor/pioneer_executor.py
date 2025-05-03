@@ -1,15 +1,15 @@
 import time
-import webbrowser
 
 import yaml
-from je_auto_control import RecordingThread
 
-from test_pioneer.exception.exceptions import WrongInputException, YamlException, ExecutorException
+from test_pioneer.exception.exceptions import WrongInputException, YamlException
 from test_pioneer.executor.browser.url import open_url
+from test_pioneer.executor.file.download import download_single_file
 from test_pioneer.executor.run.executor_run import run
 from test_pioneer.executor.run.executor_run_folder import run_folder
 from test_pioneer.executor.test_recorder.logger import set_logger
 from test_pioneer.executor.test_recorder.video_recoder import set_recoder
+from test_pioneer.executor.time.wait import blocked_wait
 from test_pioneer.logging.loggin_instance import step_log_check, test_pioneer_logger
 from test_pioneer.process.execute_process import ExecuteProcess
 from test_pioneer.process.process_manager import process_manager_instance
@@ -82,31 +82,12 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
                     break
 
             elif "download_file" in step.keys():
-                file_url = step.get("download_file")
-                file_name = step.get("file_name")
-                from automation_file import download_file
-                if file_url is None or file_name is None:
-                    step_log_check(
-                        enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
-                        message=f"Please provide the file_url and download_file: {name}")
+                if download_single_file(step=step, name=name, enable_logging=enable_logging):
                     break
-                if isinstance(file_url, str) is False or isinstance(file_name, str) is False:
-                    step_log_check(
-                        enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
-                        message=f"Both file_url and download need to be of type str: {name}")
-                    break
-                download_file(file_url=file_url, file_name=file_name)
 
             elif "wait" in step.keys():
-                if not isinstance(step.get("wait"), int):
-                    step_log_check(
-                        enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
-                        message=f"The 'wait' parameter is not an int type: {step.get('wait')}")
+                if blocked_wait(step=step, enable_logging=enable_logging) is False:
                     break
-                step_log_check(
-                    enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
-                    message=f"Wait seconds: {step.get('wait')}")
-                time.sleep((step.get("wait")))
 
             elif "open_program" in step.keys():
                 if not isinstance(step.get("open_program"), str):
