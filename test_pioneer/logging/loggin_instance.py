@@ -19,7 +19,7 @@ class TestPioneerHandler(RotatingFileHandler):
 
 
 def step_log_check(enable_logging: bool = False, logger: logging.Logger = None,
-                   level: str = "info", message: str = None):
+                   level: str = "info", message: str = None) -> None:
     if enable_logging and logger:
         logger_level = {
             "info": logger.info,
