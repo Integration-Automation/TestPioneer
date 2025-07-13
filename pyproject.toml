@@ -5,13 +5,13 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "test_pioneer_dev"
-version = "0.1.19"
+name = "test_pioneer"
+version = "0.1.16"
 authors = [
     { name = "JE-Chen", email = "jechenmailman@gmail.com" },
 ]
 description = "Test framework for CI/CD"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license-files = ["LICENSE"]
 dependencies = [
     "je_auto_control", "je_web_runner",
@@ -19,7 +19,7 @@ dependencies = [
     "automation-file", "psutil", "pyyaml"
 ]
 classifiers = [
-    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
     "Development Status :: 2 - Pre-Alpha",
     "Environment :: Win32 (MS Windows)",
     "Environment :: MacOS X",
