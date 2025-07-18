@@ -1,8 +1,8 @@
 from pathlib import Path
 from threading import Lock
 
-from test_pioneer.exception.exceptions import ProjectException
-from test_pioneer.exception.tags import cant_save_yaml_error
+from test_pioneer.utils.exception.exceptions import ProjectException
+from test_pioneer.utils.exception.tags import cant_save_yaml_error
 from test_pioneer.logging.loggin_instance import test_pioneer_logger
 from test_pioneer.project.template.template import template_1_str
 

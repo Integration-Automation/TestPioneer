@@ -1,6 +1,6 @@
 import webbrowser
 
-from test_pioneer.exception.exceptions import ExecutorException
+from test_pioneer.utils.exception.exceptions import ExecutorException
 from test_pioneer.logging.loggin_instance import step_log_check, test_pioneer_logger
 
 

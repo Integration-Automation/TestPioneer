@@ -5,8 +5,8 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "test_pioneer_dev"
-version = "0.1.20"
+name = "test_pioneer"
+version = "0.1.17"
 authors = [
     { name = "JE-Chen", email = "jechenmailman@gmail.com" },
 ]
@@ -37,3 +37,6 @@ content-type = "text/markdown"
 
 [tool.setuptools.packages]
 find = { namespaces = false }
+
+[project.optional-dependencies]
+gui = ["je_auto_control"]

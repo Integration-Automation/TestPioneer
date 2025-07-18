@@ -1,7 +1,7 @@
 import argparse
 
 from test_pioneer import execute_yaml
-from test_pioneer.exception.exceptions import ExecutorException
+from test_pioneer.utils.exception.exceptions import ExecutorException
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

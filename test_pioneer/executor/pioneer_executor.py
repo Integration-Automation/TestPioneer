@@ -2,7 +2,7 @@ import time
 
 import yaml
 
-from test_pioneer.exception.exceptions import WrongInputException, YamlException
+from test_pioneer.utils.exception.exceptions import WrongInputException, YamlException
 from test_pioneer.executor.browser.url import open_url
 from test_pioneer.executor.file.download import download_single_file
 from test_pioneer.executor.program.external_program import open_program, close_program

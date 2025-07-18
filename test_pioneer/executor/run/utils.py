@@ -1,7 +1,9 @@
 from typing import Tuple, Union, Callable
 
-from test_pioneer.exception.exceptions import ExecutorException
+from test_pioneer.utils.exception.exceptions import ExecutorException
 from test_pioneer.logging.loggin_instance import step_log_check, test_pioneer_logger
+from test_pioneer.utils.exception.tags import can_not_run_gui_error
+from test_pioneer.utils.package.check import is_installed
 
 
 def select_with_runner(step: dict, enable_logging: bool, mode: str = "run") -> Tuple[bool, Union[Callable, None]]:
@@ -25,6 +27,8 @@ def select_with_runner(step: dict, enable_logging: bool, mode: str = "run") -> T
         if mode == "run":
             from je_load_density import execute_action as single_load_runner
             from je_web_runner import execute_action as single_web_runner
+            if not is_installed(package_name="je_auto_control") and with_tag == "gui-runner":
+                raise ExecutorException(can_not_run_gui_error)
             from je_auto_control import execute_action as single_gui_runner
             from je_api_testka import execute_action as single_api_runner
             execute_with = {
