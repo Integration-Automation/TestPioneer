@@ -1,0 +1,11 @@
+pioneer_log: "test_pioneer.log"
+jobs:
+    steps:
+        - name: run_test_script_3
+          run: /docker_non_gui_test/test/test3.json
+          with: api-runner
+        - name: run_test_script_4
+          run: /docker_non_gui_test/test/test4.json
+          with: load-runner
+        - name: wait_seconds
+          wait: 5

@@ -1,0 +1,18 @@
+pioneer_log: "test_pioneer.log"
+recording_path: "test_video"
+jobs:
+    steps:
+        - name: run_test_script_1
+          run: /docker_gui_test/test/test1.json
+          with: gui-runner
+        - name: run_test_script_2
+          run: /docker_gui_test/test/test2.json
+          with: api-runner
+        - name: run_test_script_3
+          run: /docker_gui_test/test/test3.json
+          with: web-runner
+        - name: run_test_script_4
+          run: /docker_gui_test/test/test4.json
+          with: load-runner
+        - name: wait_seconds
+          wait: 5

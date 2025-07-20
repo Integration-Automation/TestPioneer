@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "test_pioneer"
-version = "0.1.17"
+version = "0.1.26"
 authors = [
     { name = "JE-Chen", email = "jechenmailman@gmail.com" },
 ]
@@ -14,7 +14,7 @@ description = "Test framework for CI/CD"
 requires-python = ">=3.10"
 license-files = ["LICENSE"]
 dependencies = [
-    "je_auto_control", "je_web_runner",
+    "je_web_runner",
     "je_load_density", "je_api_testka", "je-mail-thunder",
     "automation-file", "psutil", "pyyaml"
 ]

@@ -1,0 +1,77 @@
+# Use the latest Ubuntu base image
+FROM ubuntu:latest
+
+# Disable interactive prompts during apt operations
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install build tools, SSL certificates, and libraries needed for Python compilation
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends software-properties-common \
+  && add-apt-repository universe
+
+RUN apt-get install -y --no-install-recommends \
+        build-essential \
+        wget \
+        unzip \
+        ca-certificates \
+        zlib1g-dev \
+        libncurses5-dev \
+        libgdbm-dev \
+        libnss3-dev \
+        libssl-dev \
+        libreadline-dev \
+        libffi-dev \
+        libsqlite3-dev \
+        libbz2-dev \
+        liblzma-dev \
+        tk-dev
+
+RUN apt-get install -y --no-install-recommends \
+      xvfb \
+      fonts-liberation2 \
+      libnss3 \
+      libxss1 \
+      libayatana-appindicator3-1 \
+      libgtk-3-0 \
+      libgl1 \
+      libgl1-mesa-dri \
+      libglib2.0-0 \
+      libsm6 \
+      libxext6 \
+      libxrender-dev \
+      libjpeg-dev \
+      libpng-dev \
+      xkb-data \
+  && rm -rf /var/lib/apt/lists/*
+
+# Download, compile, and install Python 3.11.10 from source
+RUN wget https://www.python.org/ftp/python/3.11.10/Python-3.11.10.tgz \
+    && tar -xzf Python-3.11.10.tgz \
+    && cd Python-3.11.10 \
+    && ./configure --enable-optimizations \
+    && make -j"$(nproc)" \
+    && make altinstall \
+    && cd .. \
+    && rm -rf Python-3.11.10 Python-3.11.10.tgz
+
+# Install Google Chrome
+RUN wget -qO /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+  && dpkg -i /tmp/chrome.deb || apt-get -fy install -y \
+  && rm /tmp/chrome.deb
+
+# Install matching ChromeDriver
+ARG CHROME_DRIVER_VERSION=138.0.7204.157
+RUN wget -qO /tmp/chromedriver.zip \
+      "https://storage.googleapis.com/chrome-for-testing-public/${CHROME_DRIVER_VERSION}/linux64/chromedriver-linux64.zip" \
+    && unzip /tmp/chromedriver.zip -d /usr/local/bin/ \
+    && rm /tmp/chromedriver.zip \
+    && chmod +x /usr/local/bin/chromedriver-linux64/chromedriver
+
+
+# Copy docker_gui_requirements.txt and install Python packages
+COPY docker_gui_requirements.txt .
+
+RUN python3.11 -m pip install --upgrade pip \
+    && python3.11 -m pip install -r docker_gui_requirements.txt
+
+RUN sh -c Xvfb :99 -screen 0 1920x1080x24>/dev/null 2>&1 &

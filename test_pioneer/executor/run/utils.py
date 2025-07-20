@@ -24,37 +24,43 @@ def select_with_runner(step: dict, enable_logging: bool, mode: str = "run") -> T
             message=f"Run with: {step.get('with')}, path: {step.get('run')}")
         from os import environ
         environ["LOCUST_SKIP_MONKEY_PATCH"] = "1"
+        from je_load_density import execute_action as load_runner
+        from je_web_runner import execute_action as web_runner
+        from je_api_testka import execute_action as api_runner
+        runner_dict = {
+            "web-runner": web_runner,
+            "api-runner": api_runner,
+            "load-runner": load_runner
+        }
+
         if mode == "run":
-            from je_load_density import execute_action as single_load_runner
-            from je_web_runner import execute_action as single_web_runner
+
             if not is_installed(package_name="je_auto_control") and with_tag == "gui-runner":
                 raise ExecutorException(can_not_run_gui_error)
-            from je_auto_control import execute_action as single_gui_runner
-            from je_api_testka import execute_action as single_api_runner
-            execute_with = {
-                "gui-runner": single_gui_runner,
-                "web-runner": single_api_runner,
-                "api-runner": single_web_runner,
-                "load-runner": single_load_runner
-            }.get(with_tag)
+            if is_installed(package_name="je_auto_control"):
+                from je_auto_control import execute_action as single_gui_runner
+                runner_dict.update({"gui_runner": single_gui_runner})
+            execute_with = runner_dict.get(with_tag)
+
         elif mode == "run_folder":
-            from je_load_density import execute_files as multi_load_runner
-            from je_web_runner import execute_files as multi_web_runner
-            from je_auto_control import execute_files as multi_gui_runner
-            from je_api_testka import execute_files as multi_api_runner
-            execute_with = {
-                "gui-runner": multi_gui_runner,
-                "web-runner": multi_web_runner,
-                "api-runner": multi_api_runner,
-                "load-runner": multi_load_runner
-            }.get(with_tag)
+
+            if not is_installed(package_name="je_auto_control") and with_tag == "gui-runner":
+                raise ExecutorException(can_not_run_gui_error)
+            if is_installed(package_name="je_auto_control"):
+                from je_auto_control import execute_files as multi_gui_runner
+                runner_dict.update({"gui_runner": multi_gui_runner})
+            execute_with = runner_dict.get(with_tag)
+
         else:
             execute_with = None
+
         if execute_with is None:
             step_log_check(
                 enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
                 message=f"with using the wrong runner tag: {step.get('with')}")
+
             return False, None
+
     except ExecutorException as error:
         step_log_check(
             enable_logging=enable_logging, logger=test_pioneer_logger, level="error",

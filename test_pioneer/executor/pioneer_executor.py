@@ -9,13 +9,15 @@ from test_pioneer.executor.program.external_program import open_program, close_p
 from test_pioneer.executor.run.executor_run import run
 from test_pioneer.executor.run.executor_run_folder import run_folder
 from test_pioneer.executor.test_recorder.logger import set_logger
-from test_pioneer.executor.test_recorder.video_recoder import set_recoder
 from test_pioneer.executor.time.wait import blocked_wait
 from test_pioneer.logging.loggin_instance import step_log_check, test_pioneer_logger
 from test_pioneer.process.process_manager import process_manager_instance
+from test_pioneer.utils.package.check import is_installed
 
 
 def execute_yaml(stream: str, yaml_type: str = "File"):
+    recording = None
+    recoder = None
     if yaml_type == "File":
         file = open(stream, "r").read()
         yaml_data = yaml.safe_load(stream=file)
@@ -24,13 +26,15 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
     else:
         raise WrongInputException("Wrong input: " + repr(stream))
     # Pre-check data structure
-    if isinstance(yaml_data, dict) is False:
+    if not isinstance(yaml_data, dict):
         raise YamlException(f"Not a dict: {yaml_data}")
 
     # Pre-check save log or not
     enable_logging = set_logger(yaml_data=yaml_data)
-    # Pre-check recording or not
-    recording, recoder = set_recoder(yaml_data=yaml_data)
+    if is_installed(package_name="je_auto_control"):
+        from test_pioneer.executor.test_recorder.video_recoder import set_recoder
+        # Pre-check recording or not
+        recording, recoder = set_recoder(yaml_data=yaml_data)
 
     try:
         # Pre-check jobs
@@ -70,7 +74,7 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
             name = step.get("name")
 
             if "run" in step.keys():
-                if run(step=step, enable_logging=enable_logging) is False:
+                if not run(step=step, enable_logging=enable_logging):
                     break
 
             elif "run_folder" in step.keys():
@@ -101,12 +105,14 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
         step_log_check(
             enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
             message=f"Error: {repr(error)}")
+        if is_installed(package_name="je_auto_control"):
+            if recording and recoder is not None:
+                recoder.set_recoding_flag(False)
+                while recoder.is_alive():
+                    time.sleep(0.1)
+        raise error
+    if is_installed(package_name="je_auto_control"):
         if recording and recoder is not None:
             recoder.set_recoding_flag(False)
             while recoder.is_alive():
                 time.sleep(0.1)
-        raise error
-    if recording and recoder is not None:
-        recoder.set_recoding_flag(False)
-        while recoder.is_alive():
-            time.sleep(0.1)
