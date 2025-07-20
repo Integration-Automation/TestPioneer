@@ -8,7 +8,7 @@ from test_pioneer.logging.loggin_instance import step_log_check, test_pioneer_lo
 
 def run(step: dict, enable_logging: bool) -> bool:
     check_with_data = select_with_runner(step, enable_logging=enable_logging, mode="run")
-    if check_with_data[0] is False:
+    if not check_with_data[0]:
         return False
     else:
         execute_with = check_with_data[1]

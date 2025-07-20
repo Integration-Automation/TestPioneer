@@ -1,6 +1,6 @@
 from je_auto_control import RecordingThread
 
-from test_pioneer.exception.exceptions import ExecutorException
+from test_pioneer.utils.exception.exceptions import ExecutorException
 
 
 def set_recoder(yaml_data: dict) -> tuple[bool, RecordingThread] or None:

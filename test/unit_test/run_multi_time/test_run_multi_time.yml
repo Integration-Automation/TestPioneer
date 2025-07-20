@@ -7,10 +7,10 @@ jobs:
           with: gui-runner
         - name: run_test_script_2
           run: /test/unit_test/run_multi_time/test/test2.json
-          with: web-runner
+          with: api-runner
         - name: run_test_script_3
           run: /test/unit_test/run_multi_time/test/test3.json
-          with: api-runner
+          with: web-runner
         - name: run_test_script_4
           run: /test/unit_test/run_multi_time/test/test4.json
           with: load-runner

@@ -1,0 +1,51 @@
+# Use the latest Ubuntu base image
+FROM ubuntu:latest
+
+# Disable interactive prompts during apt operations
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install build tools, SSL certificates, and libraries for Python compilation
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends software-properties-common \
+  && add-apt-repository universe
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+        wget \
+        ca-certificates \
+        zlib1g-dev \
+        libncurses5-dev \
+        libgdbm-dev \
+        libssl-dev \
+        libreadline-dev \
+        libffi-dev \
+        libsqlite3-dev \
+        libbz2-dev \
+        liblzma-dev \
+        tk-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Download, compile, and install Python 3.11.10 from source
+RUN wget https://www.python.org/ftp/python/3.11.10/Python-3.11.10.tgz \
+    && tar -xzf Python-3.11.10.tgz \
+    && cd Python-3.11.10 \
+    && ./configure --enable-optimizations \
+    && make -j"$(nproc)" \
+    && make altinstall \
+    && cd .. \
+    && rm -rf Python-3.11.10 Python-3.11.10.tgz
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy requirements file for non-GUI dependencies and install
+COPY docker_nongui_requirements.txt .
+RUN python3.11 -m pip install --upgrade pip \
+    && python3.11 -m pip install -r docker_nongui_requirements.txt
+
+# Copy non-GUI test folder
+COPY docker_non_gui_test /app/docker_non_gui_test
+
+# Default command to run your test entrypoint
+CMD ["python3.11", "docker_non_gui_test/test.py"]
