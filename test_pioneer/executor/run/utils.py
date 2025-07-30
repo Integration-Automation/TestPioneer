@@ -39,7 +39,7 @@ def select_with_runner(step: dict, enable_logging: bool, mode: str = "run") -> T
                 raise ExecutorException(can_not_run_gui_error)
             if is_installed(package_name="je_auto_control"):
                 from je_auto_control import execute_action as single_gui_runner
-                runner_dict.update({"gui_runner": single_gui_runner})
+                runner_dict.update({"gui-runner": single_gui_runner})
             execute_with = runner_dict.get(with_tag)
 
         elif mode == "run_folder":
@@ -48,7 +48,7 @@ def select_with_runner(step: dict, enable_logging: bool, mode: str = "run") -> T
                 raise ExecutorException(can_not_run_gui_error)
             if is_installed(package_name="je_auto_control"):
                 from je_auto_control import execute_files as multi_gui_runner
-                runner_dict.update({"gui_runner": multi_gui_runner})
+                runner_dict.update({"gui-runner": multi_gui_runner})
             execute_with = runner_dict.get(with_tag)
 
         else:

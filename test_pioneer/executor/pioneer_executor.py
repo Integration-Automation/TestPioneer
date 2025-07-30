@@ -4,7 +4,7 @@ import yaml
 
 from test_pioneer.utils.exception.exceptions import WrongInputException, YamlException
 from test_pioneer.executor.browser.url import open_url
-from test_pioneer.executor.file.download import download_single_file
+from test_pioneer.executor.file.file_processing import download_single_file, unzip_zipfile
 from test_pioneer.executor.program.external_program import open_program, close_program
 from test_pioneer.executor.run.executor_run import run
 from test_pioneer.executor.run.executor_run_folder import run_folder
@@ -78,27 +78,31 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
                     break
 
             elif "run_folder" in step.keys():
-                if run_folder(step=step, enable_logging=enable_logging, mode="run_folder") is False:
+                if not run_folder(step=step, enable_logging=enable_logging, mode="run_folder") is False:
                     break
 
             elif "open_url" in step.keys():
-                if open_url(step=step, enable_logging=enable_logging):
+                if not open_url(step=step, enable_logging=enable_logging):
                     break
 
             elif "download_file" in step.keys():
-                if download_single_file(step=step, name=name, enable_logging=enable_logging):
+                if not download_single_file(step=step, enable_logging=enable_logging):
                     break
 
             elif "wait" in step.keys():
-                if blocked_wait(step=step, enable_logging=enable_logging) is False:
+                if not blocked_wait(step=step, enable_logging=enable_logging):
                     break
 
             elif "open_program" in step.keys():
-                if open_program(step=step, name=name, enable_logging=enable_logging) is False:
+                if not open_program(step=step, name=name, enable_logging=enable_logging):
                     break
 
             elif "close_program" in step.keys():
-                if close_program(step=step, enable_logging=enable_logging) is False:
+                if not close_program(step=step, enable_logging=enable_logging):
+                    break
+
+            elif "unzip_zipfile" in step.keys():
+                if not unzip_zipfile(step=step, enable_logging=enable_logging):
                     break
 
     except Exception as error:
