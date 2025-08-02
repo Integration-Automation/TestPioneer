@@ -24,6 +24,11 @@ def run(step: dict, enable_logging: bool) -> bool:
             enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
             message=f"This file not exists: {step.get('run')}")
         return False
-    file = json.loads(Path(file).read_text())
+    try:
+        file = json.loads(Path(file).read_text())
+    except Exception as error:
+        step_log_check(
+            enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
+            message=f"load json failed: {error}")
     execute_with(file)
     return True
