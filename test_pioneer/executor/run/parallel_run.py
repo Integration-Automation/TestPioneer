@@ -1,8 +1,8 @@
-import json
 import subprocess
 import sys
 from pathlib import Path
 
+from test_pioneer.executor.run.process_manager import process_manager
 from test_pioneer.logging.loggin_instance import step_log_check, test_pioneer_logger
 from test_pioneer.utils.exception.exceptions import ExecutorException
 from test_pioneer.utils.exception.tags import can_not_run_gui_error
@@ -39,8 +39,18 @@ def parallel_run(step: dict, enable_logging: bool = False) -> bool:
 
         for runner, script in zip(runner_list, script_path_list):
             runner_package = runner_command_dict.get(runner)
-            script_text = json.loads(Path(script).read_text())
-            print(executor_path, runner_package, script_text)
-            subprocess.Popen(args=[executor_path, "-m", runner_package, "--execute_str", script_text])
+            script_text = Path(script)
+            commands = " ".join([f"{executor_path}", "-m", f"{runner_package}", "--execute_file", f"{script_text}"])
+            current_process: subprocess.Popen = subprocess.Popen(commands)
+            process_manager.process_list.append(current_process)
+
+        while True:
+            if process_manager.process_list is None or len(process_manager.process_list) == 0:
+                break
+            for process in process_manager.process_list:
+                process.poll()
+                if process.returncode is not None:
+                    process_manager.process_list.remove(process)
 
     return True
+
