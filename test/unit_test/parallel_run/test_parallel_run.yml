@@ -1,0 +1,7 @@
+pioneer_log: "test_pioneer.log"
+jobs:
+    steps:
+        - name: test parallel_run
+          parallel_run:
+            runners: ["gui-runner", "gui-runner"]
+            scripts: ["./test/test1.json", "./test/test2.json"]

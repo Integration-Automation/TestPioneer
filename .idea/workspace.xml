@@ -5,18 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f39b62f7-4d55-4cd4-9ab6-db462852dcca" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/test/unit_test/parallel_run/test/test1.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/unit_test/parallel_run/test/test2.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/unit_test/parallel_run/test_parallel_run.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test_pioneer/executor/run/process_manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/dev_python3_10.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/dev_python3_10.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/dev_python3_11.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/dev_python3_11.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/dev_python3_12.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/dev_python3_12.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/stable_python3_10.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/stable_python3_10.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/stable_python3_11.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/stable_python3_11.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/stable_python3_12.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/stable_python3_12.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/unit_test/parallel_run/test_parallel_run.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker_gui_test/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/docker_gui_test/test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker_non_gui_test/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/docker_non_gui_test/test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/unit_test/parallel_run/test_parallel_run.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/unit_test/parallel_run/test_parallel_run.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/unit_test/run_multi_time/test_run_multi_time.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/unit_test/run_multi_time/test_run_multi_time.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_pioneer/executor/pioneer_executor.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_pioneer/executor/pioneer_executor.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test_pioneer/executor/run/parallel_run.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_pioneer/executor/run/parallel_run.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -80,6 +76,7 @@
     "Python.test.executor": "Run",
     "Python.test_parallel_run.executor": "Run",
     "Python.test_run_download_file.executor": "Run",
+    "Python.test_run_folder.executor": "Run",
     "Python.yaml.executor": "Run",
     "Python.yaml_file (1).executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -87,7 +84,7 @@
     "git-widget-placeholder": "dev",
     "ignore.virus.scanning.warn.message": "true",
     "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "C:/CodeWorkspace/Python/TestPioneer/test/unit_test/parallel_run/test",
+    "last_opened_file_path": "C:/CodeWorkspace/Python/TestPioneer/test/unit_test/parallel_run",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -100,17 +97,17 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\CodeWorkspace\Python\TestPioneer\test\unit_test\parallel_run" />
       <recent name="C:\CodeWorkspace\Python\TestPioneer\test\unit_test\parallel_run\test" />
       <recent name="C:\CodeWorkspace\Python\TestPioneer\test_pioneer\executor\run" />
       <recent name="C:\CodeWorkspace\Python\TestPioneer" />
       <recent name="C:\CodeWorkspace\Python\TestPioneer\.github" />
-      <recent name="C:\CodeWorkspace\Python\TestPioneer\test_pioneer\process" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\CodeWorkspace\Python\TestPioneer\.github\workflows" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.test_parallel_run">
+  <component name="RunManager" selected="Python.test_run_folder">
     <configuration name="parallel_run" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="TestPioneer" />
       <option name="ENV_FILES" value="" />
@@ -126,29 +123,6 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test_pioneer/executor/run/parallel_run.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="test (2)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="TestPioneer" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/test/unit_test" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test/unit_test/test.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -226,13 +200,36 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="test_run_folder" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="TestPioneer" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/test/unit_test/run_folder" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test/unit_test/run_folder/test_run_folder.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.test_run_folder" />
         <item itemvalue="Python.test_parallel_run" />
         <item itemvalue="Python.parallel_run" />
         <item itemvalue="Python.test (3)" />
         <item itemvalue="Python.test_run_download_file" />
-        <item itemvalue="Python.test (2)" />
       </list>
     </recent_temporary>
   </component>
@@ -290,7 +287,7 @@
       <workItem from="1752310471606" duration="2829000" />
       <workItem from="1752384994025" duration="1429000" />
       <workItem from="1753879119843" duration="48332000" />
-      <workItem from="1754211379655" duration="7868000" />
+      <workItem from="1754211379655" duration="31819000" />
     </task>
     <servers />
   </component>
@@ -301,7 +298,7 @@
     <SUITE FILE_PATH="coverage/TestPioneer$create_template_structure__1_.coverage" NAME="create_template_structure (1) Coverage Results" MODIFIED="1741680860884" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test_pioneer/project" />
     <SUITE FILE_PATH="coverage/TestPioneer$create_project_structure.coverage" NAME="create_project_structure Coverage Results" MODIFIED="1741659060268" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test_pioneer/project" />
     <SUITE FILE_PATH="coverage/TestPioneer$test_run_download_file.coverage" NAME="test_run_download_file Coverage Results" MODIFIED="1744564542783" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test/unit_test/download_file" />
-    <SUITE FILE_PATH="coverage/TestPioneer$test_parallel_run.coverage" NAME="test_parallel_run Coverage Results" MODIFIED="1754250243693" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test/unit_test/parallel_run" />
+    <SUITE FILE_PATH="coverage/TestPioneer$test_parallel_run.coverage" NAME="test_parallel_run Coverage Results" MODIFIED="1754522342915" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test/unit_test/parallel_run" />
     <SUITE FILE_PATH="coverage/TestPioneer$mouse_info.coverage" NAME="mouse_info Coverage Results" MODIFIED="1742714189750" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../AutoControlGUI/test/unit_test/get_info" />
     <SUITE FILE_PATH="coverage/TestPioneer$test__2_.coverage" NAME="test (2) Coverage Results" MODIFIED="1742972085728" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test/unit_test" />
     <SUITE FILE_PATH="coverage/TestPioneer$create_template_structure.coverage" NAME="create_template_structure Coverage Results" MODIFIED="1741680102305" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test_pioneer/project" />
@@ -311,6 +308,7 @@
     <SUITE FILE_PATH="coverage/TestPioneer$parallel_run.coverage" NAME="parallel_run Coverage Results" MODIFIED="1754211638762" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test_pioneer/executor/run" />
     <SUITE FILE_PATH="coverage/TestPioneer$yaml_file__1_.coverage" NAME="yaml_file (1) Coverage Results" MODIFIED="1739766827589" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test_pioneer/yaml" />
     <SUITE FILE_PATH="coverage/TestPioneer$test__3_.coverage" NAME="test (3) Coverage Results" MODIFIED="1746950537445" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/TestPioneer$test_run_folder.coverage" NAME="test_run_folder Coverage Results" MODIFIED="1754522349717" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test/unit_test/run_folder" />
     <SUITE FILE_PATH="coverage/TestPioneer$test.coverage" NAME="test Coverage Results" MODIFIED="1742744453847" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test/manual_test" />
   </component>
 </project>

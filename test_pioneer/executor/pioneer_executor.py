@@ -2,6 +2,7 @@ import time
 
 import yaml
 
+from test_pioneer.executor.run.parallel_run import parallel_run
 from test_pioneer.utils.exception.exceptions import WrongInputException, YamlException
 from test_pioneer.executor.browser.url import open_url
 from test_pioneer.executor.file.file_processing import download_single_file, unzip_zipfile
@@ -103,6 +104,10 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
 
             elif "unzip_zipfile" in step.keys():
                 if not unzip_zipfile(step=step, enable_logging=enable_logging):
+                    break
+
+            elif "parallel_run" in step.keys():
+                if not parallel_run(step=step, enable_logging=enable_logging):
                     break
 
     except Exception as error:

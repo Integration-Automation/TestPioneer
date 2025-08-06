@@ -4,15 +4,19 @@ from pathlib import Path
 
 from test_pioneer.executor.run.process_manager import process_manager
 from test_pioneer.logging.loggin_instance import step_log_check, test_pioneer_logger
-from test_pioneer.utils.exception.exceptions import ExecutorException
-from test_pioneer.utils.exception.tags import can_not_run_gui_error
 from test_pioneer.utils.package.check import is_installed
 
 
 def parallel_run(step: dict, enable_logging: bool = False) -> bool:
-    runner_list = step.get("runners", [])
-    script_path_list = step.get("scripts", [])
-    executor_path = step.get("executor_path", None)
+    parallel_run_dict = step.get("parallel_run")
+    if parallel_run_dict is None:
+        step_log_check(
+            enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
+            message="parallel_run tag needs to be defined as an argument")
+        return False
+    runner_list = parallel_run_dict.get("runners", [])
+    script_path_list = parallel_run_dict.get("scripts", [])
+    executor_path = parallel_run_dict.get("executor_path", None)
     if len(runner_list) != len(script_path_list):
         step_log_check(
             enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
@@ -26,7 +30,9 @@ def parallel_run(step: dict, enable_logging: bool = False) -> bool:
         }
 
         if not is_installed(package_name="je_auto_control") and "gui-runner" in runner_list:
-            raise ExecutorException(can_not_run_gui_error)
+            step_log_check(
+                enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
+                message="Please install gui-runner: je_auto_control")
         if is_installed(package_name="je_auto_control"):
             runner_command_dict.update({"gui-runner": "je_auto_control"})
 

@@ -23,4 +23,4 @@ if __name__ == '__main__':
     for path in list_all_files("./docker_non_gui_test"):
         print(path)
 
-    execute_yaml("./docker_non_gui_test/test_run_multi_time.yml")
+    execute_yaml("./docker_non_gui_test/test_parallel_run.yml")
