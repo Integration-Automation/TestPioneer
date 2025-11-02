@@ -1,7 +1,7 @@
 import webbrowser
 
-from test_pioneer.utils.exception.exceptions import ExecutorException
 from test_pioneer.logging.loggin_instance import step_log_check, test_pioneer_logger
+from test_pioneer.utils.exception.exceptions import ExecutorException
 
 
 def open_url(step: dict, enable_logging: bool = False) -> bool:

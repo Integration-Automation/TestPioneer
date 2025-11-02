@@ -10,6 +10,10 @@ if __name__ == "__main__":
         "-e", "--execute_yaml",
         type=str, help="choose yaml file to execute"
     )
+    parser.add_argument(
+        "-r", "--run",
+        type=str, help="run single test script"
+    )
     args = parser.parse_args()
     args = vars(args)
     if args.get("execute_yaml"):

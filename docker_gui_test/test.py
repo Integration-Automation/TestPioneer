@@ -25,4 +25,4 @@ if __name__ == '__main__':
     display = Display(visible=0, size=(1920, 1080))
     display.start()
 
-    execute_yaml("./docker_gui_test/test_run_multi_time.yml")
+    execute_yaml("./docker_gui_test/test_parallel_run.yml")

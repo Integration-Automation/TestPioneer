@@ -24,10 +24,22 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip wheel
-          pip install -r requirements.txt
-      - name: Test run yaml that execute multi scrip
+          pip install -r dev_requirements.txt
+      - name: Test run yaml that execute multi script
         run: python ./test/unit_test/run_multi_time/test_run_multi_time.py
       - name: Test yaml that script in folder
         run: python ./test/unit_test/run_folder/test_run_folder.py
       - name: Test yaml that download file yaml
         run: python ./test/unit_test/download_file/test_run_download_file.py
+      - name: Test parallel run
+        run: python ./test/unit_test/parallel_run/test_parallel_run.py
+      - name: Save Test video
+        uses: actions/upload-artifact@v4
+        with:
+          name: test_video
+          path: test_video.mp4
+      - name: Save log file
+        uses: actions/upload-artifact@v4
+        with:
+          name: test_log
+          path: test_pioneer.log

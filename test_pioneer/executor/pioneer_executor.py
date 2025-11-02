@@ -2,16 +2,17 @@ import time
 
 import yaml
 
-from test_pioneer.utils.exception.exceptions import WrongInputException, YamlException
 from test_pioneer.executor.browser.url import open_url
 from test_pioneer.executor.file.file_processing import download_single_file, unzip_zipfile
 from test_pioneer.executor.program.external_program import open_program, close_program
 from test_pioneer.executor.run.executor_run import run
 from test_pioneer.executor.run.executor_run_folder import run_folder
+from test_pioneer.executor.run.parallel_run import parallel_run
 from test_pioneer.executor.test_recorder.logger import set_logger
 from test_pioneer.executor.time.wait import blocked_wait
 from test_pioneer.logging.loggin_instance import step_log_check, test_pioneer_logger
 from test_pioneer.process.process_manager import process_manager_instance
+from test_pioneer.utils.exception.exceptions import WrongInputException, YamlException
 from test_pioneer.utils.package.check import is_installed
 
 
@@ -55,7 +56,7 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
             if step.get("name", None) is None:
                 step_log_check(
                     enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
-                    message=f"Step need name tag")
+                    message="Step need name tag")
                 break
             name = step.get("name")
             if name in process_manager_instance.name_set:
@@ -103,6 +104,10 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
 
             elif "unzip_zipfile" in step.keys():
                 if not unzip_zipfile(step=step, enable_logging=enable_logging):
+                    break
+
+            elif "parallel_run" in step.keys():
+                if not parallel_run(step=step, enable_logging=enable_logging):
                     break
 
     except Exception as error:

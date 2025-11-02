@@ -1,7 +1,7 @@
 from typing import Tuple, Union, Callable
 
-from test_pioneer.utils.exception.exceptions import ExecutorException
 from test_pioneer.logging.loggin_instance import step_log_check, test_pioneer_logger
+from test_pioneer.utils.exception.exceptions import ExecutorException
 from test_pioneer.utils.exception.tags import can_not_run_gui_error
 from test_pioneer.utils.package.check import is_installed
 
