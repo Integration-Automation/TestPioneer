@@ -59,4 +59,3 @@ def parallel_run(step: dict, enable_logging: bool = False) -> bool:
                     process_manager.process_list.remove(process)
 
     return True
-

@@ -8,12 +8,12 @@ def download_single_file(step: dict, enable_logging: bool = False) -> bool:
     if file_url is None or file_path is None:
         step_log_check(
             enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
-            message=f"Please provide the file_url and download_file")
+            message="Please provide the file_url and download_file")
         return False
     if isinstance(file_url, str) is False or isinstance(file_path, str) is False:
         step_log_check(
             enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
-            message=f"Both file_url and download need to be of type str")
+            message="Both file_url and download need to be of type str")
         return False
     download_file(file_url=file_url, file_name=file_path)
     return True
@@ -26,12 +26,12 @@ def unzip_zipfile(step: dict, enable_logging: bool = False) -> bool:
     if zip_file_path is None:
         step_log_check(
             enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
-            message=f"Please provide the zip_file_path")
+            message="Please provide the zip_file_path")
         return False
     if not isinstance(zip_file_path, str):
         step_log_check(
             enable_logging=enable_logging, logger=test_pioneer_logger, level="info",
-            message=f"zip_file_path need to be of type str")
+            message="zip_file_path need to be of type str")
         return False
 
     from automation_file import unzip_all
