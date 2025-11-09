@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f39b62f7-4d55-4cd4-9ab6-db462852dcca" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="f39b62f7-4d55-4cd4-9ab6-db462852dcca" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -54,40 +52,42 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.create_project_structure.executor&quot;: &quot;Run&quot;,
-    &quot;Python.create_template_structure (1).executor&quot;: &quot;Run&quot;,
-    &quot;Python.create_template_structure.executor&quot;: &quot;Run&quot;,
-    &quot;Python.mouse_info.executor&quot;: &quot;Run&quot;,
-    &quot;Python.parallel_run.executor&quot;: &quot;Run&quot;,
-    &quot;Python.pioneer_executor.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test (1).executor&quot;: &quot;Run&quot;,
-    &quot;Python.test (2).executor&quot;: &quot;Run&quot;,
-    &quot;Python.test (3).executor&quot;: &quot;Run&quot;,
-    &quot;Python.test.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_parallel_run.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_run_download_file.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_run_folder.executor&quot;: &quot;Run&quot;,
-    &quot;Python.yaml.executor&quot;: &quot;Run&quot;,
-    &quot;Python.yaml_file (1).executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;dev&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/CodeWorkspace/Python/TestPioneer/test/unit_test/parallel_run&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.create_project_structure.executor": "Run",
+    "Python.create_template_structure (1).executor": "Run",
+    "Python.create_template_structure.executor": "Run",
+    "Python.mouse_info.executor": "Run",
+    "Python.parallel_run.executor": "Run",
+    "Python.pioneer_executor.executor": "Run",
+    "Python.test (1).executor": "Run",
+    "Python.test (2).executor": "Run",
+    "Python.test (3).executor": "Run",
+    "Python.test.executor": "Run",
+    "Python.test_parallel_run.executor": "Run",
+    "Python.test_run_download_file.executor": "Run",
+    "Python.test_run_folder.executor": "Run",
+    "Python.yaml.executor": "Run",
+    "Python.yaml_file (1).executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultAutoModeForALLUsers.v1": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "dev",
+    "ignore.virus.scanning.warn.message": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "C:/CodeWorkspace/Python/TestPioneer/test/unit_test/parallel_run",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\CodeWorkspace\Python\TestPioneer\test\unit_test\parallel_run" />
@@ -229,8 +229,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-b598e85cdad2-JavaScript-PY-252.25557.130" />
-        <option value="bundled-python-sdk-1bde30d8e611-7b97d883f26b-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.25557.130" />
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-PY-252.27397.106" />
+        <option value="bundled-python-sdk-4e2b1448bda8-9a97661f3031-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.27397.106" />
       </set>
     </attachedChunks>
   </component>
@@ -285,6 +285,7 @@
       <workItem from="1755162820527" duration="352000" />
       <workItem from="1756753342982" duration="9000" />
       <workItem from="1756753376462" duration="1757000" />
+      <workItem from="1762073757200" duration="3249000" />
     </task>
     <servers />
   </component>

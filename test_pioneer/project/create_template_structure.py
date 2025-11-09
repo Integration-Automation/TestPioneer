@@ -9,34 +9,64 @@ from test_pioneer.utils.exception.tags import cant_save_yaml_error
 
 def create_dir(dir_name: str) -> None:
     """
-    :param dir_name: create dir use dir name
-    :return: None
+    Create a directory with the given name.
+    建立指定名稱的資料夾。
+
+    Args:
+        dir_name (str): Directory name to create. 要建立的資料夾名稱。
     """
-    Path(dir_name).mkdir(
-        parents=True,
-        exist_ok=True
-    )
+    Path(dir_name).mkdir(parents=True, exist_ok=True)
 
 
-def create_template(parent_name: str, project_path: str = None) -> None:
+def create_template(parent_name: str, project_path: str | None = None) -> None:
+    """
+    Create a template YAML file inside the given project path.
+    在指定的專案路徑中建立範本 YAML 檔案。
+
+    Args:
+        parent_name (str): Parent directory name. 父資料夾名稱。
+        project_path (str | None): Project path, defaults to current working directory.
+                                   專案路徑，預設為目前工作目錄。
+    """
     if project_path is None:
-        project_path: str = str(Path.cwd())
-    template_dir = Path(project_path + "/" + parent_name)
+        project_path = str(Path.cwd())
+
+    template_dir = Path(project_path) / parent_name
     lock = Lock()
+
     if template_dir.exists() and template_dir.is_dir():
         lock.acquire()
         try:
-            with open(str(template_dir) + "/" + parent_name + ".yml", "w+") as file_to_write:
+            file_path = template_dir / f"{parent_name}.yml"
+            with file_path.open("w", encoding="utf-8") as file_to_write:
                 file_to_write.write(template_1_str)
-        except ProjectException:
-            raise ProjectException(cant_save_yaml_error)
+        except Exception as error:
+            # 捕捉所有異常並轉換為 ProjectException
+            raise ProjectException(f"{cant_save_yaml_error}: {error}")
         finally:
             lock.release()
 
 
-def create_template_dir(project_path: str = None, parent_name: str = ".TestPioneer") -> None:
-    test_pioneer_logger.info(f"create_template_dir, project_path: {project_path}, parent_name: {parent_name}")
+def create_template_dir(project_path: str | None = None, parent_name: str = ".TestPioneer") -> None:
+    """
+    Create a template directory and YAML file.
+    建立範本資料夾與 YAML 檔案。
+
+    Args:
+        project_path (str | None): Project path, defaults to current working directory.
+                                   專案路徑，預設為目前工作目錄。
+        parent_name (str): Parent directory name, defaults to ".TestPioneer".
+                           父資料夾名稱，預設為 ".TestPioneer"。
+    """
+    test_pioneer_logger.info(
+        f"create_template_dir, project_path: {project_path}, parent_name: {parent_name}"
+    )
+
     if project_path is None:
-        project_path: str = str(Path.cwd())
-    create_dir(project_path + "/" + parent_name)
-    create_template(parent_name)
+        project_path = str(Path.cwd())
+
+    # 建立資料夾
+    create_dir(str(Path(project_path) / parent_name))
+
+    # 建立範本檔案
+    create_template(parent_name, project_path)
