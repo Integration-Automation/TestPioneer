@@ -116,12 +116,12 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
             message=f"Error: {repr(error)}")
         if is_installed(package_name="je_auto_control"):
             if recording and recoder is not None:
-                recoder.set_recoding_flag(False)
+                recoder.set_recording_flag(False)
                 while recoder.is_alive():
                     time.sleep(0.1)
         raise error
     if is_installed(package_name="je_auto_control"):
         if recording and recoder is not None:
-            recoder.set_recoding_flag(False)
+            recoder.set_recording_flag(False)
             while recoder.is_alive():
                 time.sleep(0.1)
