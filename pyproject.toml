@@ -5,15 +5,16 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "test_pioneer_dev"
-version = "0.1.40"
+name = "test_pioneer"
+version = "0.1.32"
 authors = [
     { name = "JE-Chen", email = "jechenmailman@gmail.com" },
 ]
 description = "Test framework for CI/CD"
 requires-python = ">=3.10"
 license-files = ["LICENSE"]
-dependencies = ["je_web_runner",
+dependencies = [
+    "je_web_runner",
     "je_load_density", "je_api_testka", "je-mail-thunder",
     "automation-file", "psutil", "pyyaml"
 ]
@@ -39,3 +40,8 @@ find = { namespaces = false }
 
 [project.optional-dependencies]
 gui = ["je_auto_control"]
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+python_files = ["test_*.py"]
+addopts = "--ignore=test/unit_test"
