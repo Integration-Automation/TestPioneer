@@ -86,10 +86,10 @@ jobs:
 
 | Runner | Package | Description |
 |--------|---------|-------------|
-| `gui-runner` | [je_auto_control](https://github.com/Integration-Automation/je_auto_control) | Desktop GUI automation |
-| `web-runner` | [je_web_runner](https://github.com/Integration-Automation/je_web_runner) | Web browser automation |
-| `api-runner` | [je_api_testka](https://github.com/Integration-Automation/je_api_testka) | REST API testing |
-| `load-runner` | [je_load_density](https://github.com/Integration-Automation/je_load_density) | Load & stress testing |
+| `gui-runner` | [AutoControlGUI](https://github.com/Integration-Automation/AutoControlGUI) | Desktop GUI automation |
+| `web-runner` | [WebRunner](https://github.com/Integration-Automation/WebRunner) | Web browser automation |
+| `api-runner` | [APITestka](https://github.com/Integration-Automation/APITestka) | REST API testing |
+| `load-runner` | [LoadDensity](https://github.com/Integration-Automation/LoadDensity) | Load & stress testing |
 
 ## Step Types
 
