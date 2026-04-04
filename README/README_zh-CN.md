@@ -84,10 +84,10 @@ jobs:
 
 | Runner | 包 | 说明 |
 |--------|---|------|
-| `gui-runner` | [je_auto_control](https://github.com/Integration-Automation/je_auto_control) | 桌面 GUI 自动化 |
-| `web-runner` | [je_web_runner](https://github.com/Integration-Automation/je_web_runner) | 网页浏览器自动化 |
-| `api-runner` | [je_api_testka](https://github.com/Integration-Automation/je_api_testka) | REST API 测试 |
-| `load-runner` | [je_load_density](https://github.com/Integration-Automation/je_load_density) | 负载与压力测试 |
+| `gui-runner` | [AutoControlGUI](https://github.com/Integration-Automation/AutoControlGUI) | 桌面 GUI 自动化 |
+| `web-runner` | [WebRunner](https://github.com/Integration-Automation/WebRunner) | 网页浏览器自动化 |
+| `api-runner` | [APITestka](https://github.com/Integration-Automation/APITestka) | REST API 测试 |
+| `load-runner` | [LoadDensity](https://github.com/Integration-Automation/LoadDensity) | 负载与压力测试 |
 
 ## 步骤类型
 
