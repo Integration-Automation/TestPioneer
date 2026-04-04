@@ -32,7 +32,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip wheel
           pip install pytest
-          pip install -e .[gui]
+          pip install -e .
 
       - name: Run unit tests
         run: python -m pytest test/ --ignore=test/unit_test -v --tb=short --junitxml=test-results.xml
@@ -64,7 +64,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip wheel
-          pip install -e .[gui]
+          pip install -e ".[gui]"
 
       - name: Test run yaml that execute multi script
         run: python ./test/unit_test/run_multi_time/test_run_multi_time.py

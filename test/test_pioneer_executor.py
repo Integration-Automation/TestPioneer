@@ -43,15 +43,21 @@ class TestValidateSteps:
 
 
 class TestExecuteYaml:
-    def test_no_jobs_tag_raises(self):
+    @patch("test_pioneer.executor.pioneer_executor.set_logger", return_value=False)
+    @patch("test_pioneer.executor.pioneer_executor.is_installed", return_value=False)
+    def test_no_jobs_tag_raises(self, mock_installed, mock_logger):
         with pytest.raises(YamlException, match="No jobs tag"):
             execute_yaml("key: value", yaml_type="String")
 
-    def test_jobs_not_dict_raises(self):
+    @patch("test_pioneer.executor.pioneer_executor.set_logger", return_value=False)
+    @patch("test_pioneer.executor.pioneer_executor.is_installed", return_value=False)
+    def test_jobs_not_dict_raises(self, mock_installed, mock_logger):
         with pytest.raises(YamlException, match="jobs not a dict"):
             execute_yaml("jobs: not_a_dict", yaml_type="String")
 
-    def test_empty_steps_raises(self):
+    @patch("test_pioneer.executor.pioneer_executor.set_logger", return_value=False)
+    @patch("test_pioneer.executor.pioneer_executor.is_installed", return_value=False)
+    def test_empty_steps_raises(self, mock_installed, mock_logger):
         with pytest.raises(YamlException, match="Steps tag is empty"):
             execute_yaml("jobs:\n  steps:", yaml_type="String")
 
