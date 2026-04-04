@@ -30,6 +30,7 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/Integration-Automation/TestPioneer"
 Code = "https://github.com/Integration-Automation/TestPioneer"
+Documentation = "https://testpioneer.readthedocs.io/"
 
 [project.readme]
 file = "README.md"
