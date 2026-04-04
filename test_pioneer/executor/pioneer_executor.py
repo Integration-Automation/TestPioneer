@@ -80,8 +80,11 @@ def execute_yaml(stream: str, yaml_type: str = "File"):
     # Pre-check save log or not
     enable_logging = set_logger(yaml_data=yaml_data)
     if is_installed(package_name="je_auto_control"):
-        from test_pioneer.executor.test_recorder.video_recoder import set_recorder
-        recording, recorder = set_recorder(yaml_data=yaml_data)
+        try:
+            from test_pioneer.executor.test_recorder.video_recoder import set_recorder
+            recording, recorder = set_recorder(yaml_data=yaml_data)
+        except ImportError:
+            pass
 
     try:
         # Pre-check jobs
