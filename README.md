@@ -1,5 +1,11 @@
 # TestPioneer
 
+[![Documentation Status](https://readthedocs.org/projects/testpioneer/badge/?version=latest)](https://testpioneer.readthedocs.io/en/latest/?badge=latest)
+[![CI](https://github.com/Integration-Automation/TestPioneer/actions/workflows/ci.yml/badge.svg)](https://github.com/Integration-Automation/TestPioneer/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/test_pioneer)](https://pypi.org/project/test_pioneer/)
+[![Python](https://img.shields.io/pypi/pyversions/test_pioneer)](https://pypi.org/project/test_pioneer/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 **Language: English | [繁體中文](README/README_zh-TW.md) | [简体中文](README/README_zh-CN.md)**
 
 A YAML-driven automation test framework for CI/CD pipelines, supporting GUI, Web, API, and Load testing through pluggable runners.
@@ -49,38 +55,16 @@ from test_pioneer import create_template_dir
 create_template_dir()
 ```
 
-## YAML Configuration
+## Documentation
 
-```yaml
-pioneer_log: "test_pioneer.log"       # Optional: log file path
-recording_path: "test_video"          # Optional: video recording output
-jobs:
-  steps:
-    - name: run_api_test
-      run: tests/api_test.json
-      with: api-runner
+Full documentation is available at **[testpioneer.readthedocs.io](https://testpioneer.readthedocs.io/)**.
 
-    - name: wait_for_service
-      wait: 5
-
-    - name: run_web_test
-      run: tests/web_test.json
-      with: web-runner
-
-    - name: open_docs
-      open_url: https://example.com
-      url_open_method: open_new_tab    # open | open_new | open_new_tab
-
-    - name: launch_app
-      open_program: path/to/program
-      redirect_stdout: output.log
-      redirect_stderr: errors.log
-
-    - name: parallel_tests
-      parallel_run:
-        runners: ["web-runner", "api-runner"]
-        scripts: ["./tests/web.json", "./tests/api.json"]
-```
+- [Getting Started](https://testpioneer.readthedocs.io/en/latest/getting-started.html)
+- [YAML Configuration](https://testpioneer.readthedocs.io/en/latest/yaml-configuration.html)
+- [Runners](https://testpioneer.readthedocs.io/en/latest/runners.html)
+- [Step Types](https://testpioneer.readthedocs.io/en/latest/step-types.html)
+- [Docker](https://testpioneer.readthedocs.io/en/latest/docker.html)
+- [API Reference](https://testpioneer.readthedocs.io/en/latest/api-reference.html)
 
 ## Available Runners
 
@@ -90,20 +74,6 @@ jobs:
 | `web-runner` | [WebRunner](https://github.com/Integration-Automation/WebRunner) | Web browser automation |
 | `api-runner` | [APITestka](https://github.com/Integration-Automation/APITestka) | REST API testing |
 | `load-runner` | [LoadDensity](https://github.com/Integration-Automation/LoadDensity) | Load & stress testing |
-
-## Step Types
-
-| Step | Description |
-|------|-------------|
-| `run` | Execute a JSON test script with a specified runner |
-| `run_folder` | Run all test files in a directory |
-| `parallel_run` | Run multiple scripts concurrently |
-| `wait` | Pause execution for specified seconds |
-| `open_url` | Open a URL in the default browser |
-| `download_file` | Download a file from a URL |
-| `open_program` | Launch an external program |
-| `close_program` | Terminate a running program |
-| `unzip_zipfile` | Extract a zip archive |
 
 ## Automation IDE
 

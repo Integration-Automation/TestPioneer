@@ -1,5 +1,11 @@
 # TestPioneer
 
+[![Documentation Status](https://readthedocs.org/projects/testpioneer/badge/?version=latest)](https://testpioneer.readthedocs.io/en/latest/?badge=latest)
+[![CI](https://github.com/Integration-Automation/TestPioneer/actions/workflows/ci.yml/badge.svg)](https://github.com/Integration-Automation/TestPioneer/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/test_pioneer)](https://pypi.org/project/test_pioneer/)
+[![Python](https://img.shields.io/pypi/pyversions/test_pioneer)](https://pypi.org/project/test_pioneer/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../LICENSE)
+
 以 YAML 驅動的自動化測試框架，專為 CI/CD 流程設計，支援 GUI、Web、API 與負載測試，透過可插拔的 Runner 架構運作。
 
 ## 功能特色
@@ -47,38 +53,16 @@ from test_pioneer import create_template_dir
 create_template_dir()
 ```
 
-## YAML 設定檔
+## 文件
 
-```yaml
-pioneer_log: "test_pioneer.log"       # 選填：日誌檔案路徑
-recording_path: "test_video"          # 選填：影片錄製輸出路徑
-jobs:
-  steps:
-    - name: run_api_test
-      run: tests/api_test.json
-      with: api-runner
+完整文件請參閱 **[testpioneer.readthedocs.io](https://testpioneer.readthedocs.io/)**。
 
-    - name: wait_for_service
-      wait: 5
-
-    - name: run_web_test
-      run: tests/web_test.json
-      with: web-runner
-
-    - name: open_docs
-      open_url: https://example.com
-      url_open_method: open_new_tab    # open | open_new | open_new_tab
-
-    - name: launch_app
-      open_program: path/to/program
-      redirect_stdout: output.log
-      redirect_stderr: errors.log
-
-    - name: parallel_tests
-      parallel_run:
-        runners: ["web-runner", "api-runner"]
-        scripts: ["./tests/web.json", "./tests/api.json"]
-```
+- [快速開始](https://testpioneer.readthedocs.io/en/latest/getting-started.html)
+- [YAML 設定](https://testpioneer.readthedocs.io/en/latest/yaml-configuration.html)
+- [Runner](https://testpioneer.readthedocs.io/en/latest/runners.html)
+- [步驟類型](https://testpioneer.readthedocs.io/en/latest/step-types.html)
+- [Docker](https://testpioneer.readthedocs.io/en/latest/docker.html)
+- [API 參考](https://testpioneer.readthedocs.io/en/latest/api-reference.html)
 
 ## 可用 Runner
 
@@ -88,20 +72,6 @@ jobs:
 | `web-runner` | [WebRunner](https://github.com/Integration-Automation/WebRunner) | 網頁瀏覽器自動化 |
 | `api-runner` | [APITestka](https://github.com/Integration-Automation/APITestka) | REST API 測試 |
 | `load-runner` | [LoadDensity](https://github.com/Integration-Automation/LoadDensity) | 負載與壓力測試 |
-
-## 步驟類型
-
-| 步驟 | 說明 |
-|------|------|
-| `run` | 使用指定 Runner 執行 JSON 測試腳本 |
-| `run_folder` | 執行資料夾內所有測試檔案 |
-| `parallel_run` | 同時執行多個腳本 |
-| `wait` | 暫停執行指定秒數 |
-| `open_url` | 在預設瀏覽器開啟 URL |
-| `download_file` | 從 URL 下載檔案 |
-| `open_program` | 啟動外部程式 |
-| `close_program` | 終止執行中的程式 |
-| `unzip_zipfile` | 解壓縮 zip 檔案 |
 
 ## 自動化 IDE
 
