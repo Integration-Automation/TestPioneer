@@ -1,6 +1,7 @@
 import subprocess
 import sys
 import shutil
+import time
 from pathlib import Path
 
 from test_pioneer.executor.run.process_manager import process_manager
@@ -124,9 +125,11 @@ def parallel_run(step: dict, enable_logging: bool = False) -> bool:
     # Monitor processes
     # 監控子程序狀態
     while process_manager.process_list:
-        for process in list(process_manager.process_list):  # 使用 list 避免迭代時修改
+        for process in list(process_manager.process_list):
             process.poll()
             if process.returncode is not None:
                 process_manager.process_list.remove(process)
+        if process_manager.process_list:
+            time.sleep(0.1)
 
     return True

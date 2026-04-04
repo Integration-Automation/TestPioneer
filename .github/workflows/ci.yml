@@ -1,0 +1,93 @@
+name: TestPioneer CI
+
+on:
+  push:
+    branches: ["main", "dev"]
+  pull_request:
+    branches: ["main", "dev"]
+  schedule:
+    - cron: "0 1 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  unit-test:
+    name: Unit Tests (Python ${{ matrix.python-version }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip wheel
+          pip install pytest
+          pip install -r dev_requirements.txt
+
+      - name: Run unit tests
+        run: python -m pytest test/ --ignore=test/unit_test -v --tb=short --junitxml=test-results.xml
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-py${{ matrix.python-version }}
+          path: test-results.xml
+
+  integration-test:
+    name: Integration Tests (Python ${{ matrix.python-version }})
+    runs-on: windows-latest
+    needs: unit-test
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip wheel
+          pip install -r dev_requirements.txt
+
+      - name: Test run yaml that execute multi script
+        run: python ./test/unit_test/run_multi_time/test_run_multi_time.py
+
+      - name: Test yaml that script in folder
+        run: python ./test/unit_test/run_folder/test_run_folder.py
+
+      - name: Test yaml that download file yaml
+        run: python ./test/unit_test/download_file/test_run_download_file.py
+
+      - name: Test parallel run
+        run: python ./test/unit_test/parallel_run/test_parallel_run.py
+
+      - name: Upload test video
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-video-py${{ matrix.python-version }}
+          path: test_video.mp4
+
+      - name: Upload log file
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-log-py${{ matrix.python-version }}
+          path: test_pioneer.log

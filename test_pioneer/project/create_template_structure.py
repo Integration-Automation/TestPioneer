@@ -6,6 +6,10 @@ from test_pioneer.project.template.template import template_1_str
 from test_pioneer.utils.exception.exceptions import ProjectException
 from test_pioneer.utils.exception.tags import cant_save_yaml_error
 
+# Module-level lock for thread safety across calls
+# 模組層級的鎖，確保跨呼叫的執行緒安全
+_template_lock = Lock()
+
 
 def create_dir(dir_name: str) -> None:
     """
@@ -32,19 +36,15 @@ def create_template(parent_name: str, project_path: str | None = None) -> None:
         project_path = str(Path.cwd())
 
     template_dir = Path(project_path) / parent_name
-    lock = Lock()
 
     if template_dir.exists() and template_dir.is_dir():
-        lock.acquire()
-        try:
-            file_path = template_dir / f"{parent_name}.yml"
-            with file_path.open("w", encoding="utf-8") as file_to_write:
-                file_to_write.write(template_1_str)
-        except Exception as error:
-            # 捕捉所有異常並轉換為 ProjectException
-            raise ProjectException(f"{cant_save_yaml_error}: {error}")
-        finally:
-            lock.release()
+        with _template_lock:
+            try:
+                file_path = template_dir / f"{parent_name}.yml"
+                with file_path.open("w", encoding="utf-8") as file_to_write:
+                    file_to_write.write(template_1_str)
+            except Exception as error:
+                raise ProjectException(f"{cant_save_yaml_error}: {error}")
 
 
 def create_template_dir(project_path: str | None = None, parent_name: str = ".TestPioneer") -> None:

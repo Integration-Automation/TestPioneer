@@ -1,13 +1,10 @@
 import logging
 from logging.handlers import RotatingFileHandler
 
-# Set root logger level to DEBUG
-# 設定 root logger 等級為 DEBUG
-logging.root.setLevel(logging.DEBUG)
-
-# Create a named logger
-# 建立名為 "TestPioneer" 的 logger
+# Create a named logger (avoid setting root logger level to prevent global side effects)
+# 建立名為 "TestPioneer" 的 logger（避免設定 root logger 等級以防止全域副作用）
 test_pioneer_logger = logging.getLogger("TestPioneer")
+test_pioneer_logger.setLevel(logging.DEBUG)
 
 # Define log format
 # 定義日誌格式

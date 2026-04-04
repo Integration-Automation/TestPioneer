@@ -1,7 +1,6 @@
 import webbrowser
 
 from test_pioneer.logging.loggin_instance import step_log_check, test_pioneer_logger
-from test_pioneer.utils.exception.exceptions import ExecutorException
 
 
 def open_url(step: dict, enable_logging: bool = False) -> bool:
@@ -67,7 +66,7 @@ def open_url(step: dict, enable_logging: bool = False) -> bool:
         # 執行對應的開啟方式
         url_open_method(url=url)
 
-    except ExecutorException as error:
+    except Exception as error:
         # Log exception if occurs
         # 若發生例外，記錄錯誤
         step_log_check(
