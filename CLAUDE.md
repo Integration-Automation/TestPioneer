@@ -73,6 +73,58 @@ pytest                         # Run tests (testpaths: test/)
 - Keep imports organized: stdlib, third-party, local — separated by blank lines.
 - All public modules and classes must have docstrings.
 
+### Static Analysis Compliance (SonarQube / Codacy / Pylint / Bandit)
+
+All code must pass SonarQube Python rules, Codacy quality gates, and equivalent
+linters (Pylint, Flake8, Bandit, Ruff) without new issues. Follow these rules:
+
+**Complexity & Size**
+- Cognitive Complexity per function ≤ 15 (SonarQube `python:S3776`).
+- Cyclomatic complexity ≤ 10; refactor via extraction when exceeded.
+- Function length ≤ 50 lines; file length ≤ 750 lines (`python:S104`).
+- Max 7 parameters per function (`python:S107`) — use dataclasses / kwargs otherwise.
+- Max nesting depth ≤ 4 (`python:S134`).
+
+**Duplication & Dead Code**
+- No duplicated blocks ≥ 3 lines (Sonar duplication detector); extract helpers.
+- Remove unused imports, variables, parameters, private methods (`python:S1481`, `S1854`).
+- No unreachable code after `return`/`raise`/`break`/`continue` (`python:S1763`).
+- No commented-out code (`python:S125`).
+
+**Naming & Style (PEP 8)**
+- `snake_case` for functions/variables, `PascalCase` for classes, `UPPER_SNAKE` for constants (`python:S117`, `S100`, `S101`).
+- Module names lowercase, no hyphens. Line length ≤ 120 chars.
+- No single-letter names except loop counters (`i`, `j`, `k`) or `_`.
+
+**Correctness & Bugs**
+- No bare `except:` — always catch specific exceptions (`python:S5754`, Bandit `B110`).
+- Do not silently swallow exceptions — log or re-raise (`python:S2737`).
+- No mutable default arguments (`python:S5612`).
+- No identical expressions on both sides of operators (`python:S1764`).
+- No hardcoded credentials, tokens, IPs, or file paths (`python:S2068`, `S1313`, Bandit `B105`/`B106`).
+- Use context managers (`with`) for file and resource handling (`python:S5332`).
+- Comparisons with `None`, `True`, `False` must use `is` / `is not`.
+- String formatting: prefer f-strings; never use `%` with untrusted input.
+
+**Security (Bandit / Sonar hotspots)**
+- No `assert` in production code paths (Bandit `B101`) — use explicit checks that raise.
+- No `shell=True`, `os.system`, or unsanitized `subprocess` input (`B602`–`B605`).
+- No `tempfile.mktemp`; use `tempfile.NamedTemporaryFile` or `mkstemp` (`B306`).
+- No weak crypto (`md5`, `sha1`) for security purposes (`B303`, `B324`).
+- No `yaml.load` without `SafeLoader` (`B506`).
+- No `requests` calls without `timeout=` (`python:S4830` equivalent).
+- No SSL verification disabled (`verify=False`) in production.
+
+**Typing & Documentation**
+- Type hints on all public function signatures; `mypy --strict` clean for new code.
+- Public modules, classes, and functions require docstrings (Pylint `C0114`–`C0116`).
+- Avoid `Any`; prefer concrete types or `Protocol`.
+
+**Tests**
+- Test files named `test_*.py`; test functions `test_*`.
+- Avoid `assertTrue(x == y)` — use `assertEqual` (clearer failure messages).
+- No tests that always pass (empty body or tautological assertion) (`python:S2187`).
+
 ## Git Commit Rules
 
 - Write commit messages in English, imperative mood (e.g., "Add parallel runner timeout").
