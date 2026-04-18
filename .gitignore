@@ -142,3 +142,4 @@ dmypy.json
 # Driver
 **/.wdm/*
 /.claude/
+.idea/workspace.xml

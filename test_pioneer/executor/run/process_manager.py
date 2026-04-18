@@ -1,6 +1,8 @@
 from typing import List
 import subprocess
 
+from test_pioneer.logging.loggin_instance import test_pioneer_logger
+
 
 class ProcessManager:
     """
@@ -46,8 +48,8 @@ class ProcessManager:
         for proc in self.process_list:
             try:
                 proc.terminate()
-            except Exception:
-                pass
+            except OSError as exc:
+                test_pioneer_logger.debug("Failed to terminate process %s: %s", proc.pid, exc)
         self.process_list.clear()
 
 

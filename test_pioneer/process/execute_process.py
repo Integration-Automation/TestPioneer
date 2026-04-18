@@ -1,7 +1,7 @@
 import shlex
 import subprocess
 import sys
-from typing import Union, Optional
+from typing import Union, Optional, List
 
 import psutil
 
@@ -28,22 +28,25 @@ class ExecuteProcess:
         self.process: Optional[subprocess.Popen] = None
         self.redirect_stdout: Union[str, int] = redirect_stdout
         self.redirect_stderr: Union[str, int] = redirect_stderr
-
-    def start_process(self, shell_command: str) -> None:
-        """
-        Start a subprocess with given shell command.
-        使用指定的 shell 命令啟動子程序。
-
-        Args:
-            shell_command (str): Command to execute. 要執行的命令字串。
-        """
-        # Windows uses shell=True with string, others use shlex.split without shell
-        # Windows 平台使用 shell=True 搭配字串，其他平台用 shlex.split 不使用 shell
-        use_shell = sys.platform in ["win32", "cygwin", "msys"]
-        args = shell_command if use_shell else shlex.split(shell_command)
-
         self._stdout_file = None
         self._stderr_file = None
+
+    def start_process(self, shell_command: Union[str, List[str]]) -> None:
+        """
+        Start a subprocess with given command.
+        使用指定的命令啟動子程序。
+
+        Args:
+            shell_command (Union[str, List[str]]): Command to execute as string or argument list.
+                                                   要執行的命令字串或參數列表。
+        """
+        # Always pass argument list to subprocess; never use shell=True (command injection risk).
+        # On Windows, split with posix=False to preserve backslash paths.
+        if isinstance(shell_command, list):
+            args = shell_command
+        else:
+            is_windows = sys.platform in ("win32", "cygwin", "msys")
+            args = shlex.split(shell_command, posix=not is_windows)
 
         # 設定 stdout 重定向
         if isinstance(self.redirect_stdout, str):
@@ -64,7 +67,7 @@ class ExecuteProcess:
             args=args,
             stdout=stdout_target,
             stderr=stderr_target,
-            shell=use_shell,
+            shell=False,
         )
 
     def exit_program(self) -> None:
