@@ -1,6 +1,6 @@
 """Tests for test_pioneer.executor.pioneer_executor"""
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from test_pioneer.executor.pioneer_executor import execute_yaml, _load_yaml, _validate_steps
 from test_pioneer.utils.exception.exceptions import WrongInputException, YamlException

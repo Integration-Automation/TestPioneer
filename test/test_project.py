@@ -1,6 +1,4 @@
 """Tests for test_pioneer.project.create_template_structure"""
-from pathlib import Path
-
 from test_pioneer.project.create_template_structure import create_dir, create_template, create_template_dir
 
 

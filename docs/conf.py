@@ -1,7 +1,7 @@
 # Configuration file for the Sphinx documentation builder.
 
 project = "TestPioneer"
-copyright = "2024, JE-Chen"
+copyright = "2024, JE-Chen"  # pylint: disable=redefined-builtin  # Sphinx-required name
 author = "JE-Chen"
 release = "0.1.33"
 

@@ -1,5 +1,6 @@
 import logging
 from logging.handlers import RotatingFileHandler
+from typing import Optional
 
 # Create a named logger (avoid setting root logger level to prevent global side effects)
 # 建立名為 "TestPioneer" 的 logger（避免設定 root logger 等級以防止全域副作用）
@@ -38,8 +39,8 @@ class TestPioneerHandler(RotatingFileHandler):
         super().emit(record)
 
 
-def step_log_check(enable_logging: bool = False, logger: logging.Logger = None,
-                   level: str = "info", message: str = None) -> None:
+def step_log_check(enable_logging: bool = False, logger: Optional[logging.Logger] = None,
+                   level: str = "info", message: Optional[str] = None) -> None:
     """
     Log a message if logging is enabled.
     若啟用日誌，則記錄訊息。
