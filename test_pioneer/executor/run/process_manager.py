@@ -35,10 +35,12 @@ class ProcessManager:
         Remove finished processes from the list.
         移除已結束的子程序。
         """
-        for proc in list(self.process_list):  # 使用 list 避免迭代時修改
+        remaining: List[subprocess.Popen] = []
+        for proc in self.process_list:
             proc.poll()
-            if proc.returncode is not None:
-                self.process_list.remove(proc)
+            if proc.returncode is None:
+                remaining.append(proc)
+        self.process_list[:] = remaining
 
     def terminate_all(self) -> None:
         """

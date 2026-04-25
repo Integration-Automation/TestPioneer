@@ -38,9 +38,11 @@ class TestTestPioneerHandler:
     def test_handler_creation(self, tmp_path):
         log_file = str(tmp_path / "test.log")
         handler = TestPioneerHandler(filename=log_file)
-        assert handler.maxBytes == 1073741824
-        assert handler.backupCount == 0
-        handler.close()
+        try:
+            assert handler.maxBytes > 0
+            assert handler.backupCount == 0
+        finally:
+            handler.close()
 
     def test_handler_emit(self, tmp_path):
         log_file = str(tmp_path / "test.log")

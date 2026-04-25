@@ -17,9 +17,6 @@ def list_all_files(base_path):
 
 
 if __name__ == '__main__':
-
-    from test_pioneer.utils.package.check import is_installed
-
     for path in list_all_files("./docker_non_gui_test"):
         print(path)
 

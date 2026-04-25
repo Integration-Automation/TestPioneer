@@ -1,15 +1,14 @@
-# Use the latest Ubuntu base image
-FROM ubuntu:latest
+# Use a pinned Ubuntu LTS base image
+FROM ubuntu:24.04
 
 # Disable interactive prompts during apt operations
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install build tools, SSL certificates, and libraries needed for Python compilation
+# Install build tools, runtime libraries, and GUI dependencies in a single layer
 RUN apt-get update \
   && apt-get install -y --no-install-recommends software-properties-common \
-  && add-apt-repository universe
-
-RUN apt-get install -y --no-install-recommends \
+  && add-apt-repository universe \
+  && apt-get install -y --no-install-recommends \
         build-essential \
         wget \
         unzip \
@@ -24,24 +23,22 @@ RUN apt-get install -y --no-install-recommends \
         libsqlite3-dev \
         libbz2-dev \
         liblzma-dev \
-        tk-dev
-
-RUN apt-get install -y --no-install-recommends \
-      xvfb \
-      fonts-liberation2 \
-      libnss3 \
-      libxss1 \
-      libayatana-appindicator3-1 \
-      libgtk-3-0 \
-      libgl1 \
-      libgl1-mesa-dri \
-      libglib2.0-0 \
-      libsm6 \
-      libxext6 \
-      libxrender-dev \
-      libjpeg-dev \
-      libpng-dev \
-      xkb-data \
+        tk-dev \
+        xvfb \
+        fonts-liberation2 \
+        libnss3 \
+        libxss1 \
+        libayatana-appindicator3-1 \
+        libgtk-3-0 \
+        libgl1 \
+        libgl1-mesa-dri \
+        libglib2.0-0 \
+        libsm6 \
+        libxext6 \
+        libxrender-dev \
+        libjpeg-dev \
+        libpng-dev \
+        xkb-data \
   && rm -rf /var/lib/apt/lists/*
 
 # Download, compile, and install Python 3.11.10 from source
@@ -71,7 +68,11 @@ RUN wget -qO /tmp/chromedriver.zip \
 # Copy docker_gui_requirements.txt and install Python packages
 COPY docker_gui_requirements.txt .
 
+# Install Python dependencies and start the virtual display in one layer
 RUN python3.11 -m pip install --upgrade pip \
-    && python3.11 -m pip install -r docker_gui_requirements.txt
+    && python3.11 -m pip install -r docker_gui_requirements.txt \
+    && sh -c "Xvfb :99 -screen 0 1920x1080x24 >/dev/null 2>&1 &"
 
-RUN sh -c Xvfb :99 -screen 0 1920x1080x24>/dev/null 2>&1 &
+# Run as a non-root user by default
+RUN useradd --create-home --shell /bin/bash pioneer
+USER pioneer

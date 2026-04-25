@@ -1,6 +1,8 @@
 """Tests for test_pioneer.executor.file.file_processing"""
+import secrets
 import sys
-from unittest.mock import patch, MagicMock
+import tempfile
+from unittest.mock import MagicMock
 
 # Mock automation_file before importing the module under test
 mock_automation_file = MagicMock()
@@ -8,17 +10,21 @@ sys.modules["automation_file"] = mock_automation_file
 
 from test_pioneer.executor.file.file_processing import download_single_file, unzip_zipfile
 
+# Random per-run value used purely as test input; not a real credential.
+_TEST_ZIP_SECRET = secrets.token_hex(8)
+_TEST_EXTRACT_DIR = tempfile.gettempdir()
+
 
 class TestDownloadSingleFile:
     def setup_method(self):
         mock_automation_file.reset_mock()
 
     def test_valid_download(self):
-        step = {"download_file": "http://example.com/f.zip", "file_path": "f.zip"}
+        step = {"download_file": "https://example.com/f.zip", "file_path": "f.zip"}
         result = download_single_file(step)
         assert result is True
         mock_automation_file.download_file.assert_called_once_with(
-            file_url="http://example.com/f.zip", file_name="f.zip"
+            file_url="https://example.com/f.zip", file_name="f.zip"
         )
 
     def test_missing_url_returns_false(self):
@@ -26,7 +32,7 @@ class TestDownloadSingleFile:
         assert result is False
 
     def test_missing_file_path_returns_false(self):
-        result = download_single_file({"download_file": "http://example.com/f.zip"})
+        result = download_single_file({"download_file": "https://example.com/f.zip"})
         assert result is False
 
     def test_non_string_url_returns_false(self):
@@ -34,7 +40,7 @@ class TestDownloadSingleFile:
         assert result is False
 
     def test_non_string_path_returns_false(self):
-        result = download_single_file({"download_file": "http://example.com/f.zip", "file_path": 123})
+        result = download_single_file({"download_file": "https://example.com/f.zip", "file_path": 123})
         assert result is False
 
 
@@ -49,11 +55,11 @@ class TestUnzipZipfile:
         mock_automation_file.unzip_all.assert_called_once_with(zip_file_path="test.zip")
 
     def test_unzip_with_password_and_extract_path(self):
-        step = {"zip_file_path": "test.zip", "password": "secret", "extract_path": "/tmp"}
+        step = {"zip_file_path": "test.zip", "password": _TEST_ZIP_SECRET, "extract_path": _TEST_EXTRACT_DIR}
         result = unzip_zipfile(step)
         assert result is True
         mock_automation_file.unzip_all.assert_called_once_with(
-            zip_file_path="test.zip", password="secret", extract_path="/tmp"
+            zip_file_path="test.zip", password=_TEST_ZIP_SECRET, extract_path=_TEST_EXTRACT_DIR
         )
 
     def test_missing_zip_path_returns_false(self):

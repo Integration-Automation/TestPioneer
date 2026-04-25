@@ -1,5 +1,6 @@
 import time
 from pathlib import Path
+from typing import Optional, Tuple
 
 import yaml
 
@@ -71,50 +72,58 @@ def _validate_steps(steps: list, enable_logging: bool) -> bool:
     return True
 
 
-def execute_yaml(stream: str, yaml_type: str = "File"):
-    recording = False
-    recorder = None
-
-    yaml_data = _load_yaml(stream, yaml_type)
-
-    # Pre-check save log or not
-    enable_logging = set_logger(yaml_data=yaml_data)
-    if is_installed(package_name="je_auto_control"):
-        try:
-            from test_pioneer.executor.test_recorder.video_recoder import set_recorder
-            recording, recorder = set_recorder(yaml_data=yaml_data)
-        except ImportError:
-            pass
-
+def _setup_recorder(yaml_data: dict) -> Tuple[bool, object]:
+    """Initialize the recorder when je_auto_control is available."""
+    if not is_installed(package_name="je_auto_control"):
+        return False, None
     try:
-        # Pre-check jobs
-        if "jobs" not in yaml_data:
-            raise YamlException("No jobs tag")
-        if not isinstance(yaml_data.get("jobs"), dict):
-            raise YamlException("jobs not a dict")
+        from test_pioneer.executor.test_recorder.video_recoder import set_recorder
+        return set_recorder(yaml_data=yaml_data)
+    except ImportError:
+        return False, None
 
-        # Pre-check steps
-        steps = yaml_data["jobs"].get("steps")
-        if not steps:
-            raise YamlException("Steps tag is empty")
 
-        if not _validate_steps(steps, enable_logging):
+def _extract_steps(yaml_data: dict) -> list:
+    """Validate top-level YAML structure and return the steps list."""
+    if "jobs" not in yaml_data:
+        raise YamlException("No jobs tag")
+    if not isinstance(yaml_data.get("jobs"), dict):
+        raise YamlException("jobs not a dict")
+    steps = yaml_data["jobs"].get("steps")
+    if not steps:
+        raise YamlException("Steps tag is empty")
+    return steps
+
+
+def _dispatch_step(step: dict, name: Optional[str], enable_logging: bool) -> bool:
+    """Run the first matching handler for a step. Returns False to stop execution."""
+    for step_type, handler in _STEP_HANDLERS.items():
+        if step_type in step:
+            return bool(handler(step, name, enable_logging))
+    return True
+
+
+def _run_steps(steps: list, enable_logging: bool) -> None:
+    for step in steps:
+        if not _dispatch_step(step, step.get("name"), enable_logging):
             return
 
-        # Execute step actions
-        for step in steps:
-            name = step.get("name")
-            for step_type, handler in _STEP_HANDLERS.items():
-                if step_type in step:
-                    if not handler(step, name, enable_logging):
-                        return
-                    break
 
+def execute_yaml(stream: str, yaml_type: str = "File"):
+    yaml_data = _load_yaml(stream, yaml_type)
+
+    enable_logging = set_logger(yaml_data=yaml_data)
+    recording, recorder = _setup_recorder(yaml_data)
+
+    try:
+        steps = _extract_steps(yaml_data)
+        if not _validate_steps(steps, enable_logging):
+            return
+        _run_steps(steps, enable_logging)
     except Exception as error:
         step_log_check(
             enable_logging=enable_logging, logger=test_pioneer_logger, level="error",
             message=f"Error: {repr(error)}")
         raise error
     finally:
-        if is_installed(package_name="je_auto_control"):
-            _stop_recorder(recording, recorder)
+        _stop_recorder(recording, recorder)
