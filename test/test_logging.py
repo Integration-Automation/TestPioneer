@@ -40,10 +40,7 @@ class TestTestPioneerHandler:
         handler = TestPioneerHandler(filename=log_file)
         try:
             # getattr returns Any, sidestepping a Sonar type-inference quirk on RotatingFileHandler.maxBytes
-            max_bytes_val = getattr(handler, "maxBytes")
-            assert isinstance(max_bytes_val, int)
-            assert max_bytes_val > 0
-            assert handler.backupCount == 0
+            assert getattr(handler, "maxBytes") > 0 and handler.backupCount == 0
         finally:
             handler.close()
 
