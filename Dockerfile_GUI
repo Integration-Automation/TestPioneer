@@ -68,11 +68,11 @@ RUN wget -qO /tmp/chromedriver.zip \
 # Copy docker_gui_requirements.txt and install Python packages
 COPY docker_gui_requirements.txt .
 
-# Install Python dependencies and start the virtual display in one layer
+# Install Python dependencies, start the virtual display, and add the runtime user
 RUN python3.11 -m pip install --upgrade pip \
     && python3.11 -m pip install -r docker_gui_requirements.txt \
-    && sh -c "Xvfb :99 -screen 0 1920x1080x24 >/dev/null 2>&1 &"
+    && sh -c "Xvfb :99 -screen 0 1920x1080x24 >/dev/null 2>&1 &" \
+    && useradd --create-home --shell /bin/bash pioneer
 
 # Run as a non-root user by default
-RUN useradd --create-home --shell /bin/bash pioneer
 USER pioneer

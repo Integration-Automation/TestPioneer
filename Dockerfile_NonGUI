@@ -39,8 +39,8 @@ RUN wget https://www.python.org/ftp/python/3.11.10/Python-3.11.10.tgz \
 COPY docker_nongui_requirements.txt .
 
 RUN python3.11 -m pip install --upgrade pip \
-    && python3.11 -m pip install -r docker_nongui_requirements.txt
+    && python3.11 -m pip install -r docker_nongui_requirements.txt \
+    && useradd --create-home --shell /bin/bash pioneer
 
 # Run as a non-root user by default
-RUN useradd --create-home --shell /bin/bash pioneer
 USER pioneer
