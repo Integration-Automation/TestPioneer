@@ -27,7 +27,13 @@ class TestPioneerHandler(RotatingFileHandler):
             max_bytes (int): Max file size before rotation. 檔案輪替前的最大大小。
             backup_count (int): Number of backup files to keep. 保留的備份檔案數量。
         """
-        super().__init__(filename=filename, mode=mode, maxBytes=max_bytes, backupCount=backup_count)
+        # Explicit UTF-8: step names and messages come from the user's YAML, and on the locale codec
+        # (cp950 on zh-TW Windows) a record with a character outside it is dropped inside emit().
+        # backslashreplace keeps a record with a lone surrogate (Windows paths) instead of losing it.
+        # 明確指定 UTF-8：步驟名稱與訊息來自使用者的 YAML，用系統預設編碼（繁中 Windows 為 cp950）時，
+        # 含有其外字元的紀錄會在 emit() 裡被丟掉。backslashreplace 讓落單 surrogate 的紀錄也能保留。
+        super().__init__(filename=filename, mode=mode, maxBytes=max_bytes, backupCount=backup_count,
+                         encoding="utf-8", errors="backslashreplace")
         self.setFormatter(formatter)  # 設定 formatter
         self.setLevel(logging.DEBUG)  # 設定等級為 DEBUG
 

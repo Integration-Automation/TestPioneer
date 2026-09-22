@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20260923-01 | 2026-09-23 | The step log is written as UTF-8 | #done #logging | [2026-09](2026-09.md) |
 | U-20260922-03 | 2026-09-22 | Commit the PyPI publish workflow and setuptools bump | #done #release | [2026-09](2026-09.md) |
 | U-20260922-02 | 2026-09-22 | Stop tracking .idea/ | #done #housekeeping | [2026-09](2026-09.md) |
 | U-20260922-01 | 2026-09-22 | Adopt progress/architecture/docs-updates rules | #docs #migration | [2026-09](2026-09.md) |
@@ -66,4 +67,4 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-09.md](2026-09.md) | 2026-09 | 3 |
+| [2026-09.md](2026-09.md) | 2026-09 | 4 |

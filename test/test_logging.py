@@ -57,6 +57,20 @@ class TestTestPioneerHandler:
             content = f.read()
         assert "test message" in content
 
+    def test_handler_writes_text_outside_the_locale_code_page(self, tmp_path):
+        """Step names come from the user's YAML; a record outside cp950 must be kept, as UTF-8."""
+        log_file = tmp_path / "steps.log"
+        handler = TestPioneerHandler(filename=str(log_file))
+        record = logging.LogRecord(
+            name="test", level=logging.INFO, pathname="", lineno=0,
+            msg="步驟 ⠐ \U0001F600 \udcff", args=None, exc_info=None
+        )
+        handler.emit(record)
+        handler.close()
+        content = log_file.read_bytes().decode("utf-8")
+        assert "步驟 ⠐ \U0001F600" in content  # nosec B101
+        assert "\\udcff" in content  # nosec B101
+
 
 class TestSetLogger:
     def test_set_logger_with_pioneer_log(self, tmp_path):
