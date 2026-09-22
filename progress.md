@@ -6,7 +6,6 @@ Cross-repo and workspace items live in `D:\Codes\progress.md` (relevant here: X-
 
 ## Open
 
-- **#1** Commit the untracked `.github/workflows/publish.yml` and the `setuptools>=82.0.1` bump in `pyproject.toml` / `dev.toml` (both from 2026-04-21..25). Until then PyPI stays at 0.1.33.
 - **#2** Two Dockerfile sets duplicate each other (`Dockerfile_GUI` / `Dockerfile_NonGUI` and `Test_GUI_DockerFile` / `Test_NonGUI_DockerFile`); keep one.
 - **#3** [DECIDE] `je-mail-thunder` is a declared dependency but nothing in `test_pioneer/` uses it: drop it or wire up mailing reports (workspace X-14).
 - **#5** [UNVERIFIED] `run_folder` passes a list of `Path`s to the chosen runner, but only `gui-runner` maps to `execute_files`; web, api and load still map to `execute_action` (found by reading the code).
