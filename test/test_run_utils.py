@@ -106,3 +106,15 @@ class TestRunnerEntryPoints:
                 ok, runner = select_with_runner({"with": tag}, enable_logging=False, mode="run_folder")
                 assert ok is True
                 assert runner is modules[module].execute_files
+
+
+class TestFileRunner:
+    @patch("test_pioneer.executor.run.utils.is_installed", return_value=False)
+    def test_file_runner_resolves_automation_file(self, _installed):
+        modules = _modules_with_both_entries()
+        modules["automation_file"] = MagicMock(execute_action=MagicMock(), execute_files=MagicMock())
+        with patch.dict("sys.modules", modules):
+            assert select_with_runner({"with": "file-runner"}, False, mode="run")[1] \
+                is modules["automation_file"].execute_action
+            assert select_with_runner({"with": "file-runner"}, False, mode="run_folder")[1] \
+                is modules["automation_file"].execute_files

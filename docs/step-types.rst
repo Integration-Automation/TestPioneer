@@ -27,7 +27,7 @@ Execute a single JSON test script using a specified runner.
      - Path to the JSON test file (relative to current working directory).
    * - ``with``
      - Yes
-     - Runner to use: ``gui-runner``, ``web-runner``, ``api-runner``, or ``load-runner``.
+     - Runner to use: ``gui-runner``, ``web-runner``, ``api-runner``, ``load-runner`` or ``file-runner``.
 
 run_folder
 ----------

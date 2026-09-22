@@ -74,6 +74,7 @@ Full documentation is available at **[testpioneer.readthedocs.io](https://testpi
 | `web-runner` | [WebRunner](https://github.com/Integration-Automation/WebRunner) | Web browser automation |
 | `api-runner` | [APITestka](https://github.com/Integration-Automation/APITestka) | REST API testing |
 | `load-runner` | [LoadDensity](https://github.com/Integration-Automation/LoadDensity) | Load & stress testing |
+| `file-runner` | [FileAutomation](https://github.com/Integration-Automation/FileAutomation) | File, archive and cloud-storage actions (`FA_*`) |
 
 ## Automation IDE
 

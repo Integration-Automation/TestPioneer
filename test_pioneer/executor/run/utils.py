@@ -34,6 +34,7 @@ def _build_runner_dict(mode: str, with_tag: str) -> dict:
     from os import environ
     environ["LOCUST_SKIP_MONKEY_PATCH"] = "1"
 
+    import automation_file
     import je_api_testka
     import je_load_density
     import je_web_runner
@@ -46,6 +47,7 @@ def _build_runner_dict(mode: str, with_tag: str) -> dict:
         "web-runner": getattr(je_web_runner, entry),
         "api-runner": getattr(je_api_testka, entry),
         "load-runner": getattr(je_load_density, entry),
+        "file-runner": getattr(automation_file, entry),
     }
 
     if mode not in ("run", "run_folder"):

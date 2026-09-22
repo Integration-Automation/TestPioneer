@@ -50,7 +50,7 @@ File logging and screen recording are optional.
   - required `jobs.steps`, a list where each step has a unique `name` and one of `run`, `run_folder`,
     `open_url`, `download_file` (+ `file_path`), `wait`, `open_program`, `close_program`,
     `unzip_zipfile` or `parallel_run` (`runners`, `scripts`, optional `executor_path`);
-  - `run` and `run_folder` need `with:` set to `web-runner`, `api-runner`, `load-runner` or `gui-runner`.
+  - `run` and `run_folder` need `with:` set to `web-runner`, `api-runner`, `load-runner`, `file-runner` or `gui-runner`.
 - There is no MCP server, LSP, socket server, pytest plugin or GUI of its own.
 
 ## 4. Main flows
@@ -104,15 +104,14 @@ _BASE_RUNNER_COMMANDS (+ gui-runner → je_auto_control) → for each (runner, s
   `je-mail-thunder`, `automation-file`, `psutil`, `pyyaml`. The optional extra `gui` adds
   `je_auto_control`.
 - **In-process imports**:
-  - `je_web_runner.execute_action`, `je_api_testka.execute_action` and `je_load_density.execute_action`
-    in `executor/run/utils.py`;
-  - `je_auto_control.execute_action` / `execute_files` for `gui-runner`;
+  - `execute_action` (for `run`) and `execute_files` (for `run_folder`) from `je_web_runner`,
+    `je_api_testka`, `je_load_density` and `automation_file` in `executor/run/utils.py`;
+  - `je_auto_control.execute_action` / `execute_files` for `gui-runner`, imported only for a GUI step;
   - `automation_file.download_file` / `unzip_all` in `executor/file/file_processing.py`;
   - `je_auto_control.RecordingThread` in `executor/test_recorder/video_recoder.py`.
-- **Subprocess contract**: `parallel_run.py` spawns `python -m je_web_runner|je_api_testka|je_load_density|je_auto_control --execute_file <script>`.
+- **Subprocess contract**: `parallel_run.py` spawns `python -m je_web_runner|je_api_testka|je_load_density|automation_file|je_auto_control --execute_file <script>`.
   It depends on those packages keeping the legacy `--execute_file` flag.
-- **`run_folder`** passes a list of `Path` objects to the chosen runner. Only `gui-runner` maps to
-  `execute_files` there; web, api and load still map to `execute_action`.
+- **`run_folder`** passes the folder's `.json` files, as sorted string paths, to the runner's `execute_files`.
 - **`je-mail-thunder`** is declared but not imported anywhere in `test_pioneer/`.
 - **PyBreeze** depends on these names:
   - it launches `python -m test_pioneer -e <yaml>`

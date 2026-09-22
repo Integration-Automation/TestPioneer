@@ -14,6 +14,7 @@ _BASE_RUNNER_COMMANDS = {
     "web-runner": "je_web_runner",
     "api-runner": "je_api_testka",
     "load-runner": "je_load_density",
+    "file-runner": "automation_file",
 }
 
 
