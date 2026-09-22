@@ -76,3 +76,33 @@ class TestSelectWithRunner:
         ok, runner = select_with_runner(step, enable_logging=False, mode="run_folder")
         assert ok is False
         assert runner is None
+
+
+def _modules_with_both_entries():
+    return {name: MagicMock(execute_action=MagicMock(name=f"{name}.execute_action"),
+                            execute_files=MagicMock(name=f"{name}.execute_files"))
+            for name in ("je_web_runner", "je_api_testka", "je_load_density")}
+
+
+class TestRunnerEntryPoints:
+    """``run`` gets one action list, ``run_folder`` a list of files: each needs the matching entry."""
+
+    @patch("test_pioneer.executor.run.utils.is_installed", return_value=False)
+    def test_run_uses_execute_action(self, _installed):
+        modules = _modules_with_both_entries()
+        with patch.dict("sys.modules", modules):
+            for tag, module in (("web-runner", "je_web_runner"), ("api-runner", "je_api_testka"),
+                                ("load-runner", "je_load_density")):
+                ok, runner = select_with_runner({"with": tag}, enable_logging=False, mode="run")
+                assert ok is True
+                assert runner is modules[module].execute_action
+
+    @patch("test_pioneer.executor.run.utils.is_installed", return_value=False)
+    def test_run_folder_uses_execute_files(self, _installed):
+        modules = _modules_with_both_entries()
+        with patch.dict("sys.modules", modules):
+            for tag, module in (("web-runner", "je_web_runner"), ("api-runner", "je_api_testka"),
+                                ("load-runner", "je_load_density")):
+                ok, runner = select_with_runner({"with": tag}, enable_logging=False, mode="run_folder")
+                assert ok is True
+                assert runner is modules[module].execute_files
