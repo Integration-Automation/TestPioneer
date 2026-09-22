@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20260923-04 | 2026-09-23 | One Dockerfile per image, with a selftest stage that runs | #done #docker | [2026-09](2026-09.md) |
 | U-20260923-03 | 2026-09-23 | file-runner: FileAutomation joins run, run_folder and parallel_run | #done #feature | [2026-09](2026-09.md) |
 | U-20260923-02 | 2026-09-23 | run_folder works for the web, api and load runners | #done #bugfix | [2026-09](2026-09.md) |
 | U-20260923-01 | 2026-09-23 | The step log is written as UTF-8 | #done #logging | [2026-09](2026-09.md) |
@@ -69,4 +70,4 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-09.md](2026-09.md) | 2026-09 | 6 |
+| [2026-09.md](2026-09.md) | 2026-09 | 7 |

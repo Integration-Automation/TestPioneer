@@ -34,7 +34,7 @@ File logging and screen recording are optional.
 | `test_pioneer/logging/loggin_instance.py` | `test_pioneer_logger`, `TestPioneerHandler`, `step_log_check` |
 | `test_pioneer/utils/` | `exception/` (exceptions and tags), `package/check.py` (`is_installed`) |
 | `test/` | pytest suite. `test/unit_test/` holds example YAML scenarios and manual scripts, excluded by `addopts = "--ignore=test/unit_test"` |
-| `Dockerfile_GUI`, `Dockerfile_NonGUI`, `Test_GUI_DockerFile`, `Test_NonGUI_DockerFile`, `docker_gui_test/`, `docker_non_gui_test/`, `docker_*_requirements.txt` | Container images, plus sample YAML/JSON for container runs |
+| `Dockerfile_GUI`, `Dockerfile_NonGUI`, `docker_gui_test/`, `docker_non_gui_test/`, `docker_*_requirements.txt` | Container images: the default build is the base image, `--target selftest` adds the bundled sample YAML/JSON and runs it |
 | `docs/` | Sphinx docs (`getting-started.rst`, `api-reference.rst`, `docker.rst`, `changelog.rst`) |
 
 ## 3. Entry points and public interfaces

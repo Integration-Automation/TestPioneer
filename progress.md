@@ -6,5 +6,4 @@ Cross-repo and workspace items live in `D:\Codes\progress.md` (relevant here: X-
 
 ## Open
 
-- **#2** Two Dockerfile sets duplicate each other (`Dockerfile_GUI` / `Dockerfile_NonGUI` and `Test_GUI_DockerFile` / `Test_NonGUI_DockerFile`); keep one.
 - **#3** [DECIDE] `je-mail-thunder` is a declared dependency but nothing in `test_pioneer/` uses it: drop it or wire up mailing reports (workspace X-14).
