@@ -1,5 +1,5 @@
 # Use a pinned Ubuntu LTS base image
-FROM ubuntu:24.04
+FROM ubuntu:24.04 AS base
 
 # Disable interactive prompts during apt operations
 ENV DEBIAN_FRONTEND=noninteractive
@@ -26,7 +26,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Download, compile, and install Python 3.11.10 from source
-RUN wget https://www.python.org/ftp/python/3.11.10/Python-3.11.10.tgz \
+RUN wget --max-redirect=0 https://www.python.org/ftp/python/3.11.10/Python-3.11.10.tgz \
     && tar -xzf Python-3.11.10.tgz \
     && cd Python-3.11.10 \
     && ./configure --enable-optimizations \
@@ -44,3 +44,13 @@ RUN python3.11 -m pip install --upgrade pip \
 
 # Run as a non-root user by default
 USER pioneer
+
+# Self-test image: the base plus the bundled sample, which it runs by default.
+#   docker build -f Dockerfile_NonGUI --target selftest -t testpioneer-nongui-selftest .
+FROM base AS selftest
+WORKDIR /home/pioneer/app
+COPY --chown=pioneer:pioneer docker_non_gui_test ./docker_non_gui_test
+CMD ["python3.11", "docker_non_gui_test/test.py"]
+
+# Default image (no --target): the base alone, for running your own tests.
+FROM base

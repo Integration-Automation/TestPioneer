@@ -1,5 +1,5 @@
 # Use a pinned Ubuntu LTS base image
-FROM ubuntu:24.04
+FROM ubuntu:24.04 AS base
 
 # Disable interactive prompts during apt operations
 ENV DEBIAN_FRONTEND=noninteractive
@@ -42,7 +42,7 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 # Download, compile, and install Python 3.11.10 from source
-RUN wget https://www.python.org/ftp/python/3.11.10/Python-3.11.10.tgz \
+RUN wget --max-redirect=0 https://www.python.org/ftp/python/3.11.10/Python-3.11.10.tgz \
     && tar -xzf Python-3.11.10.tgz \
     && cd Python-3.11.10 \
     && ./configure --enable-optimizations \
@@ -52,13 +52,17 @@ RUN wget https://www.python.org/ftp/python/3.11.10/Python-3.11.10.tgz \
     && rm -rf Python-3.11.10 Python-3.11.10.tgz
 
 # Install Google Chrome
-RUN wget -qO /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
-  && dpkg -i /tmp/chrome.deb || apt-get -fy install -y \
-  && rm /tmp/chrome.deb
+RUN wget --max-redirect=0 -qO /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends /tmp/chrome.deb \
+  && rm -f /tmp/chrome.deb \
+  && rm -rf /var/lib/apt/lists/*
 
-# Install matching ChromeDriver
-ARG CHROME_DRIVER_VERSION=138.0.7204.157
-RUN wget -qO /tmp/chromedriver.zip \
+# Install the ChromeDriver release that matches the installed Chrome's major version
+RUN CHROME_MAJOR="$(google-chrome --version | grep -oE '[0-9]+' | head -n 1)" \
+    && CHROME_DRIVER_VERSION="$(wget --max-redirect=0 -qO- \
+      "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${CHROME_MAJOR}")" \
+    && wget --max-redirect=0 -qO /tmp/chromedriver.zip \
       "https://storage.googleapis.com/chrome-for-testing-public/${CHROME_DRIVER_VERSION}/linux64/chromedriver-linux64.zip" \
     && unzip /tmp/chromedriver.zip -d /usr/local/bin/ \
     && rm /tmp/chromedriver.zip \
@@ -68,11 +72,22 @@ RUN wget -qO /tmp/chromedriver.zip \
 # Copy docker_gui_requirements.txt and install Python packages
 COPY docker_gui_requirements.txt .
 
-# Install Python dependencies, start the virtual display, and add the runtime user
+# Install Python dependencies and add the runtime user. Xvfb is started when a container runs
+# (see the selftest CMD and docs/docker.rst): a display started in a RUN step ends with that step.
 RUN python3.11 -m pip install --upgrade pip \
     && python3.11 -m pip install -r docker_gui_requirements.txt \
-    && sh -c "Xvfb :99 -screen 0 1920x1080x24 >/dev/null 2>&1 &" \
     && useradd --create-home --shell /bin/bash pioneer
 
 # Run as a non-root user by default
 USER pioneer
+
+# Self-test image: the base plus the bundled sample, run under a virtual display.
+#   docker build -f Dockerfile_GUI --target selftest -t testpioneer-gui-selftest .
+FROM base AS selftest
+ENV DISPLAY=:99
+WORKDIR /home/pioneer/app
+COPY --chown=pioneer:pioneer docker_gui_test ./docker_gui_test
+CMD ["sh", "-c", "Xvfb :99 -screen 0 1920x1080x24 >/dev/null 2>&1 & exec python3.11 docker_gui_test/test.py"]
+
+# Default image (no --target): the base alone, for running your own tests.
+FROM base

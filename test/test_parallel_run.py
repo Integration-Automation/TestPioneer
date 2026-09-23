@@ -80,3 +80,18 @@ class TestParallelRun:
         }
         result = parallel_run(step)
         assert result is True  # Returns True after skipping unknown runner
+
+
+@patch("test_pioneer.executor.run.parallel_run.subprocess.Popen")
+@patch("test_pioneer.executor.run.parallel_run.is_installed", return_value=False)
+def test_file_runner_spawns_automation_file(mock_installed, mock_popen, tmp_path):
+    script = tmp_path / "files.json"
+    script.write_text("[]", encoding="utf-8")
+    mock_proc = MagicMock()
+    mock_proc.poll.return_value = 0
+    mock_proc.returncode = 0
+    mock_popen.return_value = mock_proc
+    parallel_run({"parallel_run": {"runners": ["file-runner"], "scripts": [str(script)]}})
+    argv = mock_popen.call_args[0][0]
+    assert argv[1:4] == ["-m", "automation_file", "--execute_file"]  # nosec B101
+    assert argv[4] == str(script.resolve())  # nosec B101

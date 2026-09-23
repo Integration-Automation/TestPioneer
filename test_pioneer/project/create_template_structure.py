@@ -43,8 +43,8 @@ def create_template(parent_name: str, project_path: str | None = None) -> None:
                 file_path = template_dir / f"{parent_name}.yml"
                 with file_path.open("w", encoding="utf-8") as file_to_write:
                     file_to_write.write(template_1_str)
-            except Exception as error:
-                raise ProjectException(f"{cant_save_yaml_error}: {error}")
+            except OSError as error:
+                raise ProjectException(f"{cant_save_yaml_error}: {error}") from error
 
 
 def create_template_dir(project_path: str | None = None, parent_name: str = ".TestPioneer") -> None:

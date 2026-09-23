@@ -47,3 +47,17 @@ class TestCreateTemplateDir:
 
         template_file = project_dir / ".TestProject.yml"
         assert template_file.is_file()
+
+
+class TestCreateTemplateErrors:
+    def test_write_failure_is_a_project_exception_with_its_cause(self, tmp_path):
+        import pytest
+
+        from test_pioneer.utils.exception.exceptions import ProjectException
+
+        parent = ".TestPioneer"
+        (tmp_path / parent).mkdir()
+        (tmp_path / parent / f"{parent}.yml").mkdir()  # a directory where the file should go
+        with pytest.raises(ProjectException) as caught:
+            create_template(parent, str(tmp_path))
+        assert isinstance(caught.value.__cause__, OSError)  # nosec B101

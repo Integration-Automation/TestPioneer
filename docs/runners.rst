@@ -26,6 +26,9 @@ Available Runners
    * - ``load-runner``
      - `LoadDensity <https://github.com/Integration-Automation/LoadDensity>`_
      - Load and stress testing.
+   * - ``file-runner``
+     - `FileAutomation <https://github.com/Integration-Automation/FileAutomation>`_
+     - File, archive and cloud-storage actions (``FA_*`` commands).
 
 Usage
 -----

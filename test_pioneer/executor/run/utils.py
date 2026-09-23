@@ -34,28 +34,37 @@ def _build_runner_dict(mode: str, with_tag: str) -> dict:
     from os import environ
     environ["LOCUST_SKIP_MONKEY_PATCH"] = "1"
 
-    from je_load_density import execute_action as load_runner
-    from je_web_runner import execute_action as web_runner
-    from je_api_testka import execute_action as api_runner
+    import automation_file
+    import je_api_testka
+    import je_load_density
+    import je_web_runner
 
+    # run_folder hands the runner a list of JSON file paths, which is what each framework's
+    # execute_files takes; execute_action wants one action list and treated every path as a
+    # malformed action.
+    entry = "execute_files" if mode == "run_folder" else "execute_action"
     runner_dict = {
-        "web-runner": web_runner,
-        "api-runner": api_runner,
-        "load-runner": load_runner,
+        "web-runner": getattr(je_web_runner, entry),
+        "api-runner": getattr(je_api_testka, entry),
+        "load-runner": getattr(je_load_density, entry),
+        "file-runner": getattr(automation_file, entry),
     }
 
     if mode not in ("run", "run_folder"):
         return runner_dict
 
-    if with_tag == "gui-runner" and not is_installed("je_auto_control"):
+    if with_tag != "gui-runner":
+        # Only a GUI step needs AutoControl; importing it for a web/api/load step pulls in Qt and
+        # fails outright where je_auto_control is installed without its GUI dependencies.
+        return runner_dict
+    if not is_installed("je_auto_control"):
         raise ExecutorException(can_not_run_gui_error)
-    if is_installed("je_auto_control"):
-        if mode == "run":
-            from je_auto_control import execute_action as single_gui_runner
-            runner_dict["gui-runner"] = single_gui_runner
-        else:
-            from je_auto_control import execute_files as multi_gui_runner
-            runner_dict["gui-runner"] = multi_gui_runner
+    if mode == "run":
+        from je_auto_control import execute_action as single_gui_runner
+        runner_dict["gui-runner"] = single_gui_runner
+    else:
+        from je_auto_control import execute_files as multi_gui_runner
+        runner_dict["gui-runner"] = multi_gui_runner
     return runner_dict
 
 

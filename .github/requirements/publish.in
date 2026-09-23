@@ -1,0 +1,4 @@
+# Build and upload tooling for publish.yml; regenerate publish.txt with
+# uv pip compile .github/requirements/publish.in --universal --python-version 3.10 --generate-hashes --only-binary :all: -o .github/requirements/publish.txt
+build
+twine
