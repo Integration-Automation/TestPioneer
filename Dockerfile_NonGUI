@@ -26,7 +26,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Download, compile, and install Python 3.11.10 from source
-RUN wget https://www.python.org/ftp/python/3.11.10/Python-3.11.10.tgz \
+RUN wget --max-redirect=0 https://www.python.org/ftp/python/3.11.10/Python-3.11.10.tgz \
     && tar -xzf Python-3.11.10.tgz \
     && cd Python-3.11.10 \
     && ./configure --enable-optimizations \
