@@ -93,5 +93,5 @@ def test_file_runner_spawns_automation_file(mock_installed, mock_popen, tmp_path
     mock_popen.return_value = mock_proc
     parallel_run({"parallel_run": {"runners": ["file-runner"], "scripts": [str(script)]}})
     argv = mock_popen.call_args[0][0]
-    assert argv[1:4] == ["-m", "automation_file", "--execute_file"]
-    assert argv[4] == str(script.resolve())
+    assert argv[1:4] == ["-m", "automation_file", "--execute_file"]  # nosec B101
+    assert argv[4] == str(script.resolve())  # nosec B101

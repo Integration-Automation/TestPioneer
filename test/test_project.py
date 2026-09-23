@@ -60,4 +60,4 @@ class TestCreateTemplateErrors:
         (tmp_path / parent / f"{parent}.yml").mkdir()  # a directory where the file should go
         with pytest.raises(ProjectException) as caught:
             create_template(parent, str(tmp_path))
-        assert isinstance(caught.value.__cause__, OSError)
+        assert isinstance(caught.value.__cause__, OSError)  # nosec B101
