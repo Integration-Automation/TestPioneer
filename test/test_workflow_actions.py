@@ -32,11 +32,13 @@ def _uses(path: Path) -> list[tuple[int, str, str]]:
 
 
 def test_workflows_exist():
+    """There is at least one workflow file to check."""
     assert _WORKFLOWS
 
 
 @pytest.mark.parametrize("workflow", _WORKFLOWS, ids=lambda p: p.name)
 def test_every_action_is_pinned_to_a_commit_with_its_version(workflow):
+    """Every remote action is pinned to a full commit SHA with its version comment."""
     bad = [f"{workflow.name}:{number} {ref}{rest}"
            for number, ref, rest in _uses(workflow)
            if not (_PINNED.match(ref) and _VERSION_COMMENT.match(rest))]
@@ -44,6 +46,7 @@ def test_every_action_is_pinned_to_a_commit_with_its_version(workflow):
 
 
 def test_one_version_per_action():
+    """The same action is used at a single commit across all workflows."""
     # The same action at two different commits means a partial upgrade.
     seen: dict[str, set[str]] = {}
     for workflow in _WORKFLOWS:
@@ -54,6 +57,7 @@ def test_one_version_per_action():
 
 
 def test_dependabot_keeps_pins_current_on_dev():
+    """Dependabot tracks pip and github-actions, and targets the dev branch."""
     # Pinned SHAs only stay current if something bumps them; every update
     # goes to dev because main is the release branch. Parsed as text: PyYAML
     # is not a test dependency.
@@ -85,6 +89,7 @@ def _checkout_steps(path: Path) -> list[tuple[int, str]]:
 
 @pytest.mark.parametrize("workflow", _WORKFLOWS, ids=lambda p: p.name)
 def test_every_checkout_decides_on_persisted_credentials(workflow):
+    """Every checkout step explicitly decides whether to persist credentials."""
     # actions/checkout leaves the job token in .git/config unless told not
     # to, where every later step (and any uploaded workspace) can read it.
     # Only jobs that push keep it, and they say so.
