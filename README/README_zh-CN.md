@@ -72,6 +72,7 @@ create_template_dir()
 | `web-runner` | [WebRunner](https://github.com/Integration-Automation/WebRunner) | 网页浏览器自动化 |
 | `api-runner` | [APITestka](https://github.com/Integration-Automation/APITestka) | REST API 测试 |
 | `load-runner` | [LoadDensity](https://github.com/Integration-Automation/LoadDensity) | 负载与压力测试 |
+| `file-runner` | [FileAutomation](https://github.com/Integration-Automation/FileAutomation) | 文件、压缩包与云存储操作（`FA_*`） |
 
 ## 自动化 IDE
 

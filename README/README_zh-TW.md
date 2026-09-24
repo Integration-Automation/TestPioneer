@@ -72,6 +72,7 @@ create_template_dir()
 | `web-runner` | [WebRunner](https://github.com/Integration-Automation/WebRunner) | 網頁瀏覽器自動化 |
 | `api-runner` | [APITestka](https://github.com/Integration-Automation/APITestka) | REST API 測試 |
 | `load-runner` | [LoadDensity](https://github.com/Integration-Automation/LoadDensity) | 負載與壓力測試 |
+| `file-runner` | [FileAutomation](https://github.com/Integration-Automation/FileAutomation) | 檔案、壓縮檔與雲端儲存操作（`FA_*`） |
 
 ## 自動化 IDE
 
