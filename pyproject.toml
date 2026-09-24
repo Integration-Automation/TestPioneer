@@ -46,3 +46,7 @@ gui = ["je_auto_control"]
 testpaths = ["test"]
 python_files = ["test_*.py"]
 addopts = "--ignore=test/unit_test"
+
+[tool.bandit]
+exclude_dirs = ["test"]
+skips = ["B101"]
