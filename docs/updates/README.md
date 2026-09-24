@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20260924-02 | 2026-09-24 | Keep checkout credentials only in the job that pushes | #ci #security | [2026-09](2026-09.md) |
 | U-20260924-01 | 2026-09-24 | Move CI to Node 24 actions pinned by commit | #ci #security #deps | [2026-09](2026-09.md) |
 | U-20260923-06 | 2026-09-23 | Release 0.1.34 | #done #release | [2026-09](2026-09.md) |
 | U-20260923-05 | 2026-09-23 | Publish lock, no-redirect downloads, matching ChromeDriver | #done #ci #docker #security | [2026-09](2026-09.md) |
@@ -73,4 +74,4 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-09.md](2026-09.md) | 2026-09 | 10 |
+| [2026-09.md](2026-09.md) | 2026-09 | 11 |
