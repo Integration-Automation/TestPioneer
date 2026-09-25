@@ -6,6 +6,8 @@
 [![Python](https://img.shields.io/pypi/pyversions/test_pioneer)](https://pypi.org/project/test_pioneer/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../LICENSE)
 
+**語言：[English](../README.md) | 繁體中文 | [简体中文](README_zh-CN.md)**
+
 以 YAML 驅動的自動化測試框架，專為 CI/CD 流程設計，支援 GUI、Web、API 與負載測試，透過可插拔的 Runner 架構運作。
 
 ## 功能特色
