@@ -6,6 +6,8 @@
 [![Python](https://img.shields.io/pypi/pyversions/test_pioneer)](https://pypi.org/project/test_pioneer/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../LICENSE)
 
+**語言：[English](../README.md) | 繁體中文 | [简体中文](README_zh-CN.md)**
+
 以 YAML 驅動的自動化測試框架，專為 CI/CD 流程設計，支援 GUI、Web、API 與負載測試，透過可插拔的 Runner 架構運作。
 
 ## 功能特色
@@ -72,6 +74,7 @@ create_template_dir()
 | `web-runner` | [WebRunner](https://github.com/Integration-Automation/WebRunner) | 網頁瀏覽器自動化 |
 | `api-runner` | [APITestka](https://github.com/Integration-Automation/APITestka) | REST API 測試 |
 | `load-runner` | [LoadDensity](https://github.com/Integration-Automation/LoadDensity) | 負載與壓力測試 |
+| `file-runner` | [FileAutomation](https://github.com/Integration-Automation/FileAutomation) | 檔案、壓縮檔與雲端儲存操作（`FA_*`） |
 
 ## 自動化 IDE
 
