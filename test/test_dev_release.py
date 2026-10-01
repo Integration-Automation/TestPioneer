@@ -159,7 +159,7 @@ def test_the_workflow_uploads_only_a_changed_build_and_keeps_no_credentials():
     """The upload comes last, behind the comparison and the tip check, without checkout credentials."""
     job = _publish_job()
     upload = job.index("twine upload")
-    assert job.index("dev_release.py prepare") < job.index("python -m build") < upload
+    assert job.index("dev_release.py prepare") < job.index("python -m build --no-isolation") < upload
     assert job.index("dev_release.py changed dist") < upload
     assert job.index("git ls-remote origin refs/heads/dev") < upload
     assert "if: steps.compare.outputs.changed == 'true' && steps.tip.outputs.current == 'true'" in job

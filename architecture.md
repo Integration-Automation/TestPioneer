@@ -59,6 +59,8 @@ File logging and screen recording are optional.
     when the commit is still the tip of `dev` and the wheel differs from the newest published one.
     `scripts/dev_release.py` takes the version from PyPI (newest release plus one patch), so nothing
     is committed back and the version in `dev.toml` is only a floor.
+  - Both jobs install only the hash-locked `.github/requirements/publish.txt` and build with
+    `python -m build --no-isolation`, so the build backend is the locked `setuptools` too.
   - Contents, the same for both: the wheel holds only the `test_pioneer/` package; the sdist adds
     `LICENSE`, `README.md`, `pyproject.toml`, `MANIFEST.in` and the generated metadata. It carries no
     tests, because `MANIFEST.in` prunes `test/` (`test/test_sdist_manifest.py` pins it).

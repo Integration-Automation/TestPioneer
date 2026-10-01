@@ -164,3 +164,42 @@ def test_dependabot_watches_the_hash_locked_requirements():
     pip_block = next(block for block in blocks if block.split()[0].strip("\"'") == "pip")
     watched = re.search(r'^\s*-\s*"/\.github/requirements"\s*$', pip_block, re.MULTILINE)
     assert watched
+
+
+_BUILD = re.compile(r"\bpython -m build\b[^\n]*")
+_REQUIRES = re.compile(r"^requires\s*=\s*\[(?P<items>[^\]]*)\]", re.MULTILINE)
+_REQUIREMENT = re.compile(r"(?P<name>[A-Za-z0-9_.-]+)\s*(?:>=\s*(?P<floor>\d+(?:\.\d+)*))?")
+
+
+def _locked_version(package: str) -> tuple[int, ...]:
+    """Return the version ``publish.txt`` pins for ``package`` as a tuple of numbers."""
+    lock = (_ROOT / ".github" / "requirements" / "publish.txt").read_text(encoding="utf-8")
+    name = re.sub(r"[-_.]+", "-", package).lower()
+    pin = re.search(rf"^{re.escape(name)}==(\d+(?:\.\d+)*)\b", lock, re.MULTILINE)
+    assert pin, f"{package} is not pinned in publish.txt"
+    return tuple(int(part) for part in pin.group(1).split("."))
+
+
+@pytest.mark.parametrize("name, body", _token_jobs(), ids=[name for name, _body in _token_jobs()])
+def test_a_job_with_the_pypi_token_builds_with_the_locked_backend(name: str, body: str) -> None:
+    """Every ``python -m build`` in a job with the PyPI token carries ``--no-isolation``."""
+    # An isolated build downloads the newest setuptools each time, outside the lock.
+    builds = _BUILD.findall(body)
+    assert builds, name
+    assert [command for command in builds if "--no-isolation" not in command] == [], name
+
+
+@pytest.mark.parametrize("toml_name", ["pyproject.toml", "dev.toml"])
+def test_the_locked_backend_satisfies_build_system_requires(toml_name: str) -> None:
+    """Each ``build-system.requires`` entry is pinned in ``publish.txt`` at or above its floor."""
+    # --no-isolation checks the requirement instead of installing it, so a raised floor
+    # (Dependabot edits pyproject.toml) must come with a regenerated lock.
+    requires = _REQUIRES.search((_ROOT / toml_name).read_text(encoding="utf-8"))
+    assert requires, toml_name
+    items = re.findall(r'"([^"]+)"', requires.group("items"))
+    assert items, toml_name
+    for item in items:
+        requirement = _REQUIREMENT.fullmatch(item.strip())
+        assert requirement, f"{toml_name}: {item!r} is neither `name` nor `name>=version`"
+        floor = tuple(int(part) for part in (requirement.group("floor") or "0").split("."))
+        assert _locked_version(requirement.group("name")) >= floor, f"{toml_name}: {item}"
