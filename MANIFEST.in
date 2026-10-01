@@ -1,0 +1,5 @@
+# The source distribution carries no tests. setuptools adds test/test*.py to an sdist by default;
+# prune takes the directory out again. It matches whole directory names, so only test/ goes and
+# the package, test_pioneer/, stays. Keep this the last command: nothing after it can put a test
+# back. test/test_sdist_manifest.py pins this file.
+prune test

@@ -59,6 +59,9 @@ File logging and screen recording are optional.
     when the commit is still the tip of `dev` and the wheel differs from the newest published one.
     `scripts/dev_release.py` takes the version from PyPI (newest release plus one patch), so nothing
     is committed back and the version in `dev.toml` is only a floor.
+  - Contents, the same for both: the wheel holds only the `test_pioneer/` package; the sdist adds
+    `LICENSE`, `README.md`, `pyproject.toml`, `MANIFEST.in` and the generated metadata. It carries no
+    tests, because `MANIFEST.in` prunes `test/` (`test/test_sdist_manifest.py` pins it).
 - There is no MCP server, LSP, socket server, pytest plugin or GUI of its own.
 
 ## 4. Main flows
@@ -152,7 +155,7 @@ _BASE_RUNNER_COMMANDS (+ gui-runner → je_auto_control) → for each (runner, s
 
 - A step type, YAML key or `with:` runner tag is added, removed or renamed.
 - The CLI flag, the `execute_yaml` / `create_template_dir` facade, or the packaging (`pyproject.toml`,
-  `dev.toml`) changes.
+  `dev.toml`, `MANIFEST.in`) changes.
 - A sibling package's entry point that TestPioneer depends on changes: `execute_action`,
   `execute_files`, `--execute_file`, `download_file`, `unzip_all`, `RecordingThread`.
 - The dependency list or the `gui` extra changes.
