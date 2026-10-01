@@ -151,6 +151,7 @@ Workspace rule shared by every repository under `D:\Codes` (full text: `D:\Codes
 - **Do NOT mention any AI tool, assistant, or model name in commit messages or Co-Authored-By lines.**
 - Keep subject line under 72 characters; add body for non-trivial changes.
 - Each commit should be a single logical change — do not mix unrelated fixes.
+- Both branches publish to PyPI from CI: a push to `main` releases `test_pioneer` (`publish.yml`), and a push to `dev` that passes the tests and changes what the package ships releases `test_pioneer_dev` (the `publish-dev` job of `ci.yml`, `scripts/dev_release.py`). Never bump a version by hand; the version in `dev.toml` is only a floor.
 
 ## Dependencies
 

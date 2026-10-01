@@ -34,6 +34,7 @@ File logging and screen recording are optional.
 | `test_pioneer/logging/loggin_instance.py` | `test_pioneer_logger`, `TestPioneerHandler`, `step_log_check` |
 | `test_pioneer/utils/` | `exception/` (exceptions and tags), `package/check.py` (`is_installed`) |
 | `test/` | pytest suite. `test/unit_test/` holds example YAML scenarios and manual scripts, excluded by `addopts = "--ignore=test/unit_test"` |
+| `scripts/dev_release.py` | Release helper for the dev channel (stdlib only): picks the next `test_pioneer_dev` version from PyPI and tells whether the built wheel differs from the newest published one |
 | `Dockerfile_GUI`, `Dockerfile_NonGUI`, `docker_gui_test/`, `docker_non_gui_test/`, `docker_*_requirements.txt` | Container images: the default build is the base image, `--target selftest` adds the bundled sample YAML/JSON and runs it |
 | `docs/` | Sphinx docs (`getting-started.rst`, `api-reference.rst`, `docker.rst`, `changelog.rst`) |
 
@@ -51,6 +52,13 @@ File logging and screen recording are optional.
     `open_url`, `download_file` (+ `file_path`), `wait`, `open_program`, `close_program`,
     `unzip_zipfile` or `parallel_run` (`runners`, `scripts`, optional `executor_path`);
   - `run` and `run_folder` need `with:` set to `web-runner`, `api-runner`, `load-runner`, `file-runner` or `gui-runner`.
+- **PyPI packages**: `test_pioneer` (stable) and `test_pioneer_dev` (dev channel), both published by CI.
+  - Stable: a push to `main` runs `publish.yml`, which bumps `pyproject.toml`, tags and uploads.
+  - Dev: the `publish-dev` job of `ci.yml` runs after `unit-test` and `integration-test` on a push
+    to `dev` (never on `main`, a pull request or the schedule). It builds from `dev.toml` and uploads
+    when the commit is still the tip of `dev` and the wheel differs from the newest published one.
+    `scripts/dev_release.py` takes the version from PyPI (newest release plus one patch), so nothing
+    is committed back and the version in `dev.toml` is only a floor.
 - There is no MCP server, LSP, socket server, pytest plugin or GUI of its own.
 
 ## 4. Main flows
