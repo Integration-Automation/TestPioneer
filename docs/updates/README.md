@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261008-10 | 2026-10-08 | je-mail-thunder is no longer a dependency | #done #decision #deps | [2026-10](2026-10.md) |
 | U-20261008-09 | 2026-10-08 | A record is counted only for the in-process call that produced it | #done #bugfix #report | [2026-10](2026-10.md) |
 | U-20261008-08 | 2026-10-08 | A workflow can run twice in one process: step names are unique per run | #done #bugfix | [2026-10](2026-10.md) |
 | U-20261008-07 | 2026-10-08 | The sample workflows run real scripts and CI fails when they fail | #done #ci #tests | [2026-10](2026-10.md) |
@@ -90,5 +91,5 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-10.md](2026-10.md) | 2026-10 | 14 |
+| [2026-10.md](2026-10.md) | 2026-10 | 15 |
 | [2026-09.md](2026-09.md) | 2026-09 | 13 |

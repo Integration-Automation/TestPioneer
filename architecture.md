@@ -216,8 +216,7 @@ the step and the run `failed`.
 ## 6. Cross-project boundaries
 
 - **Declared dependencies** (`pyproject.toml`): `je_web_runner`, `je_load_density`, `je_api_testka`,
-  `je-mail-thunder`, `automation-file`, `psutil`, `pyyaml`. The optional extra `gui` adds
-  `je_auto_control`.
+  `automation-file`, `psutil`, `pyyaml`. The optional extra `gui` adds `je_auto_control`.
 - **In-process imports**:
   - `execute_action` (for `run`) and `execute_files` (for `run_folder`) from `je_web_runner`,
     `je_api_testka`, `je_load_density` and `automation_file` in `executor/run/utils.py`;
@@ -227,7 +226,6 @@ the step and the run `failed`.
 - **Subprocess contract**: `parallel_run.py` spawns `python -m je_web_runner|je_api_testka|je_load_density|automation_file|je_auto_control --execute_file <script>`.
   It depends on those packages keeping the legacy `--execute_file` flag.
 - **`run_folder`** passes the folder's `.json` files, as sorted string paths, to the runner's `execute_files`.
-- **`je-mail-thunder`** is declared but not imported anywhere in `test_pioneer/`.
 - **PyBreeze** depends on these names:
   - it launches `python -m test_pioneer -e <yaml>`
     (`PyBreeze/pybreeze/extend/process_executor/test_pioneer/test_pioneer_process_manager.py`);

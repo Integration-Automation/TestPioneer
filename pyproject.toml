@@ -15,7 +15,7 @@ requires-python = ">=3.10"
 license-files = ["LICENSE"]
 dependencies = [
     "je_web_runner",
-    "je_load_density", "je_api_testka", "je-mail-thunder",
+    "je_load_density", "je_api_testka",
     "automation-file", "psutil", "pyyaml"
 ]
 classifiers = [
