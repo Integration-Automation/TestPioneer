@@ -52,6 +52,9 @@ What Behaves Differently
   ``artifacts:``, that holds a failed test. Both make the step and the run ``failed`` in the
   result, in the report, and in the exit status of ``python -m test_pioneer run``. The exit
   status of ``-e`` does not change.
+- **A download that fails now fails its step.** A ``download_file`` step used to be reported as
+  done even when nothing was downloaded, and the workflow went on. It now stops there, like any
+  other failed step.
 - **Runner processes get two more environment variables**, ``TEST_PIONEER_RUN_ID`` and
   ``TEST_PIONEER_ARTIFACT_DIR``.
 - **The console output of** ``parallel_run`` **runners** is still shown, now copied from log files

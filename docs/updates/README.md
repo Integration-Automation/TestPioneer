@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261008-06 | 2026-10-08 | A download that fails now fails its step | #bugfix #steps | [2026-10](2026-10.md) |
 | U-20261008-05 | 2026-10-08 | README and Getting Started are one complete, tested example | #done #docs | [2026-10](2026-10.md) |
 | U-20261008-04 | 2026-10-08 | SonarCloud and Codacy findings of PR #32 resolved | #ci #security | [2026-10](2026-10.md) |
 | U-20261008-03 | 2026-10-08 | Runner reports are read and merged into one report | #done #feature #report | [2026-10](2026-10.md) |
@@ -86,5 +87,5 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-10.md](2026-10.md) | 2026-10 | 10 |
+| [2026-10.md](2026-10.md) | 2026-10 | 11 |
 | [2026-09.md](2026-09.md) | 2026-09 | 13 |

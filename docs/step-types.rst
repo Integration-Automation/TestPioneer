@@ -173,6 +173,10 @@ Download a file from a URL to a local path.
      - Yes
      - Local path to save the downloaded file.
 
+The step fails, and the steps after it do not run, when the URL is refused or the transfer does
+not complete. Redirects are not followed, and a URL that points at a private or loopback address
+is refused.
+
 open_program
 ------------
 
