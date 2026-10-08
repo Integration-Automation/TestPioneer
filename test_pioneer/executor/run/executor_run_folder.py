@@ -72,6 +72,6 @@ def run_folder(step: dict, enable_logging: bool = False, mode: str = "run_folder
 
     # Execute runner with JSON files
     # 使用 runner 執行 JSON 檔案
-    with in_process_runner(runner=str(step.get("with")), script=folder_path):
+    with in_process_runner(runner=str(step.get("with")), script=folder_path, artifacts=step.get("artifacts")):
         execute_with([str(path) for path in sorted(json_files)])
     return True

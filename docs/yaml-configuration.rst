@@ -13,6 +13,8 @@ File Structure
    recording_path: "test_video"          # Optional: video recording output (requires GUI extras)
    artifacts_path: "artifacts"           # Optional: where a run keeps its artifacts
    keep_artifacts: on_failure            # Optional: on_failure, always or never
+   report_path: "report"                 # Optional: where the consolidated report is written
+   report_formats: [json, html]          # Optional: json, html, junit; [] for no report
    jobs:
      steps:
        - name: step_name
@@ -42,6 +44,13 @@ Top-Level Keys
      - No
      - ``on_failure`` (default) keeps the artifacts of what did not pass, ``always`` keeps
        everything, ``never`` keeps nothing.
+   * - ``report_path``
+     - No
+     - Directory of the consolidated report. Defaults to ``report``. See :doc:`reports`.
+   * - ``report_formats``
+     - No
+     - List out of ``json``, ``html`` and ``junit``. Defaults to ``[json, html]``; an empty list
+       writes no report.
    * - ``jobs``
      - Yes
      - Container for the ``steps`` list.

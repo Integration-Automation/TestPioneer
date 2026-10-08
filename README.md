@@ -17,6 +17,7 @@ A YAML-driven automation test framework for CI/CD pipelines, supporting GUI, Web
 - **Workflow validation** - Check a workflow against a versioned JSON Schema and lint rules before anything runs
 - **Parallel execution** - Run multiple test scripts concurrently with different runners
 - **Run artifacts** - Every run has an ID; the output, exit code and files of each runner that fails are kept
+- **One report** - The results of every runner are merged into a single JSON and HTML report, with optional JUnit XML
 - **Video recording** - Built-in test session recording for debugging
 - **Process management** - Launch/terminate external programs with stdout/stderr redirection
 - **Cross-platform** - Windows, macOS, and Linux (Python 3.10+)
@@ -57,6 +58,8 @@ python -m test_pioneer run path/to/test.yaml
 
 Executes the workflow like `-e`, but exits with status 1 when the run did not pass, so a CI job fails with the tests. For a run that did not pass, `artifacts/<run-id>/` keeps each failed runner's `stdout.log`, `stderr.log` and the files it wrote, plus TestPioneer's own `execution.log` and a `manifest.json` with every step and runner. Use `--keep_artifacts always` to keep them for passing runs too. `execute_yaml()` returns the same result in Python.
 
+Every run also writes `report/testpioneer-report.json` and `report/testpioneer-report.html`: one report for all runners, with the tests each runner recorded and links to its artifacts. Add `--report_formats json,html,junit` for JUnit XML. A step lists the report files its runner writes under `artifacts:`, which is also how a failed action is detected, since the runners exit with status 0 either way.
+
 ### Validate a Workflow
 
 ```bash
@@ -87,6 +90,7 @@ Full documentation is available at **[testpioneer.readthedocs.io](https://testpi
 - [YAML Configuration](https://testpioneer.readthedocs.io/en/latest/yaml-configuration.html)
 - [Validation](https://testpioneer.readthedocs.io/en/latest/validation.html)
 - [Run IDs and Artifacts](https://testpioneer.readthedocs.io/en/latest/artifacts.html)
+- [Consolidated Report](https://testpioneer.readthedocs.io/en/latest/reports.html)
 - [Runners](https://testpioneer.readthedocs.io/en/latest/runners.html)
 - [Step Types](https://testpioneer.readthedocs.io/en/latest/step-types.html)
 - [Docker](https://testpioneer.readthedocs.io/en/latest/docker.html)

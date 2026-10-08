@@ -62,7 +62,8 @@ class TestSchemaContent:
     def test_top_level_keys(self):
         schema = get_yaml_schema()
         assert set(schema["properties"]) == {
-            "pioneer_log", "recording_path", "artifacts_path", "keep_artifacts", "jobs"}
+            "pioneer_log", "recording_path", "artifacts_path", "keep_artifacts", "report_path",
+            "report_formats", "jobs"}
         assert schema["required"] == ["jobs"]
         assert schema["properties"]["jobs"]["required"] == ["steps"]
 
@@ -79,6 +80,11 @@ class TestSchemaContent:
         block = get_yaml_schema()["$defs"]["parallel_run"]
         assert block["required"] == ["runners", "scripts"]
         assert block["properties"]["runners"]["items"] == {"$ref": "#/$defs/runner"}
+        assert block["properties"]["artifacts"]["items"]["items"] == {"type": "string", "minLength": 1}
+
+    def test_report_formats_are_an_enumerated_list(self):
+        formats = get_yaml_schema()["properties"]["report_formats"]
+        assert formats["items"]["enum"] == ["json", "html", "junit"]
 
     def test_every_field_belongs_to_an_action(self):
         used = {name for action in ACTIONS for name in action.fields}

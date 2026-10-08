@@ -17,6 +17,7 @@ from test_pioneer.artifacts.session import RunOptions
 from test_pioneer.executor.pioneer_executor import execute_yaml
 from test_pioneer.models.diagnostic import Diagnostic, ValidationResult, format_path
 from test_pioneer.models.result import RunResult, Status
+from test_pioneer.report.formats import REPORT_FORMATS
 from test_pioneer.schema import SCHEMA_VERSION, get_yaml_schema
 from test_pioneer.utils.exception.exceptions import ExecutorException
 from test_pioneer.validation import LintOptions, lint_yaml
@@ -24,6 +25,17 @@ from test_pioneer.validation import LintOptions, lint_yaml
 EXIT_OK = 0
 EXIT_INVALID = 1
 EXIT_RUN_FAILED = 1
+
+
+def _report_formats(text: str) -> list[str]:
+    """Parse ``--report_formats``: ``json,html``, a single format, or ``none``."""
+    names = [name.strip() for name in text.split(",") if name.strip()]
+    if names == ["none"]:
+        return []
+    if not names or any(name not in REPORT_FORMATS for name in names):
+        raise argparse.ArgumentTypeError(
+            f"expected {', '.join(REPORT_FORMATS)} separated by commas, or none; got {text!r}")
+    return names
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -45,6 +57,11 @@ def build_parser() -> argparse.ArgumentParser:
                                               "(default: the workflow's artifacts_path, else artifacts)")
     run.add_argument("--keep_artifacts", choices=KEEP_POLICIES,
                      help="what is kept when the run ends (default: the workflow's keep_artifacts, else on_failure)")
+    run.add_argument("--report_path", help="directory of the consolidated report "
+                                           "(default: the workflow's report_path, else report)")
+    run.add_argument("--report_formats", type=_report_formats, metavar="FORMATS",
+                     help=f"comma-separated report formats out of {', '.join(REPORT_FORMATS)}, or none "
+                          "(default: the workflow's report_formats, else json,html)")
 
     validate = commands.add_parser(
         "validate", help="check workflow files without executing them",
@@ -103,7 +120,7 @@ def _validate(args: argparse.Namespace) -> int:
 
 
 def _run_summary(result: RunResult) -> str:
-    """Describe a finished run in one line."""
+    """Describe a finished run in one line, followed by one line per report file."""
     counts = result.summary()
     line = f"Run {result.run_id} {result.status.value}: {counts['total']} runner execution(s)"
     by_status = [f"{counts[status.value]} {status.value}" for status in Status if counts[status.value]]
@@ -111,12 +128,16 @@ def _run_summary(result: RunResult) -> str:
         line += f" ({', '.join(by_status)})"
     if result.artifact_dir is not None:
         line += f"; artifacts: {result.artifact_dir}"
-    return line
+    cases = result.case_summary()
+    if cases["total"]:
+        line += f"; {cases['total']} recorded test(s), {cases['failed'] + cases['error']} not passed"
+    return "\n".join([line, *(f"Report: {path}" for path in result.reports)])
 
 
 def _run(args: argparse.Namespace) -> int:
     options = RunOptions(run_id=args.run_id, artifacts_path=args.artifacts_path,
-                         keep_artifacts=args.keep_artifacts)
+                         keep_artifacts=args.keep_artifacts, report_path=args.report_path,
+                         report_formats=args.report_formats)
     result = execute_yaml(args.file, options=options)
     for warning in result.warnings:
         print(f"warning: {warning}", file=sys.stderr)

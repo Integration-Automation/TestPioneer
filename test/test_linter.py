@@ -137,6 +137,50 @@ class TestParallelRun:
         assert _codes(_steps(body)) == []
 
 
+class TestArtifacts:
+    def test_declared_artifacts_are_fine_on_runner_steps(self):
+        body = (
+            "    - name: one\n      run: a.json\n      with: api-runner\n      artifacts: ['reports/*.json']\n"
+            "    - name: all\n      run_folder: cases\n      with: api-runner\n      artifacts: [shots]\n"
+            + PARALLEL.replace("name: a", "name: both")
+            + "        runners: [api-runner, web-runner]\n        scripts: [a.json, b.json]\n"
+            "        artifacts: [['reports/a_*.json'], []]\n"
+        )
+        assert _codes(_steps(body)) == []
+
+    def test_artifacts_on_a_step_without_a_runner_have_no_effect(self):
+        (problem,) = _lint(_steps("    - name: a\n      wait: 1\n      artifacts: [shots]\n"))
+        assert (problem.code, problem.message) == ("unused-field", "'artifacts' has no effect on a 'wait' step")
+
+    @pytest.mark.parametrize("pattern, reason", [
+        ("../reports/*.json", "it leaves the working directory"),
+        ("/var/reports", "it is not relative to the working directory"),
+    ])
+    def test_a_pattern_that_would_be_refused_is_a_warning(self, pattern, reason):
+        body = f"    - name: a\n      run: a.json\n      with: api-runner\n      artifacts: [ok, '{pattern}']\n"
+        (problem,) = _lint(_steps(body))
+        assert (problem.code, problem.severity) == ("artifact-pattern", Severity.WARNING)
+        assert problem.message == f"artifact pattern '{pattern}' is not used: {reason}"
+        assert problem.path == ("jobs", "steps", 0, "artifacts", 1)
+
+    def test_parallel_artifacts_and_scripts_of_different_lengths(self):
+        body = PARALLEL + (
+            "        runners: [api-runner, web-runner]\n        scripts: [a.json, b.json]\n"
+            "        artifacts: [['reports/*.json']]\n")
+        (problem,) = _lint(_steps(body))
+        assert (problem.code, problem.severity) == ("artifacts-scripts-mismatch", Severity.ERROR)
+        assert problem.message == (
+            "'artifacts' has 1 entries and 'scripts' has 2; each script has its own list of patterns")
+        assert (problem.line, problem.column) == (7, 9)
+
+    def test_a_refused_pattern_inside_parallel_run(self):
+        body = PARALLEL + (
+            "        runners: [api-runner]\n        scripts: [a.json]\n        artifacts: [['../x']]\n")
+        (problem,) = _lint(_steps(body))
+        assert (problem.code, problem.path) == (
+            "artifact-pattern", ("jobs", "steps", 0, "parallel_run", "artifacts", 0, 0))
+
+
 class TestRunnerPackages:
     @patch(INSTALLED, return_value=False)
     def test_missing_gui_package_is_reported_once_with_the_extra(self, _installed):

@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 
 from test_pioneer.artifacts.context import DEFAULT_ARTIFACTS_PATH, KEEP_ON_FAILURE, KEEP_POLICIES
+from test_pioneer.report.formats import DEFAULT_REPORT_FORMATS, DEFAULT_REPORT_PATH, REPORT_FORMATS
 
 JsonSchema = dict[str, object]
 
@@ -54,7 +55,20 @@ TOP_LEVEL_FIELDS: Mapping[str, Mapping[str, object]] = MappingProxyType({
         "description": f"What is kept when the run ends: only what failed ({KEEP_ON_FAILURE}, the default), "
                        "everything, or nothing.",
     },
+    "report_path": _text(f"Directory of the consolidated report. Defaults to {DEFAULT_REPORT_PATH}."),
+    "report_formats": {
+        "type": "array",
+        "items": {"type": "string", "enum": list(REPORT_FORMATS)},
+        "description": f"Formats of the consolidated report. Defaults to {', '.join(DEFAULT_REPORT_FORMATS)}; "
+                       "an empty list writes no report.",
+    },
 })
+
+
+def artifact_patterns(description: str) -> JsonSchema:
+    """Schema of a list of file patterns, relative to the working directory."""
+    return {"type": "array", "items": {"type": "string", "minLength": 1}, "description": description}
+
 
 # Keys a step reads besides its name and its action key.
 STEP_FIELDS: Mapping[str, Mapping[str, object]] = MappingProxyType({
@@ -70,14 +84,17 @@ STEP_FIELDS: Mapping[str, Mapping[str, object]] = MappingProxyType({
     "zip_file_path": _text("Path of the zip archive to extract."),
     "password": _text("Password of an encrypted archive.", allow_empty=True),
     "extract_path": _text("Directory to extract into. Defaults to the working directory.", allow_empty=True),
+    "artifacts": artifact_patterns(
+        "Files or folders the runner writes, relative to the working directory. They are copied "
+        "into its artifact directory, where its report is read."),
 })
 
 # In dispatch order: when a step holds several action keys, the executor runs the first one.
 ACTIONS: tuple[ActionSpec, ...] = (
     ActionSpec("run", _text("JSON action file to run, relative to the working directory."),
-               required=("with",)),
+               required=("with",), optional=("artifacts",)),
     ActionSpec("run_folder", _text("Folder whose *.json files are all run, in name order."),
-               required=("with",)),
+               required=("with",), optional=("artifacts",)),
     ActionSpec("open_url", _text("URL to open in the default browser."),
                optional=("url_open_method",)),
     ActionSpec("download_file", _text("URL of the file to download."), required=("file_path",)),
@@ -97,4 +114,4 @@ ACTION_BY_KEY: Mapping[str, ActionSpec] = MappingProxyType({action.key: action f
 TOP_LEVEL_KEYS: tuple[str, ...] = (*TOP_LEVEL_FIELDS, "jobs")
 JOBS_KEYS: tuple[str, ...] = ("steps",)
 STEP_KEYS: tuple[str, ...] = ("name", *ACTION_KEYS, *STEP_FIELDS)
-PARALLEL_RUN_KEYS: tuple[str, ...] = ("runners", "scripts", "executor_path")
+PARALLEL_RUN_KEYS: tuple[str, ...] = ("runners", "scripts", "executor_path", "artifacts")

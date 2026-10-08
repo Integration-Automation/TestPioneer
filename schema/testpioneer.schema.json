@@ -31,6 +31,23 @@
       ],
       "description": "What is kept when the run ends: only what failed (on_failure, the default), everything, or nothing."
     },
+    "report_path": {
+      "type": "string",
+      "description": "Directory of the consolidated report. Defaults to report.",
+      "minLength": 1
+    },
+    "report_formats": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "json",
+          "html",
+          "junit"
+        ]
+      },
+      "description": "Formats of the consolidated report. Defaults to json, html; an empty list writes no report."
+    },
     "jobs": {
       "type": "object",
       "description": "Container of the steps list.",
@@ -151,6 +168,14 @@
         "extract_path": {
           "type": "string",
           "description": "Directory to extract into. Defaults to the working directory."
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Files or folders the runner writes, relative to the working directory. They are copied into its artifact directory, where its report is read."
         }
       }
     },
@@ -182,6 +207,18 @@
         "executor_path": {
           "type": "string",
           "description": "Python executable that starts the runners. Defaults to this one."
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Files or folders written by the runner at this position."
+          },
+          "description": "What each runner writes, one list of patterns per script. Same length as scripts."
         }
       }
     }

@@ -11,13 +11,14 @@ from __future__ import annotations
 
 import os
 import time
-from collections.abc import Callable, Iterable, Iterator, Mapping
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from contextvars import ContextVar, Token
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from test_pioneer.artifacts.capture import tee_output
+from test_pioneer.artifacts.collect import as_patterns, collect_files
 from test_pioneer.artifacts.context import (
     DEFAULT_ARTIFACTS_PATH,
     ENV_ARTIFACT_DIR,
@@ -31,6 +32,9 @@ from test_pioneer.artifacts.context import (
 from test_pioneer.artifacts.store import ArtifactStore
 from test_pioneer.logging.loggin_instance import reset_step_log_sink, set_step_log_sink
 from test_pioneer.models.result import RunnerResult, RunResult, Status, StepResult, utc_now, worst_status
+from test_pioneer.report.formats import DEFAULT_REPORT_FORMATS, DEFAULT_REPORT_PATH, REPORT_FORMATS
+from test_pioneer.report.service import write_reports
+from test_pioneer.runner.registry import find_runner
 from test_pioneer.schema.spec import ACTION_KEYS
 from test_pioneer.utils.exception.exceptions import YamlException
 
@@ -44,22 +48,41 @@ class RunOptions:
     ``run_id`` names the run; one is generated when it is not given. ``artifacts_path`` is the
     directory that receives ``<run-id>/`` (default ``artifacts``). ``keep_artifacts`` is
     ``on_failure`` (default: a run that passed leaves nothing, a failed one keeps the artifacts
-    of what failed), ``always`` or ``never``.
+    of what failed), ``always`` or ``never``. ``report_path`` is the directory of the consolidated
+    report (default ``report``) and ``report_formats`` its formats out of ``json``, ``html`` and
+    ``junit`` (default ``json`` and ``html``; empty for no report).
     """
 
     run_id: str | None = None
     artifacts_path: str | None = None
     keep_artifacts: str | None = None
+    report_path: str | None = None
+    report_formats: Sequence[str] | None = None
+
+
+@dataclass(frozen=True)
+class _Settings:
+    """The settings of a run once options, workflow and defaults are combined."""
+
+    keep: str
+    report_path: Path
+    report_formats: tuple[str, ...]
 
 
 @dataclass
 class Invocation:
-    """A runner execution in progress: where it may write and what its environment adds."""
+    """A runner execution in progress: where it may write and what its environment adds.
+
+    ``patterns`` are the files the step declared with ``artifacts:``; they are collected when
+    the execution ends, if they changed after ``wall_started``.
+    """
 
     result: RunnerResult
     directory: Path | None
     environment: dict[str, str]
+    patterns: tuple[str, ...] = ()
     started: float = field(default_factory=time.monotonic)
+    wall_started: float = field(default_factory=time.time)
 
 
 def _setting(chosen: str | None, yaml_data: Mapping[str, object], key: str, default: str) -> str:
@@ -72,6 +95,24 @@ def _setting(chosen: str | None, yaml_data: Mapping[str, object], key: str, defa
     if not isinstance(value, str) or not value:
         raise YamlException(f"{key} must be a non-empty string, got: {value!r}")
     return value
+
+
+def _report_formats(chosen: Sequence[str] | None, yaml_data: Mapping[str, object]) -> tuple[str, ...]:
+    """Pick the report formats: the option, else the workflow's ``report_formats``, else the default."""
+    value: object = chosen if chosen is not None else yaml_data.get("report_formats")
+    if value is None:
+        return DEFAULT_REPORT_FORMATS
+    if isinstance(value, str) or not isinstance(value, Sequence) or any(item not in REPORT_FORMATS for item in value):
+        raise YamlException(f"report_formats must be a list of {', '.join(REPORT_FORMATS)}, got: {value!r}")
+    return tuple(str(item) for item in value)
+
+
+def _settings(options: RunOptions, yaml_data: Mapping[str, object]) -> _Settings:
+    keep = _setting(options.keep_artifacts, yaml_data, "keep_artifacts", KEEP_ON_FAILURE)
+    if keep not in KEEP_POLICIES:
+        raise YamlException(f"keep_artifacts must be one of {', '.join(KEEP_POLICIES)}, got: {keep!r}")
+    report_path = _setting(options.report_path, yaml_data, "report_path", DEFAULT_REPORT_PATH)
+    return _Settings(keep, Path(report_path), _report_formats(options.report_formats, yaml_data))
 
 
 def _action_of(step: Mapping[str, object]) -> str:
@@ -97,9 +138,7 @@ class RunSession:
     def __init__(self, yaml_data: Mapping[str, object], options: RunOptions | None = None,
                  workflow: str | None = None) -> None:
         options = options or RunOptions()
-        self._keep = _setting(options.keep_artifacts, yaml_data, "keep_artifacts", KEEP_ON_FAILURE)
-        if self._keep not in KEEP_POLICIES:
-            raise YamlException(f"keep_artifacts must be one of {', '.join(KEEP_POLICIES)}, got: {self._keep!r}")
+        self._settings = _settings(options, yaml_data)
         run_id = checked_run_id(options.run_id) if options.run_id is not None else new_run_id()
         root = _setting(options.artifacts_path, yaml_data, "artifacts_path", DEFAULT_ARTIFACTS_PATH)
         self.result = RunResult(run_id=run_id, workflow=workflow)
@@ -219,10 +258,11 @@ class RunSession:
         for step in steps:
             self.result.steps.append(StepResult(str(step.get("name")), _action_of(step), Status.CANCELLED))
 
-    def begin(self, runner: str, script: str, part: int | None = None) -> Invocation:
+    def begin(self, runner: str, script: str, part: int | None = None, artifacts: object = None) -> Invocation:
         """Start recording a runner execution and give it a directory of its own.
 
-        ``part`` numbers the entries of one ``parallel_run`` step.
+        ``part`` numbers the entries of one ``parallel_run`` step. ``artifacts`` is what the step
+        declared for this runner, as written in the workflow.
         """
         step = self._step.name if self._step is not None else ""
         record = RunnerResult(runner, script, step, Status.ERROR, started_at=utc_now())
@@ -232,7 +272,7 @@ class RunSession:
             record.artifact_dir = self._store.relative(directory)
             environment[ENV_ARTIFACT_DIR] = str(directory.resolve())
         self.result.runners.append(record)
-        return Invocation(record, directory, environment)
+        return Invocation(record, directory, environment, as_patterns(artifacts))
 
     def _new_runner_dir(self, runner: str, label: str) -> Path | None:
         if self._store is None:
@@ -245,14 +285,44 @@ class RunSession:
 
     def end(self, invocation: Invocation, status: Status, exit_code: int | None = None,
             message: str | None = None) -> None:
-        """Finish recording a runner execution."""
+        """Finish recording a runner execution: collect its files, read its report, set its status.
+
+        A runner whose report holds a failed test is ``failed`` even when it exited with 0.
+        """
         record = invocation.result
+        self._gather(invocation)
+        failed = sum(1 for case in record.cases if case.status is not Status.PASSED)
+        if failed and status is Status.PASSED:
+            status, message = Status.FAILED, f"{failed} of {len(record.cases)} recorded test(s) failed"
         record.status, record.exit_code, record.message = status, exit_code, message
         record.finished_at = utc_now()
         record.duration_ms = _elapsed_ms(invocation.started)
         level = "info" if status is Status.PASSED else "error"
         detail = f": {message}" if message else ""
         self.log(level, f"Runner {record.runner} ({record.script}) {status.value}{detail}")
+
+    def _gather(self, invocation: Invocation) -> None:
+        """Copy the declared files into the runner's directory and read the runner's own report.
+
+        Whatever goes wrong here is a warning: the runner's outcome stands.
+        """
+        directory, record = invocation.directory, invocation.result
+        if directory is None or self._store is None:
+            return
+        label = f"{record.runner} ({record.script})"
+        for warning in collect_files(invocation.patterns, directory, invocation.wall_started):
+            self._warn(f"{label}: {warning}")
+        adapter = find_runner(record.runner)
+        if adapter is None or adapter.report is None:
+            return
+        try:
+            parsed = adapter.report.read(directory)
+        except (OSError, ValueError) as error:
+            self._warn(f"{label}: the runner report could not be read: {error}")
+            return
+        if parsed is not None:
+            record.cases = parsed.cases
+            record.report = self._store.relative(parsed.source)
 
     def reject(self, runner: str, script: str, message: str) -> None:
         """Record a runner execution that could not start; the caller has already logged why."""
@@ -268,37 +338,55 @@ class RunSession:
         result.finished_at = utc_now()
         result.duration_ms = _elapsed_ms(self._started)
         self.log("info", f"Run {result.run_id} finished: {result.status.value}")
-        if self._store is not None:
-            self._stop_log(self._store)
-            self._settle_artifacts(self._store)
+        store = self._store
+        if store is not None:
+            self._stop_log(store)
+            self._settle_artifacts(store)
+        self._write_reports()
+        if store is not None and result.artifact_dir is not None:
+            self._write_manifest(store)
 
     def _settle_artifacts(self, store: ArtifactStore) -> None:
-        """Apply the keep policy, list what is kept and write the manifest."""
+        """Apply the keep policy and list what is kept."""
         failed = self.result.status is not Status.PASSED
-        keep_run = self._keep == KEEP_ALWAYS or (self._keep == KEEP_ON_FAILURE and failed)
+        keep = self._settings.keep
+        keep_run = keep == KEEP_ALWAYS or (keep == KEEP_ON_FAILURE and failed)
         try:
             if not keep_run:
                 for runner in self.result.runners:
-                    runner.artifact_dir = None
+                    runner.artifact_dir = runner.report = None
                 store.remove_run()
                 return
             for runner in self.result.runners:
                 self._settle_runner(store, runner)
             self.result.artifact_dir = str(store.run_dir)
-            store.write_manifest(self.result)
         except OSError as error:
             self._warn(f"artifact collection failed: {error}")
+
+    def _write_reports(self) -> None:
+        settings = self._settings
+        try:
+            write_reports(self.result, settings.report_path, settings.report_formats)
+        except (OSError, ValueError) as error:
+            self.result.reports = []
+            self._warn(f"the report was not written: {error}")
+
+    def _write_manifest(self, store: ArtifactStore) -> None:
+        try:
+            store.write_manifest(self.result)
+        except OSError as error:
+            self._warn(f"the manifest was not written: {error}")
 
     def _settle_runner(self, store: ArtifactStore, runner: RunnerResult) -> None:
         if runner.artifact_dir is None:
             return
         directory = store.run_dir / runner.artifact_dir
         try:
-            if self._keep == KEEP_ALWAYS or runner.status is not Status.PASSED:
+            if self._settings.keep == KEEP_ALWAYS or runner.status is not Status.PASSED:
                 runner.artifacts = store.collect(directory)
             else:
                 store.remove(directory)
-                runner.artifact_dir = None
+                runner.artifact_dir = runner.report = None
         except OSError as error:
             self._warn(f"artifact collection failed for {runner.runner} ({runner.script}): {error}")
 
@@ -319,17 +407,17 @@ def _environment(values: Mapping[str, str]) -> Iterator[None]:
 
 
 @contextmanager
-def in_process_runner(runner: str, script: str) -> Iterator[None]:
+def in_process_runner(runner: str, script: str, artifacts: object = None) -> Iterator[None]:
     """Record a runner call made in this process: its timing, its outcome and what it prints.
 
     The runner sees ``TEST_PIONEER_RUN_ID`` and ``TEST_PIONEER_ARTIFACT_DIR`` while it runs.
-    Outside ``execute_yaml`` this does nothing.
+    ``artifacts`` is the step's ``artifacts`` value. Outside ``execute_yaml`` this does nothing.
     """
     session = current_session()
     if session is None:
         yield
         return
-    invocation = session.begin(runner, script)
+    invocation = session.begin(runner, script, artifacts=artifacts)
     try:
         with _environment(invocation.environment), tee_output(invocation.directory):
             yield

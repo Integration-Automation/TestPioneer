@@ -130,13 +130,41 @@ class TestSchemaCommand:
 class TestRunCommand:
     def test_a_passing_run_exits_zero_and_is_summarised(self, tmp_path, capsys):
         assert main(["run", "--run_id", "r1", _write(tmp_path, "ok.yml", RUNNABLE)]) == 0
-        assert capsys.readouterr().out == "Run r1 passed: 0 runner execution(s)\n"
+        assert capsys.readouterr().out.splitlines() == [
+            "Run r1 passed: 0 runner execution(s)",
+            f"Report: {Path('report') / 'testpioneer-report.json'}",
+            f"Report: {Path('report') / 'testpioneer-report.html'}",
+        ]
 
     def test_a_failed_run_exits_one_and_names_its_artifacts(self, tmp_path, capsys):
         assert main(["run", "--run_id", "r1", _write(tmp_path, "bad.yml", NOT_RUNNABLE)]) == 1
         expected = Path("artifacts") / "r1"
-        assert capsys.readouterr().out == f"Run r1 failed: 0 runner execution(s); artifacts: {expected}\n"
+        assert capsys.readouterr().out.splitlines()[0] == (
+            f"Run r1 failed: 0 runner execution(s); artifacts: {expected}")
         assert (expected / "testpioneer" / "manifest.json").is_file()
+
+    def test_report_options_are_passed_on(self, tmp_path, capsys):
+        path = _write(tmp_path, "ok.yml", RUNNABLE)
+        assert main(["run", "--report_path", "out", "--report_formats", "junit", path]) == 0
+        assert [item.name for item in Path("out").iterdir()] == ["testpioneer-junit.xml"]
+        assert capsys.readouterr().out.splitlines()[1:] == [f"Report: {Path('out') / 'testpioneer-junit.xml'}"]
+
+    def test_no_report_format_writes_no_report(self, tmp_path, capsys):
+        assert main(["run", "--run_id", "r1", "--report_formats", "none", _write(tmp_path, "ok.yml", RUNNABLE)]) == 0
+        assert capsys.readouterr().out == "Run r1 passed: 0 runner execution(s)\n"
+        assert not Path("report").exists()
+
+    def test_several_report_formats_are_separated_by_commas(self, tmp_path):
+        path = _write(tmp_path, "ok.yml", RUNNABLE)
+        assert main(["run", "--report_formats", "json, junit", path]) == 0
+        assert sorted(item.name for item in Path("report").iterdir()) == [
+            "testpioneer-junit.xml", "testpioneer-report.json"]
+
+    @pytest.mark.parametrize("value", ["pdf", "json,pdf", "", ","])
+    def test_an_unknown_report_format_is_a_usage_error(self, tmp_path, value):
+        with pytest.raises(SystemExit) as stopped:
+            main(["run", "--report_formats", value, _write(tmp_path, "ok.yml", RUNNABLE)])
+        assert stopped.value.code == 2
 
     def test_artifact_options_are_passed_on(self, tmp_path):
         path = _write(tmp_path, "ok.yml", RUNNABLE)

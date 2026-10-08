@@ -8,7 +8,7 @@ from __future__ import annotations
 import copy
 
 from test_pioneer.runner.registry import RUNNER_NAMES
-from test_pioneer.schema.spec import ACTIONS, STEP_FIELDS, TOP_LEVEL_FIELDS, JsonSchema
+from test_pioneer.schema.spec import ACTIONS, STEP_FIELDS, TOP_LEVEL_FIELDS, JsonSchema, artifact_patterns
 
 # Bump the minor part for a backward-compatible addition, the major part when a workflow that
 # used to validate no longer does.
@@ -61,6 +61,11 @@ def _parallel_run_schema() -> JsonSchema:
             "executor_path": {
                 "type": "string",
                 "description": "Python executable that starts the runners. Defaults to this one.",
+            },
+            "artifacts": {
+                "type": "array",
+                "items": artifact_patterns("Files or folders written by the runner at this position."),
+                "description": "What each runner writes, one list of patterns per script. Same length as scripts.",
             },
         },
     }

@@ -22,24 +22,28 @@ Execute a YAML test workflow and return what happened.
 - ``yaml_type`` (str) -- ``"File"`` (default) to read from a file path, or ``"String"``
   to parse the stream as a YAML string directly.
 - ``options`` (RunOptions | None) -- ``RunOptions(run_id=None, artifacts_path=None,
-  keep_artifacts=None)``. A field left at ``None`` is read from the workflow
-  (``artifacts_path``, ``keep_artifacts``) and then defaulted; a run ID is generated.
+  keep_artifacts=None, report_path=None, report_formats=None)``. A field left at ``None`` is
+  read from the workflow key of the same name and then defaulted; a run ID is generated.
 
 **Returns:** a ``RunResult`` (see :doc:`artifacts`) with these attributes:
 
 - ``run_id`` (str) and ``status`` (``Status.PASSED``, ``FAILED``, ``ERROR`` or ``CANCELLED``).
 - ``steps`` -- one ``StepResult`` per step: ``name``, ``action``, ``status``, ``message``, timing.
 - ``runners`` -- one ``RunnerResult`` per runner execution: ``runner``, ``script``, ``step``,
-  ``status``, ``exit_code``, ``message``, ``artifact_dir``, ``artifacts``, timing.
+  ``status``, ``exit_code``, ``message``, ``artifact_dir``, ``artifacts``, timing, and from the
+  runner's own report ``cases`` (``CaseResult``: ``name``, ``status``, ``message``) and ``report``.
 - ``artifact_dir`` (str | None) -- the run's artifact directory when it was kept.
-- ``warnings`` -- problems with the artifacts that did not affect the run.
-- ``summary()`` and ``to_dict()`` -- counts by status, and the JSON form of the manifest.
+- ``reports`` -- the consolidated report files that were written (see :doc:`reports`).
+- ``warnings`` -- problems with artifacts or reports that did not affect the run.
+- ``summary()``, ``case_summary()`` and ``to_dict()`` -- runner executions by status, recorded
+  tests by status, and the JSON form of the manifest and the JSON report.
 
 **Raises:**
 
 - ``YamlException`` -- If the YAML is invalid, missing ``jobs`` or ``steps``.
 - ``WrongInputException`` -- If ``yaml_type`` is not ``"File"`` or ``"String"``.
-- ``YamlException`` -- Also if ``artifacts_path`` or ``keep_artifacts`` has an invalid value.
+- ``YamlException`` -- Also if ``artifacts_path``, ``keep_artifacts``, ``report_path`` or
+  ``report_formats`` has an invalid value.
 - ``WrongInputException`` -- Also if ``options.run_id`` is not a safe directory name.
 - ``ExecutorException`` -- If recording setup fails.
 
@@ -204,9 +208,11 @@ Command Line Interface
 
 **Commands:**
 
-- ``run [--run_id ID] [--artifacts_path DIR] [--keep_artifacts {on_failure,always,never}] file`` --
-  Execute a workflow, print a one-line summary, and exit with status 0 when the run passed and 1
-  when it did not. See :doc:`artifacts`.
+- ``run [--run_id ID] [--artifacts_path DIR] [--keep_artifacts {on_failure,always,never}]
+  [--report_path DIR] [--report_formats FORMATS] file`` -- Execute a workflow, print a summary
+  line and the report files, and exit with status 0 when the run passed and 1 when it did not.
+  ``FORMATS`` is a comma-separated list out of ``json``, ``html`` and ``junit``, or ``none``.
+  See :doc:`artifacts` and :doc:`reports`.
 - ``validate [--format {text,json}] [--strict] [--base_dir DIR] [--no_file_check] files...`` --
   Check workflow files without executing them. Exits with status 1 when a file has an error.
   See :doc:`validation`.

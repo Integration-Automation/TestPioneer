@@ -1,7 +1,7 @@
 # TestPioneer Architecture
 
 > Short overview for people and agents.
-> Last verified: 2026-10-08 against `7743c66` plus the run-artifact change, on
+> Last verified: 2026-10-08 against `c6192e0` plus the consolidated-report change, on
 > `feature/testpioneer-platform-improvements`.
 
 ## 1. Purpose
@@ -18,7 +18,8 @@ lists named `jobs.steps`, and each step does one of two things:
 File logging and screen recording are optional. A workflow can also be checked without executing
 it: against a versioned JSON Schema and a set of lint rules, with diagnostics located by line and
 column. Every execution is a run with an ID; it returns a normalized result and keeps the
-artifacts of the runner executions that did not pass.
+artifacts of the runner executions that did not pass. The runners' own reports are read into
+that result, and one consolidated report (JSON, HTML, optional JUnit XML) is written per run.
 
 ## 2. Layers and directories
 
@@ -30,8 +31,9 @@ artifacts of the runner executions that did not pass.
 | `schema/testpioneer.schema.json` | The same schema, published for editors and other tools. Written by `python -m test_pioneer schema -o`; `test/test_schema.py` keeps it identical to the built one |
 | `test_pioneer/validation/` | `yaml_loader.load_yaml` (safe parse that keeps the line and column of every key and value), `schema_validator.check_schema` (built-in validator for the keywords the schema uses), `linter.run_lint_rules` (semantic rules), `api.validate_yaml` / `lint_yaml` |
 | `test_pioneer/models/` | `diagnostic.py`: `Diagnostic`, `ValidationResult`, `Severity`. `result.py`: the normalized run result (`RunResult`, `StepResult`, `RunnerResult`, `Artifact`, `Status`) |
-| `test_pioneer/runner/` | `adapter.py`: the `RunnerAdapter` protocol and `ModuleRunner` (a package started as `python -m <package> --execute_file <script>`). `registry.py`: `RUNNERS`, one adapter per `with:` tag, read by the schema, the linter and `parallel_run` |
-| `test_pioneer/artifacts/` | `context.py`: the two environment variable names, the keep policies, run ID creation and checking. `store.py`: `ArtifactStore`, the directory tree of one run (runner directories, execution log, manifest, removal). `capture.py`: copies in-process output and sub-process logs without threads. `session.py`: `RunSession`, `RunOptions`, `current_session`, `in_process_runner` |
+| `test_pioneer/runner/` | `adapter.py`: the `RunnerAdapter` protocol and `ModuleRunner` (a package started as `python -m <package> --execute_file <script>`, with the reader of its report format). `registry.py`: `RUNNERS`, one adapter per `with:` tag, read by the schema, the linter, `parallel_run` and the run session; `find_runner` |
+| `test_pioneer/artifacts/` | `context.py`: the two environment variable names, the keep policies, run ID creation and checking. `store.py`: `ArtifactStore`, the directory tree of one run (runner directories, execution log, manifest, removal). `capture.py`: copies in-process output and sub-process logs without threads. `collect.py`: copies the files a step declares with `artifacts:` into its runner directory. `session.py`: `RunSession`, `RunOptions`, `current_session`, `in_process_runner` |
+| `test_pioneer/report/` | `readers.py`: `ReportReader` and `RecordPairReader`, which turn a runner's `*_success.json` / `*_failure.json` pair into `CaseResult`s. `formats.py`: format names, default location and file names. `html_report.py`, `junit_report.py`: renderers. `service.py`: `write_reports` |
 | `test_pioneer/executor/pioneer_executor.py` | `execute_yaml`: loads YAML (`yaml.safe_load`), opens a `RunSession`, dispatches each step through `_STEP_HANDLERS` and returns the `RunResult` |
 | `test_pioneer/executor/run/` | `executor_run.run` (one JSON file), `executor_run_folder.run_folder` (every `*.json` in a folder), `parallel_run.parallel_run` (subprocesses), `runner_process.py` (one runner sub-process: its environment, log files and exit code), `utils.select_with_runner` (maps `with:` tags to runners), `process_manager.py` (tracks parallel subprocesses) |
 | `test_pioneer/executor/file/file_processing.py` | `download_file` and `unzip_zipfile` steps, delegated to `automation_file` |
@@ -51,8 +53,8 @@ artifacts of the runner executions that did not pass.
 
 - **Python**: `from test_pioneer import execute_yaml, create_template_dir`. Call
   `execute_yaml(stream, yaml_type="File", options=None)` with a path, or with `yaml_type="String"`
-  and inline YAML. It returns a `RunResult`; `RunOptions(run_id, artifacts_path, keep_artifacts)`
-  overrides the workflow's own settings.
+  and inline YAML. It returns a `RunResult`; `RunOptions(run_id, artifacts_path, keep_artifacts,
+  report_path, report_formats)` overrides the workflow's own settings.
   `validate_yaml` (syntax and schema) and `lint_yaml` (the same plus the lint rules) take the same
   two arguments and return a `ValidationResult`; `load_yaml` returns the parsed `YamlDocument` and
   `get_yaml_schema` the schema as a dict.
@@ -60,8 +62,8 @@ artifacts of the runner executions that did not pass.
   - `python -m test_pioneer -e <file.yml>` (`--execute_yaml`) executes a workflow and exits 0
     unless an exception is raised, whatever the steps did;
   - `python -m test_pioneer run [--run_id ID] [--artifacts_path DIR]
-    [--keep_artifacts {on_failure,always,never}] <file.yml>` executes one and exits 0 when the
-    run passed, 1 when it did not;
+    [--keep_artifacts {on_failure,always,never}] [--report_path DIR] [--report_formats FORMATS]
+    <file.yml>` executes one and exits 0 when the run passed, 1 when it did not;
   - `python -m test_pioneer validate [--format {text,json}] [--strict] [--base_dir DIR]
     [--no_file_check] <file.yml>...` checks workflows without executing them and exits 1 on an
     error (or on a warning with `--strict`);
@@ -70,11 +72,14 @@ artifacts of the runner executions that did not pass.
   - no `-d`, `-c` or `--execute_str`, and no console script is declared.
 - **YAML contract**:
   - optional top-level keys `pioneer_log` (log file path), `recording_path` (needs `je_auto_control`),
-    `artifacts_path` (default `artifacts`) and `keep_artifacts` (`on_failure`, `always`, `never`);
+    `artifacts_path` (default `artifacts`), `keep_artifacts` (`on_failure`, `always`, `never`),
+    `report_path` (default `report`) and `report_formats` (list of `json`, `html`, `junit`);
   - required `jobs.steps`, a list where each step has a unique `name` and one of `run`, `run_folder`,
     `open_url`, `download_file` (+ `file_path`), `wait`, `open_program`, `close_program`,
     `unzip_zipfile` or `parallel_run` (`runners`, `scripts`, optional `executor_path`);
   - `run` and `run_folder` need `with:` set to `web-runner`, `api-runner`, `load-runner`, `file-runner` or `gui-runner`;
+  - `run` and `run_folder` take an optional `artifacts` list of file patterns, and `parallel_run`
+    one such list per script;
   - the same contract is published as a JSON Schema, `schema/testpioneer.schema.json`.
 - There is no MCP server, LSP, socket server, pytest plugin or GUI of its own.
 
@@ -101,12 +106,18 @@ RunSession.__enter__ → ArtifactStore.create (<artifacts_path>/<run-id>/testpio
 run_step → StepResult (timing; True → passed, False → failed, exception → error and re-raised)
   → the step takes the worst status of itself and the runner executions recorded during it
 begin/end (or reject) → RunnerResult + runners/<runner>/<nn>-<step>/ + the two variables
+end → collect_files (the step's artifacts: patterns, files changed since the runner started,
+  copied to collected/) → find_runner(runner).report.read(directory) → RunnerResult.cases
+  → a runner that ended normally but recorded a failed test becomes failed
 __exit__ → run status = worst step status → on_failure: a passed run is removed entirely, a
-  failed one keeps testpioneer/ and the runners that did not pass → manifest.json
+  failed one keeps testpioneer/ and the runners that did not pass
+  → write_reports (<report_path>/testpioneer-report.{json,html}, testpioneer-junit.xml)
+  → manifest.json
 ```
 
-An artifact problem (`OSError`) becomes an entry of `RunResult.warnings`; it never changes the
-outcome. A handler called outside `execute_yaml` finds no session and behaves as before.
+An artifact or report problem (`OSError`, or `ValueError` for a malformed runner report) becomes
+an entry of `RunResult.warnings`; it never changes the outcome. A handler called outside
+`execute_yaml` finds no session and behaves as before.
 
 **Validation (nothing is executed)**
 
@@ -164,12 +175,21 @@ the step and the run `failed`.
 - **New runner (`with:` tag)**:
   1. Add a `ModuleRunner(tag, package)` to `RUNNERS` (`runner/registry.py`); `parallel_run`, the
      schema's runner enum and the linter read it. Pass `optional=True` when the package comes
-     from an extra. A runner with another command line implements `RunnerAdapter` itself.
+     from an extra, and `report=` with the reader of its report format. A runner with another
+     command line implements `RunnerAdapter` itself.
   2. Import it lazily in `_build_runner_dict` (`executor/run/utils.py`).
   3. Declare the dependency in `pyproject.toml` and `dev.toml` (in `dependencies`, or in an extra
      like `gui`).
   4. Bump `SCHEMA_VERSION` and regenerate the published schema, as for a step type.
   5. Extend `test/test_run_utils.py` and `test/test_parallel_run.py`.
+- **New runner report format**: implement `ReportReader.read(directory)` in `report/readers.py`
+  (return `None` when there is no report, raise `ValueError` for a malformed one) and give it to
+  the runner's adapter. For a runner of the same family, a `RecordPairReader` with that runner's
+  field names is enough. Test it in `test/test_report_readers.py` with a record in the runner's
+  real shape.
+- **New report format**: add its name and file to `report/formats.py`, a renderer beside
+  `html_report.py`, and a branch in `report/service.py`; the schema's `report_formats` enum and
+  the `--report_formats` option read `REPORT_FORMATS`.
 - **New lint rule**: add a method to `_Linter` (`validation/linter.py`), register it in `_rules`
   when it belongs to one step type, list its code in `docs/validation.rst`, and test it in
   `test/test_linter.py`. Errors are for what the executor stops on or can never run; anything that
@@ -208,12 +228,22 @@ the step and the run `failed`.
   an action of the script fails, and 1 only for a script that is missing or malformed
   (je_auto_control also for an unknown command or a failed `AC_assert_*`). A `failed` status
   from an exit code therefore means only that.
+- **Runner report format**, relied on here and owned by the runner packages: the pair
+  `<name>_success.json` / `<name>_failure.json`, each an object of `Success_TestN` /
+  `Failure_TestN` records, written by `AT_generate_json_report`, `WR_generate_json_report`,
+  `LD_generate_json_report` and `AC_generate_json_report`. The readers use these record fields:
+  API `request_method`, `http_method`, `request_url`, `test_url`, `error`; web and GUI
+  `function_name`, `exception`; load `Method`, `name`, `error`. A renamed field degrades a test
+  name to its record key; a changed layout makes the report unreadable, which is a warning.
+  The path a script gives is relative to the working directory and its folder must exist.
 - **Run result contract**, offered to CI and UIs:
   - `<artifacts_path>/<run-id>/testpioneer/manifest.json` and the return value of
     `execute_yaml`: `RunResult.to_dict()` with `format_version` (`RESULT_FORMAT_VERSION`),
     documented in `docs/artifacts.rst`;
   - the directory layout `runners/<runner>/<nn>-<step>/` with `stdout.log` and `stderr.log`;
-  - `python -m test_pioneer run`: exit status 0 (passed) or 1, and its one-line summary.
+  - `python -m test_pioneer run`: exit status 0 (passed) or 1, and its summary lines;
+  - `<report_path>/testpioneer-report.json` (the same `RunResult.to_dict()`),
+    `testpioneer-report.html` and `testpioneer-junit.xml`, documented in `docs/reports.rst`.
 - **Validation contract**, offered to editors and UIs (PyBreeze is the intended consumer):
   - `schema/testpioneer.schema.json`, at that path and under the `$id` URL it declares. Its
     `version` follows `SCHEMA_VERSION`: a minor bump adds something, a major bump is for a
@@ -255,6 +285,7 @@ the step and the run `failed`.
 - The schema version, the `validate --format json` output or a diagnostic code changes.
 - The artifact layout, the two environment variables, the keep policies or the fields of the run
   result change.
+- A report file name or format, or a record field that a report reader uses, changes.
 - A sibling package's entry point that TestPioneer depends on changes: `execute_action`,
   `execute_files`, `--execute_file`, `download_file`, `unzip_all`, `RecordingThread`.
 - The dependency list or the `gui` extra changes.

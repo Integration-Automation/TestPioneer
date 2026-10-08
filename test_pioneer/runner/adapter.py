@@ -11,9 +11,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
 
+from test_pioneer.report.readers import ReportReader
+
 
 class RunnerAdapter(Protocol):
-    """What TestPioneer needs to know about a runner to start it."""
+    """What TestPioneer needs to know about a runner to start it and to read what it reports."""
 
     @property
     def name(self) -> str:
@@ -27,6 +29,10 @@ class RunnerAdapter(Protocol):
     def optional(self) -> bool:
         """True when the package comes from an extra instead of a core dependency."""
 
+    @property
+    def report(self) -> ReportReader | None:
+        """Reader of the runner's own report format, or ``None`` when it writes no report."""
+
     def command(self, executor: str, script: Path) -> list[str]:
         """Return the argument list that runs ``script`` in a sub-process of ``executor``."""
 
@@ -36,11 +42,13 @@ class ModuleRunner:
     """A runner package with the family's ``--execute_file`` command line.
 
     ``optional`` marks a package that comes from an extra instead of a core dependency.
+    ``report`` reads the report files the runner leaves in its artifact directory.
     """
 
     name: str
     package: str
     optional: bool = False
+    report: ReportReader | None = None
 
     def command(self, executor: str, script: Path) -> list[str]:
         """Return ``[executor, "-m", package, "--execute_file", script]``."""

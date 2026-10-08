@@ -28,6 +28,11 @@ Execute a single JSON test script using a specified runner.
    * - ``with``
      - Yes
      - Runner to use: ``gui-runner``, ``web-runner``, ``api-runner``, ``load-runner`` or ``file-runner``.
+   * - ``artifacts``
+     - No
+     - Files or folders the runner writes, as patterns relative to the working directory. They
+       are copied into the runner's artifact directory, where its report is read. See
+       :doc:`reports`.
 
 run_folder
 ----------
@@ -53,6 +58,11 @@ Execute all JSON files inside a specified folder using a single runner.
    * - ``with``
      - Yes
      - Runner to use.
+   * - ``artifacts``
+     - No
+     - Files or folders the runner writes, as patterns relative to the working directory. They
+       are copied into the runner's artifact directory, where its report is read. See
+       :doc:`reports`.
 
 parallel_run
 ------------
@@ -84,6 +94,13 @@ separate sub-processes and monitored until all complete.
    * - ``executor_path``
      - No
      - Custom Python executable path. Defaults to ``sys.executable``.
+   * - ``artifacts``
+     - No
+     - What each runner writes: one list of patterns per script, in the same order as
+       ``scripts``. See :doc:`reports`.
+
+Each runner's exit code and output are recorded in the run result (:doc:`artifacts`). A runner
+that fails makes the step and the run ``failed``, but does not stop the steps after it.
 
 wait
 ----

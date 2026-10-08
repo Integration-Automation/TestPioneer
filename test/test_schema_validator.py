@@ -11,11 +11,16 @@ from test_pioneer.validation.yaml_loader import load_yaml
 VALID = """\
 pioneer_log: "test_pioneer.log"
 recording_path: "test_video"
+artifacts_path: "build/artifacts"
+keep_artifacts: always
+report_path: "build/report"
+report_formats: [json, html, junit]
 jobs:
   steps:
     - name: run_api_test
       run: tests/api_test.json
       with: api-runner
+      artifacts: ["reports/api_*.json", "screenshots"]
     - name: wait_for_service
       wait: 5
     - name: open_docs
@@ -32,6 +37,7 @@ jobs:
         runners: ["web-runner", "api-runner"]
         scripts: ["./tests/web.json", "./tests/api.json"]
         executor_path: /usr/bin/python3
+        artifacts: [["reports/web_*.json"], []]
     - name: run_all_in_folder
       run_folder: tests/regression/
       with: web-runner
@@ -192,6 +198,48 @@ class TestParallelRun:
     def test_empty_lists(self):
         text = _step("      parallel_run:\n        runners: []\n        scripts: []\n")
         assert _codes(text) == ["schema-min-items", "schema-min-items"]
+
+
+class TestRunSettings:
+    def test_unknown_keep_policy(self):
+        (problem,) = validate_yaml("keep_artifacts: sometimes\n" + _step("      wait: 1\n"), "String").diagnostics
+        assert (problem.code, problem.path) == ("schema-enum", ("keep_artifacts",))
+        assert problem.message == "'sometimes' is not one of: on_failure, always, never."
+
+    def test_unknown_report_format(self):
+        (problem,) = validate_yaml("report_formats: [json, pdf]\n" + _step("      wait: 1\n"), "String").diagnostics
+        assert (problem.code, problem.path, problem.line, problem.column) == (
+            "schema-enum", ("report_formats", 1), 1, 24)
+
+    def test_report_formats_must_be_a_list(self):
+        assert _codes("report_formats: html\n" + _step("      wait: 1\n")) == ["schema-type"]
+
+    def test_no_report_format_is_allowed(self):
+        assert _codes("report_formats: []\n" + _step("      wait: 1\n")) == []
+
+    def test_empty_paths(self):
+        text = "artifacts_path: ''\nreport_path: ''\n" + _step("      wait: 1\n")
+        assert _codes(text) == ["schema-min-length", "schema-min-length"]
+
+
+class TestArtifactPatterns:
+    def test_step_artifacts_must_be_a_list(self):
+        text = _step("      run: a.json\n      with: api-runner\n      artifacts: reports/*.json\n")
+        (problem,) = validate_yaml(text, "String").diagnostics
+        assert (problem.code, problem.message) == ("schema-type", "expected a list, got a string")
+
+    def test_step_artifact_patterns_must_be_text(self):
+        text = _step("      run: a.json\n      with: api-runner\n      artifacts: [reports, 5, '']\n")
+        assert _codes(text) == ["schema-type", "schema-min-length"]
+
+    def test_parallel_artifacts_are_one_list_per_script(self):
+        text = _step(
+            "      parallel_run:\n        runners: [api-runner]\n        scripts: [a.json]\n"
+            "        artifacts: ['reports/*.json']\n")
+        (problem,) = validate_yaml(text, "String").diagnostics
+        assert (problem.code, problem.path) == (
+            "schema-type", ("jobs", "steps", 0, "parallel_run", "artifacts", 0))
+        assert problem.message == "expected a list, got a string"
 
 
 class TestOrdering:

@@ -7,9 +7,10 @@ from typing import List, Optional, Tuple
 
 from test_pioneer.artifacts.session import current_session
 from test_pioneer.executor.run.process_manager import process_manager
-from test_pioneer.executor.run.runner_process import RunnerProcess, start_runner_process
+from test_pioneer.executor.run.runner_process import RunnerProcess, RunnerRequest, start_runner_process
 from test_pioneer.logging.loggin_instance import step_log_check, test_pioneer_logger
-from test_pioneer.runner.registry import GUI_RUNNER, OPTIONAL_RUNNERS, RUNNER_PACKAGES, RUNNERS
+from test_pioneer.runner.adapter import ModuleRunner
+from test_pioneer.runner.registry import GUI_RUNNER, OPTIONAL_RUNNERS, RUNNER_PACKAGES, find_runner
 from test_pioneer.utils.package.check import is_installed
 
 
@@ -71,16 +72,27 @@ def _resolve_executor_path(executor_path: Optional[str]) -> Optional[str]:
     return executor_path
 
 
+def _requests(parallel_run_dict: dict, runner_list: List[str], script_path_list: List[str]) -> List[RunnerRequest]:
+    """Pair each runner with its script and with the artifacts declared at the same position."""
+    declared = parallel_run_dict.get("artifacts")
+    patterns = declared if isinstance(declared, list) else []
+    return [
+        RunnerRequest(runner, script, part, patterns[part - 1] if part <= len(patterns) else None)
+        for part, (runner, script) in enumerate(zip(runner_list, script_path_list), start=1)
+    ]
+
+
 def _start_single_process(
     executor_path: str,
-    runner: str,
+    request: RunnerRequest,
+    runner_package: str,
     script_path: Path,
-    part: int,
     enable_logging: bool,
 ) -> Optional[RunnerProcess]:
-    commands = RUNNERS[runner].command(executor_path, script_path)
+    adapter = find_runner(request.runner) or ModuleRunner(request.runner, runner_package)
+    commands = adapter.command(executor_path, script_path)
     try:
-        child = start_runner_process(commands, runner, str(script_path), part)
+        child = start_runner_process(commands, request)
     except OSError as error:
         _log_error(enable_logging, f"Failed to start process for {script_path}: {error}")
         return None
@@ -97,15 +109,16 @@ def _reject(runner: str, script: str, message: str, enable_logging: bool) -> Non
 
 
 def _start_processes(
-    runner_list: List[str],
-    script_path_list: List[str],
+    requests: List[RunnerRequest],
     runner_command_dict: dict,
     executor_path: str,
     enable_logging: bool,
 ) -> List[RunnerProcess]:
     children: List[RunnerProcess] = []
-    for part, (runner, script) in enumerate(zip(runner_list, script_path_list), start=1):
-        if not runner_command_dict.get(runner):
+    for request in requests:
+        runner, script = request.runner, request.script
+        runner_package = runner_command_dict.get(runner)
+        if not runner_package:
             _reject(runner, script, f"Unknown runner type: {runner}", enable_logging)
             continue
 
@@ -114,7 +127,7 @@ def _start_processes(
             _reject(runner, script, f"Script file does not exist: {script}", enable_logging)
             continue
 
-        child = _start_single_process(executor_path, runner, script_path, part, enable_logging)
+        child = _start_single_process(executor_path, request, runner_package, script_path, enable_logging)
         if child is not None:
             children.append(child)
     return children
@@ -169,8 +182,7 @@ def parallel_run(step: dict, enable_logging: bool = False) -> bool:
     executor_path = _resolve_executor_path(executor_path)
 
     children = _start_processes(
-        runner_list,
-        script_path_list,
+        _requests(step["parallel_run"], runner_list, script_path_list),
         runner_command_dict,
         executor_path,
         enable_logging,

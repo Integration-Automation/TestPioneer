@@ -72,6 +72,6 @@ def run(step: dict, enable_logging: bool = False) -> bool:
 
     # Execute with runner
     # 使用 runner 執行
-    with in_process_runner(runner=str(step.get("with")), script=file_path):
+    with in_process_runner(runner=str(step.get("with")), script=file_path, artifacts=step.get("artifacts")):
         execute_with(file_content)
     return True

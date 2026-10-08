@@ -17,6 +17,7 @@
 - **流程驗證** - 執行前先以具版本的 JSON Schema 與 lint 規則檢查流程
 - **平行執行** - 使用不同 Runner 同時執行多個測試腳本
 - **執行產物** - 每次執行都有一個 ID；失敗的 Runner 其輸出、結束代碼與檔案都會保留
+- **單一報告** - 所有 Runner 的結果合併成一份 JSON 與 HTML 報告，並可選擇輸出 JUnit XML
 - **影片錄製** - 內建測試過程錄影功能，方便除錯
 - **程序管理** - 啟動/終止外部程式，支援 stdout/stderr 重新導向
 - **跨平台** - 支援 Windows、macOS 及 Linux（Python 3.10+）
@@ -57,6 +58,8 @@ python -m test_pioneer run path/to/test.yaml
 
 與 `-e` 一樣執行流程，但執行未通過時以狀態碼 1 結束，CI 工作會跟著測試一起失敗。未通過的執行會在 `artifacts/<run-id>/` 保留每個失敗 Runner 的 `stdout.log`、`stderr.log` 與它寫出的檔案，另外還有 TestPioneer 自己的 `execution.log`，以及列出每個步驟與 Runner 的 `manifest.json`。加上 `--keep_artifacts always` 則連通過的執行也保留。在 Python 中，`execute_yaml()` 會回傳相同的結果。
 
+每次執行還會寫出 `report/testpioneer-report.json` 與 `report/testpioneer-report.html`：所有 Runner 共用的一份報告，內含各 Runner 記錄的測試，以及連到其產物的連結。加上 `--report_formats json,html,junit` 可另外輸出 JUnit XML。步驟以 `artifacts:` 列出其 Runner 寫出的報告檔；由於 Runner 不論動作成敗都以狀態碼 0 結束，這也是偵測動作失敗的方式。
+
 ### 驗證流程
 
 ```bash
@@ -87,6 +90,7 @@ create_template_dir()
 - [YAML 設定](https://testpioneer.readthedocs.io/en/latest/yaml-configuration.html)
 - [驗證](https://testpioneer.readthedocs.io/en/latest/validation.html)
 - [執行 ID 與產物](https://testpioneer.readthedocs.io/en/latest/artifacts.html)
+- [合併報告](https://testpioneer.readthedocs.io/en/latest/reports.html)
 - [Runner](https://testpioneer.readthedocs.io/en/latest/runners.html)
 - [步驟類型](https://testpioneer.readthedocs.io/en/latest/step-types.html)
 - [Docker](https://testpioneer.readthedocs.io/en/latest/docker.html)

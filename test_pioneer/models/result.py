@@ -49,6 +49,30 @@ class Artifact:
         return {"path": self.path, "kind": self.kind, "size": self.size}
 
 
+@dataclass(frozen=True)
+class CaseResult:
+    """One test that a runner recorded in its own report."""
+
+    name: str
+    status: Status
+    message: str | None = None
+
+    def to_dict(self) -> dict[str, object]:
+        """Return the JSON form."""
+        return {"name": self.name, "status": self.status.value, "message": self.message}
+
+
+def count_by_status(statuses: Iterable[Status]) -> dict[str, int]:
+    """Count statuses into ``{"passed": n, "failed": n, "error": n, "cancelled": n, "total": n}``."""
+    counts = {status.value: 0 for status in Status}
+    total = 0
+    for status in statuses:
+        counts[status.value] += 1
+        total += 1
+    counts["total"] = total
+    return counts
+
+
 @dataclass
 class RunnerResult:  # pylint: disable=too-many-instance-attributes  # one field per report key
     """One runner execution: a ``run`` or ``run_folder`` step, or one entry of ``parallel_run``."""
@@ -65,6 +89,7 @@ class RunnerResult:  # pylint: disable=too-many-instance-attributes  # one field
     artifact_dir: str | None = None
     report: str | None = None
     artifacts: list[Artifact] = field(default_factory=list)
+    cases: list[CaseResult] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, object]:
         """Return the JSON form."""
@@ -81,6 +106,7 @@ class RunnerResult:  # pylint: disable=too-many-instance-attributes  # one field
             "artifact_dir": self.artifact_dir,
             "report": self.report,
             "artifacts": [item.to_dict() for item in self.artifacts],
+            "cases": [case.to_dict() for case in self.cases],
         }
 
 
@@ -124,14 +150,15 @@ class RunResult:  # pylint: disable=too-many-instance-attributes  # one field pe
     steps: list[StepResult] = field(default_factory=list)
     runners: list[RunnerResult] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
+    reports: list[str] = field(default_factory=list)
 
     def summary(self) -> dict[str, int]:
         """Count the runner executions by status, plus their total."""
-        counts = {status.value: 0 for status in Status}
-        for runner in self.runners:
-            counts[runner.status.value] += 1
-        counts["total"] = len(self.runners)
-        return counts
+        return count_by_status(runner.status for runner in self.runners)
+
+    def case_summary(self) -> dict[str, int]:
+        """Count the tests that the runners recorded in their own reports."""
+        return count_by_status(case.status for runner in self.runners for case in runner.cases)
 
     def to_dict(self) -> dict[str, object]:
         """Return the JSON form written to the manifest and the merged report."""
@@ -146,7 +173,9 @@ class RunResult:  # pylint: disable=too-many-instance-attributes  # one field pe
             "message": self.message,
             "artifact_dir": self.artifact_dir,
             "summary": self.summary(),
+            "cases": self.case_summary(),
             "steps": [step.to_dict() for step in self.steps],
             "runners": [runner.to_dict() for runner in self.runners],
             "warnings": list(self.warnings),
+            "reports": list(self.reports),
         }

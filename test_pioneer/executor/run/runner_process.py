@@ -21,6 +21,19 @@ from test_pioneer.logging.loggin_instance import test_pioneer_logger
 from test_pioneer.models.result import Status
 
 
+@dataclass(frozen=True)
+class RunnerRequest:
+    """One entry of a ``parallel_run`` step: a runner, its script, its position and its artifacts.
+
+    ``script`` and ``artifacts`` are kept as the workflow wrote them.
+    """
+
+    runner: str
+    script: str
+    part: int
+    artifacts: object = None
+
+
 @dataclass(eq=False)
 class RunnerProcess:
     """A started runner process with its log files and its entry in the run result."""
@@ -107,12 +120,12 @@ def _spawn(commands: list[str], environment: Mapping[str, str] | None = None,
         commands, stdout=stdout, stderr=stderr, env=environment)
 
 
-def start_runner_process(commands: list[str], runner: str, script: str, part: int) -> RunnerProcess:
-    """Start a runner; ``part`` numbers it within its step. Raises ``OSError`` if it cannot start."""
+def start_runner_process(commands: list[str], request: RunnerRequest) -> RunnerProcess:
+    """Start the runner of ``request`` with ``commands``. Raises ``OSError`` if it cannot start."""
     session = current_session()
     if session is None:
         return RunnerProcess(_spawn(commands))
-    invocation = session.begin(runner, script, part)
+    invocation = session.begin(request.runner, request.script, request.part, request.artifacts)
     handles, echoes = _open_logs(invocation.directory)
     try:
         process = _spawn(commands, {**os.environ, **invocation.environment}, handles)

@@ -10,6 +10,7 @@ from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from test_pioneer.artifacts.collect import pattern_refusal
 from test_pioneer.logging.loggin_instance import test_pioneer_logger
 from test_pioneer.models.diagnostic import Diagnostic, Severity, YamlPath, format_path
 from test_pioneer.runner.registry import OPTIONAL_RUNNERS, RUNNER_PACKAGES
@@ -167,10 +168,20 @@ class _Linter:  # pylint: disable=too-few-public-methods  # one entry point over
     def _lint_run(self, step: _Step) -> None:
         self._check_runner(step.data.get("with"), step.at("with"))
         self._check_path(step.text("run"), step.at("run"), folder=False)
+        self._check_patterns(step.data.get("artifacts"), step.at("artifacts"))
 
     def _lint_run_folder(self, step: _Step) -> None:
         self._check_runner(step.data.get("with"), step.at("with"))
         self._check_path(step.text("run_folder"), step.at("run_folder"), folder=True)
+        self._check_patterns(step.data.get("artifacts"), step.at("artifacts"))
+
+    def _check_patterns(self, patterns: object, path: YamlPath) -> None:
+        """Warn about an artifact pattern that would be refused when the workflow runs."""
+        for index, pattern in enumerate(patterns if isinstance(patterns, list) else ()):
+            refusal = pattern_refusal(pattern) if isinstance(pattern, str) and pattern else None
+            if refusal is not None:
+                self._warning("artifact-pattern", f"artifact pattern '{pattern}' is not used: {refusal}",
+                              path + (index,))
 
     def _lint_parallel_run(self, step: _Step) -> None:
         block = step.data.get("parallel_run")
@@ -184,11 +195,22 @@ class _Linter:  # pylint: disable=too-few-public-methods  # one entry point over
             self._error("runners-scripts-mismatch",
                         f"'runners' has {len(runners)} entries and 'scripts' has {len(scripts)}; "
                         "they are paired one to one", step.at("parallel_run"), on_key=True)
+        self._lint_parallel_artifacts(step, block.get("artifacts"), len(scripts))
         for index, runner in enumerate(runners):
             self._check_runner(runner, step.at("parallel_run", "runners", index))
         for index, script in enumerate(scripts):
             if isinstance(script, str) and script:
                 self._check_path(script, step.at("parallel_run", "scripts", index), folder=False)
+
+    def _lint_parallel_artifacts(self, step: _Step, artifacts: object, scripts: int) -> None:
+        if not isinstance(artifacts, list):
+            return
+        if len(artifacts) != scripts:
+            self._error("artifacts-scripts-mismatch",
+                        f"'artifacts' has {len(artifacts)} entries and 'scripts' has {scripts}; "
+                        "each script has its own list of patterns", step.at("parallel_run", "artifacts"), on_key=True)
+        for index, patterns in enumerate(artifacts):
+            self._check_patterns(patterns, step.at("parallel_run", "artifacts", index))
 
     def _lint_open_program(self, step: _Step) -> None:
         name = step.text("name")

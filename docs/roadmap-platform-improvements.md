@@ -253,12 +253,12 @@ Keep the existing English/Traditional Chinese/Simplified Chinese README structur
 
 ### Phase 3 — Report normalization
 
-- [ ] Define normalized TestPioneer result model.
-- [ ] Implement runner report adapters.
-- [ ] Implement merge service.
-- [ ] Generate JSON + HTML reports.
-- [ ] Add JUnit output if useful for CI consumers.
-- [ ] Add integration tests with multiple runners.
+- [x] Define normalized TestPioneer result model.
+- [x] Implement runner report adapters.
+- [x] Implement merge service.
+- [x] Generate JSON + HTML reports.
+- [x] Add JUnit output if useful for CI consumers.
+- [x] Add integration tests with multiple runners.
 
 ### Phase 4 — YAML editor / UI
 

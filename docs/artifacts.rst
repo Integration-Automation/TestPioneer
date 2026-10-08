@@ -37,6 +37,7 @@ Artifact Directory
            01-run_api_test/          one directory per runner execution
              stdout.log
              stderr.log
+             collected/              files the step declared with artifacts:
              ...                     files the runner wrote itself
          web-runner/
            02-parallel_tests-1/      entry 1 of a parallel_run step
@@ -113,6 +114,9 @@ Each runner execution receives two environment variables:
 A runner writes its reports, screenshots, videos and traces there. It must not rely on its
 working directory, which stays the one TestPioneer was started in.
 
+A step can also name the files its runner writes, with ``artifacts:``; they are copied into
+``collected/`` when the runner ends. See :doc:`reports`.
+
 A runner that does not read the variables yet is still covered:
 
 - **Sub-processes** (``parallel_run``): standard output and standard error go to ``stdout.log``
@@ -177,6 +181,10 @@ data:
 ``artifact_dir``. ``exit_code`` is ``null`` for an in-process call. ``kind`` is ``log``,
 ``report``, ``screenshot``, ``video``, ``trace`` or ``other``, chosen by file extension.
 
+The result also holds the tests each runner recorded in its own report (``cases``), the raw
+report they came from (``report``) and the consolidated report files (``reports``); these are
+described in :doc:`reports`.
+
 .. list-table::
    :header-rows: 1
    :widths: 15 85
@@ -186,8 +194,8 @@ data:
    * - ``passed``
      - Finished without a problem.
    * - ``failed``
-     - Ran to the end and reported a failure: a runner process exited with a non-zero code, or a
-       step returned a failure.
+     - Ran to the end and reported a failure: a runner process exited with a non-zero code, the
+       runner's own report holds a failed test, or a step returned a failure.
    * - ``error``
      - Could not be completed: a script or runner that does not exist, a process that could not
        be started, an exception.
@@ -212,8 +220,9 @@ the tests. It prints one line, for example::
 .. note::
 
    The runner packages exit with status 0 when one of the actions in a script fails; only a
-   script that cannot be read or is malformed makes them exit with 1. A run is therefore marked
-   ``failed`` by an exit code only in those cases.
+   script that cannot be read or is malformed makes them exit with 1. A failed action is found
+   in the runner's own report instead: have the script write one and declare it with
+   ``artifacts:``, as described in :doc:`reports`.
 
 Compatibility
 -------------
@@ -224,7 +233,7 @@ Compatibility
   step and the run ``failed``.
 - ``execute_yaml`` used to return ``None`` and now returns the result. It raises the same
   exceptions as before.
-- New files appear only under ``artifacts_path``, and by default only for a run that did not
-  pass. ``keep_artifacts: never`` turns them off.
+- New files appear under ``artifacts_path``, by default only for a run that did not pass
+  (``keep_artifacts: never`` turns them off), and under ``report_path`` (:doc:`reports`).
 - A step handler that is called directly, outside ``execute_yaml``, records nothing and starts
   its processes exactly as before.

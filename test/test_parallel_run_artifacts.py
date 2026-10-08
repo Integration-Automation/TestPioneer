@@ -12,6 +12,7 @@ from test_pioneer import RunOptions, execute_yaml
 from test_pioneer.executor.run import parallel_run as parallel_run_module
 from test_pioneer.executor.run.parallel_run import parallel_run
 from test_pioneer.models.result import Status
+from test_pioneer.runner import registry
 from test_pioneer.runner.adapter import ModuleRunner
 
 FAKE_RUNNER = '''
@@ -40,8 +41,8 @@ def fake_runner(tmp_path_factory, monkeypatch):
     (package / "__init__.py").write_text("", encoding="utf-8")
     (package / "__main__.py").write_text(FAKE_RUNNER, encoding="utf-8")
     monkeypatch.setenv("PYTHONPATH", str(package.parent))
-    monkeypatch.setattr(parallel_run_module, "RUNNERS", {
-        **parallel_run_module.RUNNERS, "fake-runner": ModuleRunner("fake-runner", "fake_runner")})
+    monkeypatch.setattr(registry, "RUNNERS", {
+        **registry.RUNNERS, "fake-runner": ModuleRunner("fake-runner", "fake_runner")})
     monkeypatch.setitem(parallel_run_module._BASE_RUNNER_COMMANDS, "fake-runner", "fake_runner")
 
 
@@ -74,7 +75,7 @@ class TestOneFailsOneSucceeds:
         assert (good.runner, good.step, good.status, good.exit_code, good.message) == (
             "fake-runner", "together", Status.PASSED, 0, None)
         assert (bad.status, bad.exit_code, bad.message) == (Status.FAILED, 3, "exit code 3")
-        assert good.script == str(Path("good.json").resolve())
+        assert (good.script, bad.script) == ("good.json", "bad.json")
         assert bad.duration_ms >= 0 and bad.started_at <= bad.finished_at
 
     def test_the_step_and_the_run_fail_but_later_steps_still_run(self, result):
