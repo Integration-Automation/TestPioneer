@@ -41,6 +41,10 @@ class TestCleanWorkflows:
     @pytest.mark.parametrize("workflow", [
         "docker_gui_test/test_run_multi_time.yml",
         "docker_non_gui_test/test_run_multi_time.yml",
+        "test/unit_test/run_multi_time/test_run_multi_time.yml",
+        "test/unit_test/run_folder/test_run_folder.yml",
+        "test/unit_test/parallel_run/test_parallel_run.yml",
+        "test/unit_test/download_file/download_file.yml",
     ])
     def test_bundled_sample_and_its_scripts_have_no_problem(self, workflow):
         result = lint_yaml(str(REPO_ROOT / workflow), options=LintOptions(base_dir=REPO_ROOT))

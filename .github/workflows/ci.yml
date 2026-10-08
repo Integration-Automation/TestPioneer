@@ -39,7 +39,14 @@ jobs:
           pip install -e .
 
       - name: Validate the bundled workflows
-        run: python -m test_pioneer validate docker_gui_test/test_run_multi_time.yml docker_non_gui_test/test_run_multi_time.yml
+        run: >
+          python -m test_pioneer validate
+          docker_gui_test/test_run_multi_time.yml
+          docker_non_gui_test/test_run_multi_time.yml
+          test/unit_test/run_multi_time/test_run_multi_time.yml
+          test/unit_test/run_folder/test_run_folder.yml
+          test/unit_test/parallel_run/test_parallel_run.yml
+          test/unit_test/download_file/download_file.yml
 
       - name: Run unit tests
         run: python -m pytest test/ --ignore=test/unit_test -v --tb=short --junitxml=test-results.xml
@@ -87,13 +94,6 @@ jobs:
 
       - name: Test parallel run
         run: python ./test/unit_test/parallel_run/test_parallel_run.py
-
-      - name: Upload test video
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: test-video-py${{ matrix.python-version }}
-          path: test_video.mp4
 
       - name: Upload log file
         if: always()

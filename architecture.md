@@ -45,7 +45,7 @@ that result, and one consolidated report (JSON, HTML, optional JUnit XML) is wri
 | `test_pioneer/project/` | `create_template_dir` scaffolding (default parent `.TestPioneer`), templates in `template/template.py` |
 | `test_pioneer/logging/loggin_instance.py` | `test_pioneer_logger`, `TestPioneerHandler`, `step_log_check`, and `set_step_log_sink`, through which the run session receives every step message whether or not `pioneer_log` is set |
 | `test_pioneer/utils/` | `exception/` (exceptions and tags), `package/check.py` (`is_installed`) |
-| `test/` | pytest suite. `test/unit_test/` holds example YAML scenarios and manual scripts, excluded by `addopts = "--ignore=test/unit_test"` |
+| `test/` | pytest suite. `test/unit_test/` holds the sample workflows that CI's integration job executes, excluded from pytest by `addopts = "--ignore=test/unit_test"`. They need no browser, display or external service except one small download: a page from `site/` is served with `http.server` and tested with the API, load and file runners. Each `test_*.py` there exits 1 when its run does not pass; what the runners write goes to `output/` |
 | `scripts/dev_release.py` | Release helper for the dev channel (stdlib only): picks the next `test_pioneer_dev` version from PyPI and tells whether the built wheel differs from the newest published one |
 | `Dockerfile_GUI`, `Dockerfile_NonGUI`, `docker_gui_test/`, `docker_non_gui_test/`, `docker_*_requirements.txt` | Container images: the default build is the base image, `--target selftest` adds the bundled sample YAML/JSON and runs it |
 | `docs/` | Sphinx docs (`getting-started.rst`, `api-reference.rst`, `docker.rst`, `changelog.rst`) |

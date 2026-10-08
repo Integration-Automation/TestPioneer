@@ -1,0 +1,15 @@
+[
+  [
+    "FA_create_dir",
+    {
+      "dir_path": "test/unit_test/output/run_folder"
+    }
+  ],
+  [
+    "FA_create_file",
+    {
+      "file_path": "test/unit_test/output/run_folder/created.txt",
+      "content": "created by file-runner"
+    }
+  ]
+]
