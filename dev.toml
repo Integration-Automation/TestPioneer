@@ -1,5 +1,6 @@
-# Rename to build stable version
-# This is stable version
+# The dev channel, test_pioneer_dev. The publish-dev job of .github/workflows/ci.yml builds it by
+# writing this file to pyproject.toml (scripts/dev_release.py). The version below is a floor: CI publishes
+# one patch above the newest release on PyPI and commits nothing back.
 [build-system]
 requires = ["setuptools>=82.0.1"]
 build-backend = "setuptools.build_meta"
@@ -14,11 +15,15 @@ description = "Test framework for CI/CD"
 requires-python = ">=3.10"
 license-files = ["LICENSE"]
 dependencies = ["je_web_runner",
-    "je_load_density", "je_api_testka", "je-mail-thunder",
+    "je_load_density", "je_api_testka",
     "automation-file", "psutil", "pyyaml"
 ]
 classifiers = [
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Development Status :: 2 - Pre-Alpha",
     "Environment :: Win32 (MS Windows)",
     "Environment :: MacOS X",
@@ -29,6 +34,7 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/Integration-Automation/TestPioneer"
 Code = "https://github.com/Integration-Automation/TestPioneer"
+Documentation = "https://testpioneer.readthedocs.io/"
 
 [project.readme]
 file = "README.md"

@@ -32,6 +32,15 @@ class TestOpenProgram:
         assert mock_ep.redirect_stdout == "stdout.log"
         assert mock_ep.redirect_stderr == "stderr.log"
 
+    @patch("test_pioneer.executor.program.external_program.ExecuteProcess")
+    def test_a_name_that_is_still_open_is_not_opened_again(self, mock_ep_class):
+        first = mock_ep_class.return_value
+        assert open_program({"open_program": "server.exe"}, name="server") is True
+        assert open_program({"open_program": "other.exe"}, name="server") is False
+        # The first program keeps its name, so it can still be closed.
+        assert process_manager_instance.process_dict["server"] is first
+        first.start_process.assert_called_once_with("server.exe")
+
     def test_non_string_program_returns_false(self):
         result = open_program({"open_program": 123}, name="test")
         assert result is False

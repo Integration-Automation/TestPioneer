@@ -58,6 +58,30 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261008-17 | 2026-10-08 | The runner pull requests for native support are open | #artifacts #decision | [2026-10](2026-10.md) |
+| U-20261008-16 | 2026-10-08 | Runner survey: LoadDensity already fails its CLI, ActionCore needs no change | #docs #artifacts | [2026-10](2026-10.md) |
+| U-20261008-15 | 2026-10-08 | What native artifact support means for a runner | #decision #artifacts #docs | [2026-10](2026-10.md) |
+| U-20261008-14 | 2026-10-08 | validate reads a workflow from standard input | #feature #cli #validation | [2026-10](2026-10.md) |
+| U-20261008-13 | 2026-10-08 | Run output stays on by default | #decision #artifacts #report | [2026-10](2026-10.md) |
+| U-20261008-12 | 2026-10-08 | JUnit timestamps are plain UTC date-times | #feature #report | [2026-10](2026-10.md) |
+| U-20261008-11 | 2026-10-08 | An artifacts pattern the runner satisfied itself is not a warning | #feature #artifacts | [2026-10](2026-10.md) |
+| U-20261008-10 | 2026-10-08 | je-mail-thunder is no longer a dependency | #done #decision #deps | [2026-10](2026-10.md) |
+| U-20261008-09 | 2026-10-08 | A record is counted only for the in-process call that produced it | #done #bugfix #report | [2026-10](2026-10.md) |
+| U-20261008-08 | 2026-10-08 | A workflow can run twice in one process: step names are unique per run | #done #bugfix | [2026-10](2026-10.md) |
+| U-20261008-07 | 2026-10-08 | The sample workflows run real scripts and CI fails when they fail | #done #ci #tests | [2026-10](2026-10.md) |
+| U-20261008-06 | 2026-10-08 | A download that fails now fails its step | #bugfix #steps | [2026-10](2026-10.md) |
+| U-20261008-05 | 2026-10-08 | README and Getting Started are one complete, tested example | #done #docs | [2026-10](2026-10.md) |
+| U-20261008-04 | 2026-10-08 | SonarCloud and Codacy findings of PR #32 resolved | #ci #security | [2026-10](2026-10.md) |
+| U-20261008-03 | 2026-10-08 | Runner reports are read and merged into one report | #done #feature #report | [2026-10](2026-10.md) |
+| U-20261008-02 | 2026-10-08 | Runs have an ID, a result and kept failure artifacts | #done #feature #artifacts | [2026-10](2026-10.md) |
+| U-20261008-01 | 2026-10-08 | Workflows are validated without running: schema, lint rules, CLI | #done #feature #validation | [2026-10](2026-10.md) |
+| U-20261001-05 | 2026-10-01 | The publish jobs build with the locked setuptools instead of downloading the newest | #ci #security #X-13 | [2026-10](2026-10.md) |
+| U-20261001-04 | 2026-10-01 | Dependabot watches the hash-locked requirements; a guard keeps the publish jobs on them | #ci #security #X-13 | [2026-10](2026-10.md) |
+| U-20261001-03 | 2026-10-01 | The sdist carries no tests | #done #packaging #X-13 | [2026-10](2026-10.md) |
+| U-20261001-02 | 2026-10-01 | CI publishes test_pioneer_dev from the dev branch | #release #ci #X-13 | [2026-10](2026-10.md) |
+| U-20261001-01 | 2026-10-01 | Every workflow job has a timeout | #ci #tests | [2026-10](2026-10.md) |
+| U-20260925-02 | 2026-09-25 | CI and classifiers cover Python 3.13 and 3.14 | #ci #packaging #tests | [2026-09](2026-09.md) |
+| U-20260925-01 | 2026-09-25 | Dependabot waits 7 days before proposing a new release | #ci #security #deps | [2026-09](2026-09.md) |
 | U-20260924-02 | 2026-09-24 | Keep checkout credentials only in the job that pushes | #ci #security | [2026-09](2026-09.md) |
 | U-20260924-01 | 2026-09-24 | Move CI to Node 24 actions pinned by commit | #ci #security #deps | [2026-09](2026-09.md) |
 | U-20260923-06 | 2026-09-23 | Release 0.1.34 | #done #release | [2026-09](2026-09.md) |
@@ -74,4 +98,5 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-09.md](2026-09.md) | 2026-09 | 11 |
+| [2026-10.md](2026-10.md) | 2026-10 | 22 |
+| [2026-09.md](2026-09.md) | 2026-09 | 13 |

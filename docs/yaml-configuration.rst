@@ -11,6 +11,10 @@ File Structure
 
    pioneer_log: "test_pioneer.log"       # Optional: log file path
    recording_path: "test_video"          # Optional: video recording output (requires GUI extras)
+   artifacts_path: "artifacts"           # Optional: where a run keeps its artifacts
+   keep_artifacts: on_failure            # Optional: on_failure, always or never
+   report_path: "report"                 # Optional: where the consolidated report is written
+   report_formats: [json, html]          # Optional: json, html, junit; [] for no report
    jobs:
      steps:
        - name: step_name
@@ -32,6 +36,21 @@ Top-Level Keys
    * - ``recording_path``
      - No
      - Path for video recording output (without extension). Requires ``test_pioneer[gui]``.
+   * - ``artifacts_path``
+     - No
+     - Directory that receives ``<run-id>/`` with the artifacts of a run. Defaults to
+       ``artifacts``. See :doc:`artifacts`.
+   * - ``keep_artifacts``
+     - No
+     - ``on_failure`` (default) keeps the artifacts of what did not pass, ``always`` keeps
+       everything, ``never`` keeps nothing.
+   * - ``report_path``
+     - No
+     - Directory of the consolidated report. Defaults to ``report``. See :doc:`reports`.
+   * - ``report_formats``
+     - No
+     - List out of ``json``, ``html`` and ``junit``. Defaults to ``[json, html]``; an empty list
+       writes no report.
    * - ``jobs``
      - Yes
      - Container for the ``steps`` list.
@@ -74,11 +93,14 @@ key is present (``run``, ``wait``, ``open_url``, etc.).
 Rules
 -----
 
-- Every step **must** have a unique ``name``.
+- Every step **must** have a ``name`` that no other step of the same workflow has.
 - Duplicate step names cause execution to abort.
 - Steps are executed sequentially in the order they appear, except for
   ``parallel_run`` which launches sub-processes concurrently.
 - If any step fails, execution stops immediately.
+
+These rules, the key names and the value types can be checked without executing the
+workflow: see :doc:`validation`.
 
 Full Example
 ------------

@@ -81,6 +81,18 @@ def open_program(step: dict, name: str, enable_logging: bool = False) -> bool:
         )
         redirect_stderr = stderr_path
 
+    # A program opened under this name by an earlier run is still registered: starting another
+    # one would leave the first without a name to close it by.
+    # 先前的執行以同名開啟的程式仍在註冊中：再開一個會讓第一個失去可用來關閉它的名稱。
+    if name in process_manager_instance.process_dict:
+        step_log_check(
+            enable_logging=enable_logging,
+            logger=test_pioneer_logger,
+            level="error",
+            message=f"A program named {name} is already open"
+        )
+        return False
+
     # Create and register process
     # 建立並註冊程序
     execute_process = ExecuteProcess()

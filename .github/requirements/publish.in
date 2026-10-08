@@ -1,4 +1,10 @@
-# Build and upload tooling for publish.yml; regenerate publish.txt with
-# uv pip compile .github/requirements/publish.in --universal --python-version 3.10 --generate-hashes --only-binary :all: -o .github/requirements/publish.txt
+# Build and upload tooling for the jobs that hold the PyPI token: `publish` in publish.yml and
+# `publish-dev` in ci.yml. Regenerate publish.txt with
+# uv pip compile .github/requirements/publish.in --universal --python-version 3.10 --generate-hashes --only-binary :all: --exclude-newer 2026-09-24 -o .github/requirements/publish.txt
+# --exclude-newer keeps the 7-day wait Dependabot applies: move the date when regenerating.
 build
 twine
+# The build backend. The jobs run `python -m build --no-isolation`, so the backend is this locked
+# one and not whatever is newest on PyPI when the job runs. It must satisfy `build-system.requires`
+# in pyproject.toml and dev.toml.
+setuptools

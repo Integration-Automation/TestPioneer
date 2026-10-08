@@ -15,10 +15,11 @@ jobs:
   unit-test:
     name: Unit Tests (Python ${{ matrix.python-version }})
     runs-on: windows-latest
+    timeout-minutes: 15  # about 3x the slowest recent run, at least 15
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -30,11 +31,22 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      # jsonschema is the reference validator that the built-in schema validator is compared with.
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip wheel
-          pip install pytest
+          pip install pytest jsonschema
           pip install -e .
+
+      - name: Validate the bundled workflows
+        run: >
+          python -m test_pioneer validate
+          docker_gui_test/test_run_multi_time.yml
+          docker_non_gui_test/test_run_multi_time.yml
+          test/unit_test/run_multi_time/test_run_multi_time.yml
+          test/unit_test/run_folder/test_run_folder.yml
+          test/unit_test/parallel_run/test_parallel_run.yml
+          test/unit_test/download_file/download_file.yml
 
       - name: Run unit tests
         run: python -m pytest test/ --ignore=test/unit_test -v --tb=short --junitxml=test-results.xml
@@ -49,11 +61,12 @@ jobs:
   integration-test:
     name: Integration Tests (Python ${{ matrix.python-version }})
     runs-on: windows-latest
+    timeout-minutes: 15  # about 3x the slowest recent run, at least 15
     needs: unit-test
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -82,16 +95,76 @@ jobs:
       - name: Test parallel run
         run: python ./test/unit_test/parallel_run/test_parallel_run.py
 
-      - name: Upload test video
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: test-video-py${{ matrix.python-version }}
-          path: test_video.mp4
-
       - name: Upload log file
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: test-log-py${{ matrix.python-version }}
           path: test_pioneer.log
+
+      # The consolidated report of the last workflow, and the artifacts of every run that did not pass.
+      - name: Upload TestPioneer report and artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: testpioneer-report-py${{ matrix.python-version }}
+          path: |
+            report/
+            artifacts/
+
+  publish-dev:
+    # The dev channel. A push to dev that passes the tests is built from dev.toml and uploaded when
+    # it is still the tip of dev and ships something the newest test_pioneer_dev does not.
+    # scripts/dev_release.py picks the version from PyPI, so nothing is committed back.
+    # This workflow also runs for main; the condition below keeps this job off it.
+    name: Publish test_pioneer_dev to PyPI
+    needs: [unit-test, integration-test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15  # about 3x the slowest recent run, at least 15
+    concurrency:
+      group: publish-dev
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Install build tooling
+        run: |
+          python -m pip install --require-hashes --only-binary :all: -r .github/requirements/publish.txt
+
+      - name: Write pyproject.toml from dev.toml with the next version
+        run: python scripts/dev_release.py prepare
+
+      # --no-isolation: the backend is the setuptools locked in publish.txt, not a fresh download.
+      - name: Build distribution
+        run: python -m build --no-isolation
+
+      - name: Verify distribution metadata
+        run: python -m twine check dist/*
+
+      - name: Compare with the newest published wheel
+        id: compare
+        run: python scripts/dev_release.py changed dist
+
+      # A run that finishes after a newer push would otherwise publish older code as the newest release.
+      - name: Check that this commit is still the tip of dev
+        id: tip
+        run: |
+          tip="$(git ls-remote origin refs/heads/dev | cut -f1)"
+          if [ "$tip" = "$GITHUB_SHA" ]; then current=true; else current=false; fi
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to PyPI
+        if: steps.compare.outputs.changed == 'true' && steps.tip.outputs.current == 'true'
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: python -m twine upload --non-interactive dist/*
