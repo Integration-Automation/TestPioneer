@@ -93,7 +93,7 @@ key is present (``run``, ``wait``, ``open_url``, etc.).
 Rules
 -----
 
-- Every step **must** have a unique ``name``.
+- Every step **must** have a ``name`` that no other step of the same workflow has.
 - Duplicate step names cause execution to abort.
 - Steps are executed sequentially in the order they appear, except for
   ``parallel_run`` which launches sub-processes concurrently.

@@ -55,6 +55,10 @@ What Behaves Differently
 - **A download that fails now fails its step.** A ``download_file`` step used to be reported as
   done even when nothing was downloaded, and the workflow went on. It now stops there, like any
   other failed step.
+- **Step names are unique per workflow, not per process.** A second ``execute_yaml`` call in
+  the same Python process used to stop with "job name duplicated" when it reused a step name of
+  the first. It now runs. A program that an earlier call left open can still be closed by its
+  name, and ``open_program`` refuses to start another one under a name that is still open.
 - **Runner processes get two more environment variables**, ``TEST_PIONEER_RUN_ID`` and
   ``TEST_PIONEER_ARTIFACT_DIR``.
 - **The console output of** ``parallel_run`` **runners** is still shown, now copied from log files

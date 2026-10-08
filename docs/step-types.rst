@@ -207,6 +207,9 @@ later using ``close_program``.
      - No
      - File path to redirect standard error.
 
+The step fails when a program opened under the same name, by this or an earlier ``execute_yaml``
+call in the same process, has not been closed yet.
+
 close_program
 -------------
 

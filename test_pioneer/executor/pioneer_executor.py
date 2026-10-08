@@ -61,6 +61,9 @@ def _load_yaml(stream: str, yaml_type: str) -> dict:
 
 def _validate_steps(steps: list, enable_logging: bool) -> bool:
     """Validate step names for duplicates. Returns True if valid."""
+    # Names are unique within one workflow. The names of an earlier execute_yaml call in this
+    # process do not count; a program it left open stays in process_dict and can still be closed.
+    process_manager_instance.name_set.clear()
     for step in steps:
         if step.get("name") is None:
             step_log_check(

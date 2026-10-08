@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261008-08 | 2026-10-08 | A workflow can run twice in one process: step names are unique per run | #done #bugfix | [2026-10](2026-10.md) |
 | U-20261008-07 | 2026-10-08 | The sample workflows run real scripts and CI fails when they fail | #done #ci #tests | [2026-10](2026-10.md) |
 | U-20261008-06 | 2026-10-08 | A download that fails now fails its step | #bugfix #steps | [2026-10](2026-10.md) |
 | U-20261008-05 | 2026-10-08 | README and Getting Started are one complete, tested example | #done #docs | [2026-10](2026-10.md) |
@@ -88,5 +89,5 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-10.md](2026-10.md) | 2026-10 | 12 |
+| [2026-10.md](2026-10.md) | 2026-10 | 13 |
 | [2026-09.md](2026-09.md) | 2026-09 | 13 |
