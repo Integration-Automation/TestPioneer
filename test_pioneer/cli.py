@@ -10,7 +10,6 @@ workflow or its options name for artifacts and reports.
 from __future__ import annotations
 
 import argparse
-import dataclasses
 import json
 import sys
 from collections.abc import Sequence
@@ -122,7 +121,7 @@ def _lint_stdin(options: LintOptions) -> ValidationResult:
         problem = Diagnostic(Severity.ERROR, "yaml-unreadable", f"standard input is not UTF-8: {error}",
                              source="yaml")
         return ValidationResult((problem,), STDIN_NAME)
-    return dataclasses.replace(lint_yaml(text, "String", options), source=STDIN_NAME)
+    return ValidationResult(lint_yaml(text, "String", options).diagnostics, STDIN_NAME)
 
 
 def _validate(args: argparse.Namespace) -> int:
