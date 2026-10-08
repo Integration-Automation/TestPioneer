@@ -262,6 +262,10 @@ Keep the existing English/Traditional Chinese/Simplified Chinese README structur
 
 ### Phase 4 — YAML editor / UI
 
+The engine side of this phase is in place: `load_yaml()`, `validate_yaml()`, `lint_yaml()` and
+`get_yaml_schema()`, `validate --format json`, the published schema, the run result and the report
+files. The editor and the workspace themselves are built in PyBreeze (`progress.md` #9).
+
 - [ ] Build YAML editor around the schema.
 - [ ] Add completion and inline diagnostics.
 - [ ] Add run controls/status.
@@ -271,12 +275,12 @@ Keep the existing English/Traditional Chinese/Simplified Chinese README structur
 
 ### Phase 5 — Documentation
 
-- [ ] Replace the README quick-start with a complete workflow.
-- [ ] Document schema/linter.
-- [ ] Document artifact directory and runner contract.
-- [ ] Document merged report format.
-- [ ] Add migration/compatibility notes.
-- [ ] Synchronize Traditional Chinese and Simplified Chinese README content.
+- [x] Replace the README quick-start with a complete workflow.
+- [x] Document schema/linter.
+- [x] Document artifact directory and runner contract.
+- [x] Document merged report format.
+- [x] Add migration/compatibility notes.
+- [x] Synchronize Traditional Chinese and Simplified Chinese README content.
 
 ## Testing strategy
 

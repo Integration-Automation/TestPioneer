@@ -8,7 +8,6 @@ Cross-repo and workspace items live in `D:\Codes\progress.md` (relevant here: X-
 
 - **#3** [DECIDE] `je-mail-thunder` is a declared dependency but nothing in `test_pioneer/` uses it: drop it or wire up mailing reports (workspace X-14).
 - **#9** Platform roadmap, phase 4 (PR #32, `docs/roadmap-platform-improvements.md` §1 and §2): the YAML-aware editor and the run/report workspace. The UI belongs in PyBreeze; this repository offers it `validate --format json`, the schema, the run result and the report files (`architecture.md` §6).
-- **#10** Platform roadmap, phase 5 (§6): one complete end-to-end README example in all three languages, the artifact and report documentation, and migration notes.
 - **#11** [DECIDE] The sample workflows under `test/unit_test/` do not run what they name, so the CI integration jobs pass without executing a script. `python -m test_pioneer validate` reports each case:
   - `download_file/download_file.yml` gives `file_name` where the step reads `file_path`, so the step is rejected. With the key corrected, every CI run would download a 512 MB file from a bare IP address; pick another URL first.
   - `run_multi_time/` and `run_folder/` name their scripts with a leading `/`, which resolves from the filesystem root (the fault fixed for the Docker samples in U-20260923-04).

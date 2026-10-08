@@ -17,4 +17,5 @@ and Load testing through pluggable runners.
    step-types
    docker
    api-reference
+   migration
    changelog
