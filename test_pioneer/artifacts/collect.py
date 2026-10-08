@@ -68,12 +68,22 @@ def _copy_new(base: Path, pattern: str, destination: Path, since: float) -> int:
     return copied
 
 
+def _written_by_the_runner(destination: Path, pattern: str) -> bool:
+    """True when the runner itself put what ``pattern`` names into its artifact directory.
+
+    A runner that reads ``TEST_PIONEER_ARTIFACT_DIR`` resolves a relative report name there, so
+    the same pattern that used to match below the working directory matches below ``destination``.
+    """
+    return any(True for _match in destination.glob(pattern))
+
+
 def collect_files(patterns: Sequence[str], destination: Path, since: float) -> list[str]:
     """Copy what ``patterns`` match below the working directory into ``destination/collected``.
 
     ``since`` is the wall-clock time the runner started. The return value lists what went wrong,
     as warnings: a refused pattern, a pattern that matched nothing new, a file that could not be
-    copied. Nothing is raised.
+    copied. A pattern that the runner satisfied inside ``destination`` itself is not a problem.
+    Nothing is raised.
     """
     warnings: list[str] = []
     base = Path.cwd()
@@ -83,7 +93,7 @@ def collect_files(patterns: Sequence[str], destination: Path, since: float) -> l
             warnings.append(f"artifact pattern {pattern!r} is not used: {refusal}")
             continue
         try:
-            if _copy_new(base, pattern, destination, since) == 0:
+            if _copy_new(base, pattern, destination, since) == 0 and not _written_by_the_runner(destination, pattern):
                 warnings.append(f"artifact pattern {pattern!r} matched no file written by this runner")
         except (OSError, ValueError) as error:
             warnings.append(f"artifact pattern {pattern!r} could not be collected: {error}")

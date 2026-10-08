@@ -107,7 +107,9 @@ Rules of ``artifacts``:
   script runs.
 
 A runner that reads ``TEST_PIONEER_ARTIFACT_DIR`` and writes its report there needs no
-``artifacts`` entry.
+``artifacts`` entry. An entry that is left in place does no harm: a pattern that the runner
+satisfied inside its own artifact directory is not reported as unmatched, so one workflow works
+with runner versions of both kinds.
 
 Reading a Runner's Report
 -------------------------

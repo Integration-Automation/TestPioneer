@@ -89,6 +89,13 @@ class TestCollect:
         assert collect_files(["absent/*.json"], runner_dir, NOW) == [
             "artifact pattern 'absent/*.json' matched no file written by this runner"]
 
+    def test_a_pattern_the_runner_satisfied_in_its_own_directory_is_not_a_warning(self, runner_dir):
+        # A runner that reads TEST_PIONEER_ARTIFACT_DIR writes "reports/api_x" below that directory.
+        (runner_dir / "reports").mkdir()
+        (runner_dir / "reports" / "api_x_success.json").write_text("{}", encoding="utf-8")
+        assert collect_files(["reports/api_*.json"], runner_dir, NOW) == []
+        assert not (runner_dir / "collected").exists()
+
     def test_a_refused_pattern_is_a_warning_and_copies_nothing(self, runner_dir, tmp_path):
         outside = tmp_path.parent / "outside_collect.json"
         outside.write_text("{}", encoding="utf-8")
