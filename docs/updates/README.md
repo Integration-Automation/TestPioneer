@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261008-17 | 2026-10-08 | The runner pull requests for native support are open | #artifacts #decision | [2026-10](2026-10.md) |
 | U-20261008-16 | 2026-10-08 | Runner survey: LoadDensity already fails its CLI, ActionCore needs no change | #docs #artifacts | [2026-10](2026-10.md) |
 | U-20261008-15 | 2026-10-08 | What native artifact support means for a runner | #decision #artifacts #docs | [2026-10](2026-10.md) |
 | U-20261008-14 | 2026-10-08 | validate reads a workflow from standard input | #feature #cli #validation | [2026-10](2026-10.md) |
@@ -97,5 +98,5 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-10.md](2026-10.md) | 2026-10 | 21 |
+| [2026-10.md](2026-10.md) | 2026-10 | 22 |
 | [2026-09.md](2026-09.md) | 2026-09 | 13 |
