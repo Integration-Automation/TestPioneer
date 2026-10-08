@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261008-15 | 2026-10-08 | What native artifact support means for a runner | #decision #artifacts #docs | [2026-10](2026-10.md) |
 | U-20261008-14 | 2026-10-08 | validate reads a workflow from standard input | #feature #cli #validation | [2026-10](2026-10.md) |
 | U-20261008-13 | 2026-10-08 | Run output stays on by default | #decision #artifacts #report | [2026-10](2026-10.md) |
 | U-20261008-12 | 2026-10-08 | JUnit timestamps are plain UTC date-times | #feature #report | [2026-10](2026-10.md) |
@@ -95,5 +96,5 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-10.md](2026-10.md) | 2026-10 | 19 |
+| [2026-10.md](2026-10.md) | 2026-10 | 20 |
 | [2026-09.md](2026-09.md) | 2026-09 | 13 |

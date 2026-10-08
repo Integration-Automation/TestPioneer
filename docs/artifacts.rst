@@ -117,6 +117,23 @@ working directory, which stays the one TestPioneer was started in.
 A step can also name the files its runner writes, with ``artifacts:``; they are copied into
 ``collected/`` when the runner ends. See :doc:`reports`.
 
+Native Support
+^^^^^^^^^^^^^^
+
+A runner supports the contract natively when, with ``TEST_PIONEER_ARTIFACT_DIR`` set, it does
+two things. Without the variable it behaves as it always has.
+
+1. A report, screenshot or other file it is asked to write under a relative name is written
+   below that directory, and missing folders below it are created. An absolute name is used as
+   it is.
+2. ``python -m <package> --execute_file <script>`` exits with status 1 when an action of the
+   script failed or a failure was recorded, and with 0 otherwise.
+
+TestPioneer is ready for such a runner: a non-zero exit status makes the execution ``failed``,
+its report is read from the artifact directory, and an ``artifacts:`` pattern left in the
+workflow is not reported as unmatched when the runner wrote the files itself. No runner package
+does either yet, and all of them exit with status 0 when an action fails.
+
 A runner that does not read the variables yet is still covered:
 
 - **Sub-processes** (``parallel_run``): standard output and standard error go to ``stdout.log``
