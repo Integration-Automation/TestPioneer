@@ -1,7 +1,7 @@
 # TestPioneer Architecture
 
 > Short overview for people and agents.
-> Last verified: 2026-10-08 against `658470c` plus the static-analysis fixes, on
+> Last verified: 2026-10-08 against `9951492` merged with `dev` (`a3afdcc`), on
 > `feature/testpioneer-platform-improvements`.
 
 ## 1. Purpose
@@ -46,6 +46,7 @@ that result, and one consolidated report (JSON, HTML, optional JUnit XML) is wri
 | `test_pioneer/logging/loggin_instance.py` | `test_pioneer_logger`, `TestPioneerHandler`, `step_log_check`, and `set_step_log_sink`, through which the run session receives every step message whether or not `pioneer_log` is set |
 | `test_pioneer/utils/` | `exception/` (exceptions and tags), `package/check.py` (`is_installed`) |
 | `test/` | pytest suite. `test/unit_test/` holds example YAML scenarios and manual scripts, excluded by `addopts = "--ignore=test/unit_test"` |
+| `scripts/dev_release.py` | Release helper for the dev channel (stdlib only): picks the next `test_pioneer_dev` version from PyPI and tells whether the built wheel differs from the newest published one |
 | `Dockerfile_GUI`, `Dockerfile_NonGUI`, `docker_gui_test/`, `docker_non_gui_test/`, `docker_*_requirements.txt` | Container images: the default build is the base image, `--target selftest` adds the bundled sample YAML/JSON and runs it |
 | `docs/` | Sphinx docs (`getting-started.rst`, `api-reference.rst`, `docker.rst`, `changelog.rst`) |
 
@@ -81,6 +82,18 @@ that result, and one consolidated report (JSON, HTML, optional JUnit XML) is wri
   - `run` and `run_folder` take an optional `artifacts` list of file patterns, and `parallel_run`
     one such list per script;
   - the same contract is published as a JSON Schema, `schema/testpioneer.schema.json`.
+- **PyPI packages**: `test_pioneer` (stable) and `test_pioneer_dev` (dev channel), both published by CI.
+  - Stable: a push to `main` runs `publish.yml`, which bumps `pyproject.toml`, tags and uploads.
+  - Dev: the `publish-dev` job of `ci.yml` runs after `unit-test` and `integration-test` on a push
+    to `dev` (never on `main`, a pull request or the schedule). It builds from `dev.toml` and uploads
+    when the commit is still the tip of `dev` and the wheel differs from the newest published one.
+    `scripts/dev_release.py` takes the version from PyPI (newest release plus one patch), so nothing
+    is committed back and the version in `dev.toml` is only a floor.
+  - Both jobs install only the hash-locked `.github/requirements/publish.txt` and build with
+    `python -m build --no-isolation`, so the build backend is the locked `setuptools` too.
+  - Contents, the same for both: the wheel holds only the `test_pioneer/` package; the sdist adds
+    `LICENSE`, `README.md`, `pyproject.toml`, `MANIFEST.in` and the generated metadata. It carries no
+    tests, because `MANIFEST.in` prunes `test/` (`test/test_sdist_manifest.py` pins it).
 - There is no MCP server, LSP, socket server, pytest plugin or GUI of its own.
 
 ## 4. Main flows
@@ -281,7 +294,7 @@ the step and the run `failed`.
 
 - A step type, YAML key or `with:` runner tag is added, removed or renamed.
 - The CLI flags or commands, the facade in `test_pioneer/__init__.py`, or the packaging
-  (`pyproject.toml`, `dev.toml`) changes.
+  (`pyproject.toml`, `dev.toml`, `MANIFEST.in`) changes.
 - The schema version, the `validate --format json` output or a diagnostic code changes.
 - The artifact layout, the two environment variables, the keep policies or the fields of the run
   result change.

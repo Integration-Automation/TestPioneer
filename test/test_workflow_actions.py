@@ -69,6 +69,17 @@ def test_dependabot_keeps_pins_current_on_dev():
                for block in blocks)
 
 
+def test_dependabot_waits_a_week_before_proposing_a_release():
+    """Every Dependabot update block waits at least 7 days before proposing a release."""
+    # A compromised release is usually found and yanked within days. Dependabot's
+    # own default wait is 3 days, and zizmor's dependabot-cooldown audit asks
+    # for 7. The wait never delays security updates.
+    text = (_ROOT / ".github" / "dependabot.yml").read_text(encoding="utf-8")
+    blocks = re.split(r"^\s*-\s*package-ecosystem:", text, flags=re.MULTILINE)[1:]
+    days = [re.search(r"^\s*default-days:\s*(\d+)", block, re.MULTILINE) for block in blocks]
+    assert blocks and all(match and int(match.group(1)) >= 7 for match in days)
+
+
 def _checkout_steps(path: Path) -> list[tuple[int, str]]:
     """Return ``(line number, step text)`` for each ``actions/checkout`` step."""
     lines = path.read_text(encoding="utf-8").splitlines()
@@ -96,3 +107,99 @@ def test_every_checkout_decides_on_persisted_credentials(workflow):
     bad = [f"{workflow.name}:{number}" for number, step in _checkout_steps(workflow)
            if not re.search(r"^\s*persist-credentials:\s*(true|false)\b", step, re.MULTILINE)]
     assert bad == []
+
+
+_JOB_HEAD = re.compile(r"^  [A-Za-z0-9_-]+:\s*(#.*)?$")
+
+
+def _jobs(path: Path) -> list[tuple[str, str]]:
+    """Return ``(job id, job text)`` for each job under ``jobs:`` in a workflow."""
+    lines = path.read_text(encoding="utf-8").splitlines()
+    start = next(i for i, line in enumerate(lines) if re.match(r"^jobs:\s*(#.*)?$", line))
+    heads = [i for i in range(start + 1, len(lines)) if _JOB_HEAD.match(lines[i])]
+    ends = [*heads[1:], len(lines)]
+    return [(lines[i].strip().rstrip(":"), "\n".join(lines[i:end])) for i, end in zip(heads, ends)]
+
+
+@pytest.mark.parametrize("workflow", _WORKFLOWS, ids=lambda p: p.name)
+def test_every_job_has_a_timeout(workflow):
+    """Every job that runs on a runner sets timeout-minutes."""
+    # Without timeout-minutes a hung job runs for GitHub's default six hours.
+    # Each job sets about three times its slowest recent run, at least 15 minutes.
+    bad = [name for name, body in _jobs(workflow)
+           if "runs-on:" in body and not re.search(r"^\s*timeout-minutes:", body, re.MULTILINE)]
+    assert bad == []
+
+
+_PIP_INSTALL = re.compile(r"\bpip3?\s+install\b[^\n]*")
+_LOCKED_INSTALL = re.compile(
+    r"^pip3? install --require-hashes --only-binary :all: -r \.github/requirements/[\w.-]+\.txt$")
+
+
+def _token_jobs() -> list[tuple[str, str]]:
+    """Return ``(workflow:job, job text)`` for each job that is handed the PyPI token."""
+    return [(f"{workflow.name}:{name}", body) for workflow in _WORKFLOWS
+            for name, body in _jobs(workflow) if "secrets.PYPI_API_TOKEN" in body]
+
+
+def test_the_pypi_token_reaches_only_the_publish_jobs():
+    expected = ['ci.yml:publish-dev', 'publish.yml:publish']
+    assert [name for name, _body in _token_jobs()] == expected
+
+
+@pytest.mark.parametrize("name, body", _token_jobs(), ids=[name for name, _body in _token_jobs()])
+def test_a_job_with_the_pypi_token_installs_only_hash_locked_tooling(name, body):
+    # A tool resolved when the job runs could change between two releases and read the token.
+    installs = [match.group(0).strip() for match in _PIP_INSTALL.finditer(body)]
+    assert installs, name
+    unlocked = [command for command in installs if not _LOCKED_INSTALL.match(command)]
+    assert unlocked == [], name
+
+
+def test_dependabot_watches_the_hash_locked_requirements():
+    # From "/" Dependabot does not look as deep as .github/requirements, so the
+    # files CI installs with --require-hashes would never be updated.
+    text = (_ROOT / ".github" / "dependabot.yml").read_text(encoding="utf-8")
+    blocks = re.split(r"^\s*-\s*package-ecosystem:", text, flags=re.MULTILINE)[1:]
+    pip_block = next(block for block in blocks if block.split()[0].strip("\"'") == "pip")
+    watched = re.search(r'^\s*-\s*"/\.github/requirements"\s*$', pip_block, re.MULTILINE)
+    assert watched
+
+
+_BUILD = re.compile(r"\bpython -m build\b[^\n]*")
+_REQUIRES = re.compile(r"^requires\s*=\s*\[(?P<items>[^\]]*)\]", re.MULTILINE)
+_REQUIREMENT = re.compile(r"(?P<name>[A-Za-z0-9_.-]+)\s*(?:>=\s*(?P<floor>\d+(?:\.\d+)*))?")
+
+
+def _locked_version(package: str) -> tuple[int, ...]:
+    """Return the version ``publish.txt`` pins for ``package`` as a tuple of numbers."""
+    lock = (_ROOT / ".github" / "requirements" / "publish.txt").read_text(encoding="utf-8")
+    name = re.sub(r"[-_.]+", "-", package).lower()
+    pin = re.search(rf"^{re.escape(name)}==(\d+(?:\.\d+)*)\b", lock, re.MULTILINE)
+    assert pin, f"{package} is not pinned in publish.txt"
+    return tuple(int(part) for part in pin.group(1).split("."))
+
+
+@pytest.mark.parametrize("name, body", _token_jobs(), ids=[name for name, _body in _token_jobs()])
+def test_a_job_with_the_pypi_token_builds_with_the_locked_backend(name: str, body: str) -> None:
+    """Every ``python -m build`` in a job with the PyPI token carries ``--no-isolation``."""
+    # An isolated build downloads the newest setuptools each time, outside the lock.
+    builds = _BUILD.findall(body)
+    assert builds, name
+    assert [command for command in builds if "--no-isolation" not in command] == [], name
+
+
+@pytest.mark.parametrize("toml_name", ["pyproject.toml", "dev.toml"])
+def test_the_locked_backend_satisfies_build_system_requires(toml_name: str) -> None:
+    """Each ``build-system.requires`` entry is pinned in ``publish.txt`` at or above its floor."""
+    # --no-isolation checks the requirement instead of installing it, so a raised floor
+    # (Dependabot edits pyproject.toml) must come with a regenerated lock.
+    requires = _REQUIRES.search((_ROOT / toml_name).read_text(encoding="utf-8"))
+    assert requires, toml_name
+    items = re.findall(r'"([^"]+)"', requires.group("items"))
+    assert items, toml_name
+    for item in items:
+        requirement = _REQUIREMENT.fullmatch(item.strip())
+        assert requirement, f"{toml_name}: {item!r} is neither `name` nor `name>=version`"
+        floor = tuple(int(part) for part in (requirement.group("floor") or "0").split("."))
+        assert _locked_version(requirement.group("name")) >= floor, f"{toml_name}: {item}"

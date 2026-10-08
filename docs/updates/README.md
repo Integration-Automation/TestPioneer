@@ -63,6 +63,13 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 | U-20261008-03 | 2026-10-08 | Runner reports are read and merged into one report | #done #feature #report | [2026-10](2026-10.md) |
 | U-20261008-02 | 2026-10-08 | Runs have an ID, a result and kept failure artifacts | #done #feature #artifacts | [2026-10](2026-10.md) |
 | U-20261008-01 | 2026-10-08 | Workflows are validated without running: schema, lint rules, CLI | #done #feature #validation | [2026-10](2026-10.md) |
+| U-20261001-05 | 2026-10-01 | The publish jobs build with the locked setuptools instead of downloading the newest | #ci #security #X-13 | [2026-10](2026-10.md) |
+| U-20261001-04 | 2026-10-01 | Dependabot watches the hash-locked requirements; a guard keeps the publish jobs on them | #ci #security #X-13 | [2026-10](2026-10.md) |
+| U-20261001-03 | 2026-10-01 | The sdist carries no tests | #done #packaging #X-13 | [2026-10](2026-10.md) |
+| U-20261001-02 | 2026-10-01 | CI publishes test_pioneer_dev from the dev branch | #release #ci #X-13 | [2026-10](2026-10.md) |
+| U-20261001-01 | 2026-10-01 | Every workflow job has a timeout | #ci #tests | [2026-10](2026-10.md) |
+| U-20260925-02 | 2026-09-25 | CI and classifiers cover Python 3.13 and 3.14 | #ci #packaging #tests | [2026-09](2026-09.md) |
+| U-20260925-01 | 2026-09-25 | Dependabot waits 7 days before proposing a new release | #ci #security #deps | [2026-09](2026-09.md) |
 | U-20260924-02 | 2026-09-24 | Keep checkout credentials only in the job that pushes | #ci #security | [2026-09](2026-09.md) |
 | U-20260924-01 | 2026-09-24 | Move CI to Node 24 actions pinned by commit | #ci #security #deps | [2026-09](2026-09.md) |
 | U-20260923-06 | 2026-09-23 | Release 0.1.34 | #done #release | [2026-09](2026-09.md) |
@@ -79,5 +86,5 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-09.md](2026-09.md) | 2026-09 | 11 |
-| [2026-10.md](2026-10.md) | 2026-10 | 5 |
+| [2026-10.md](2026-10.md) | 2026-10 | 10 |
+| [2026-09.md](2026-09.md) | 2026-09 | 13 |
