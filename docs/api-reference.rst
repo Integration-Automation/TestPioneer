@@ -215,5 +215,5 @@ Command Line Interface
   See :doc:`artifacts` and :doc:`reports`.
 - ``validate [--format {text,json}] [--strict] [--base_dir DIR] [--no_file_check] files...`` --
   Check workflow files without executing them. Exits with status 1 when a file has an error.
-  See :doc:`validation`.
+  ``-`` in place of a file reads the workflow from standard input. See :doc:`validation`.
 - ``schema`` -- Print the workflow JSON Schema.

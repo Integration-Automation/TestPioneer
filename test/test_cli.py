@@ -1,4 +1,5 @@
 """Tests for test_pioneer.cli: the ``python -m test_pioneer`` command line."""
+import io
 import json
 import runpy
 import sys
@@ -80,6 +81,42 @@ class TestValidateCommand:
         with pytest.raises(SystemExit) as stopped:
             main(["validate"])
         assert stopped.value.code == 2
+
+
+class TestStandardInput:
+    def _feed(self, monkeypatch, data: bytes) -> None:
+        monkeypatch.setattr(sys, "stdin", io.TextIOWrapper(io.BytesIO(data), encoding="cp1252"))
+
+    def test_a_dash_reads_the_workflow_from_standard_input(self, monkeypatch, capsys):
+        self._feed(monkeypatch, INVALID.encode("utf-8"))
+        assert main(["validate", "-"]) == 1
+        assert capsys.readouterr().out.splitlines()[0] == (
+            "<stdin>:4:13: error: jobs.steps[0].wait: expected an integer, got a string [schema-type]")
+
+    def test_standard_input_is_read_as_utf8_whatever_the_console_encoding(self, monkeypatch, capsys):
+        text = "jobs:\n  steps:\n    - name: 步驟\n      wait: 1\n    - name: 步驟\n      wait: 1\n"
+        self._feed(monkeypatch, text.encode("utf-8"))
+        assert main(["validate", "--format", "json", "-"]) == 1
+        (entry,) = json.loads(capsys.readouterr().out)["files"]
+        assert entry["source"] == "<stdin>"
+        assert entry["diagnostics"][0]["message"] == "step name '步驟' is already used by jobs.steps[0]"
+
+    def test_scripts_are_looked_up_below_base_dir(self, tmp_path, monkeypatch, capsys):
+        (tmp_path / "cases").mkdir()
+        (tmp_path / "cases" / "a.json").write_text("[]", encoding="utf-8")
+        self._feed(monkeypatch, NEEDS_SCRIPT.encode("utf-8"))
+        assert main(["validate", "--strict", "--base_dir", str(tmp_path), "-"]) == 0
+        assert capsys.readouterr().out == "Checked 1 file(s): 0 error(s), 0 warning(s)\n"
+
+    def test_bytes_that_are_not_utf8_are_a_diagnostic(self, monkeypatch, capsys):
+        self._feed(monkeypatch, b"jobs: \xff\xfe\n")
+        assert main(["validate", "-"]) == 1
+        assert capsys.readouterr().out.startswith("<stdin>: error: <root>: standard input is not UTF-8")
+
+    def test_standard_input_and_files_can_be_checked_together(self, tmp_path, monkeypatch, capsys):
+        self._feed(monkeypatch, VALID.encode("utf-8"))
+        assert main(["validate", "-", _write(tmp_path, "bad.yml", INVALID)]) == 1
+        assert capsys.readouterr().out.splitlines()[-1] == "Checked 2 file(s): 1 error(s), 0 warning(s)"
 
 
 class TestJsonFormat:

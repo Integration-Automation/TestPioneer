@@ -1,7 +1,7 @@
 # TestPioneer Architecture
 
 > Short overview for people and agents.
-> Last verified: 2026-10-08 against `9951492` merged with `dev` (`a3afdcc`), on
+> Last verified: 2026-10-08 against `20eb1a2` plus the standard-input change, on
 > `feature/testpioneer-platform-improvements`.
 
 ## 1. Purpose
@@ -260,6 +260,8 @@ the step and the run `failed`.
   - `schema/testpioneer.schema.json`, at that path and under the `$id` URL it declares. Its
     `version` follows `SCHEMA_VERSION`: a minor bump adds something, a major bump is for a
     workflow that used to validate and no longer does;
+  - `python -m test_pioneer validate -` reads the workflow from standard input (UTF-8), for an
+    editor's unsaved buffer; its `source` is `<stdin>`;
   - `python -m test_pioneer validate --format json`: an object with `schema_version`, `ok` and
     `files[]`, each file with `source`, `ok`, `errors`, `warnings` and `diagnostics[]` of
     `severity`, `code`, `message`, `path`, `pointer`, `line`, `column`, `source`. Exit status 0,

@@ -41,7 +41,8 @@ and exits with status 1:
    * - Argument
      - Description
    * - ``files``
-     - One or more workflow files to check.
+     - One or more workflow files to check. ``-`` reads a workflow from standard input, as UTF-8;
+       it is reported under the name ``<stdin>``.
    * - ``--format {text,json}``
      - Output format. ``text`` (default) is shown above; ``json`` is described below.
    * - ``--strict``
@@ -182,6 +183,18 @@ JSON Output
 ``line`` and ``column`` start at 1 and are ``null`` when a problem has no position, as for a file
 that cannot be read. ``source`` is ``yaml``, ``schema`` or ``lint``. The top-level ``ok`` follows
 the exit status, so it is ``false`` for a warning under ``--strict``.
+
+Checking Text That Is Not Saved
+-------------------------------
+
+An editor can check the buffer in front of the user without writing it to disk:
+
+.. code-block:: bash
+
+   python -m test_pioneer validate --format json --base_dir path/to/project - < buffer.yml
+
+``--base_dir`` says where the scripts the workflow names are, since standard input has no
+location of its own. In the JSON output the file's ``source`` is ``<stdin>``.
 
 Python API
 ----------

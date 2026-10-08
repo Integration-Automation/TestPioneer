@@ -10,6 +10,7 @@ workflow or its options name for artifacts and reports.
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 import sys
 from collections.abc import Sequence
@@ -18,7 +19,7 @@ from pathlib import Path
 from test_pioneer.artifacts.context import KEEP_POLICIES
 from test_pioneer.artifacts.session import RunOptions
 from test_pioneer.executor.pioneer_executor import execute_yaml
-from test_pioneer.models.diagnostic import Diagnostic, ValidationResult, format_path
+from test_pioneer.models.diagnostic import Diagnostic, Severity, ValidationResult, format_path
 from test_pioneer.models.result import RunResult, Status
 from test_pioneer.report.formats import REPORT_FORMATS
 from test_pioneer.schema import SCHEMA_VERSION, get_yaml_schema
@@ -28,6 +29,9 @@ from test_pioneer.validation import LintOptions, lint_yaml
 EXIT_OK = 0
 EXIT_INVALID = 1
 EXIT_RUN_FAILED = 1
+# As a file argument of validate: read the workflow from standard input.
+STDIN = "-"
+STDIN_NAME = "<stdin>"
 
 
 def _report_formats(text: str) -> list[str]:
@@ -70,7 +74,8 @@ def build_parser() -> argparse.ArgumentParser:
         "validate", help="check workflow files without executing them",
         description="Check workflow files against the schema and the lint rules. Exits 1 on an error.",
     )
-    validate.add_argument("files", nargs="+", help="workflow YAML files to check")
+    validate.add_argument("files", nargs="+",
+                          help="workflow YAML files to check; - reads one from standard input (UTF-8)")
     validate.add_argument("--format", choices=("text", "json"), default="text", help="output format")
     validate.add_argument("--strict", action="store_true", help="treat warnings as errors")
     validate.add_argument("--base_dir", help="directory that script paths in the workflow are relative to "
@@ -94,7 +99,7 @@ def _print_text(results: Sequence[ValidationResult]) -> None:
         errors += len(result.errors)
         warnings += len(result.warnings)
         for item in result.diagnostics:
-            print(_format_line(result.source or "<string>", item))
+            print(_format_line(result.source or STDIN_NAME, item))
     print(f"Checked {len(results)} file(s): {errors} error(s), {warnings} warning(s)")
 
 
@@ -107,12 +112,26 @@ def _print_json(results: Sequence[ValidationResult], passed: bool) -> None:
     print(json.dumps(report, indent=2))
 
 
+def _lint_stdin(options: LintOptions) -> ValidationResult:
+    """Check the workflow on standard input: an editor's buffer that is not saved yet."""
+    binary = getattr(sys.stdin, "buffer", None)
+    try:
+        # Read as bytes where possible: the console's own encoding would garble UTF-8 text.
+        text = binary.read().decode("utf-8") if binary is not None else sys.stdin.read()
+    except UnicodeDecodeError as error:
+        problem = Diagnostic(Severity.ERROR, "yaml-unreadable", f"standard input is not UTF-8: {error}",
+                             source="yaml")
+        return ValidationResult((problem,), STDIN_NAME)
+    return dataclasses.replace(lint_yaml(text, "String", options), source=STDIN_NAME)
+
+
 def _validate(args: argparse.Namespace) -> int:
     options = LintOptions(
         base_dir=Path(args.base_dir) if args.base_dir else None,
         check_files=not args.no_file_check,
     )
-    results = [lint_yaml(path, options=options) for path in args.files]
+    results = [_lint_stdin(options) if path == STDIN else lint_yaml(path, options=options)
+               for path in args.files]
     passed = all(result.ok and not (args.strict and result.warnings) for result in results)
     if args.format == "json":
         _print_json(results, passed)

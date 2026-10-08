@@ -238,6 +238,8 @@ jobs:
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Integration-Automation/TestPioneer/main/schema/testpioneer.schema.json
 ```
 
+An editor can also check text that is not saved yet: `python -m test_pioneer validate --format json -` reads the workflow from standard input and prints its problems with line and column.
+
 A starter project is created with:
 
 ```python

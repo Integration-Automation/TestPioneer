@@ -238,6 +238,8 @@ jobs:
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Integration-Automation/TestPioneer/main/schema/testpioneer.schema.json
 ```
 
+编辑器也能检查尚未保存的内容：`python -m test_pioneer validate --format json -` 会从标准输入读取流程，并输出带有行号与列号的问题。
+
 创建起始项目：
 
 ```python
