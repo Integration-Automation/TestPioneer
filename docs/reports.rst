@@ -229,7 +229,8 @@ JUnit XML
    * - Element
      - Content
    * - ``<testsuite>``
-     - One per runner execution, named ``<runner>: <script>``.
+     - One per runner execution, named ``<runner>: <script>``. ``timestamp`` is its start in UTC,
+       to the second and without a zone suffix.
    * - ``<testcase>``
      - One per recorded test. A runner execution without a report is a single test named after
        its script.

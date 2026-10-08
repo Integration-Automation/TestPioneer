@@ -1,5 +1,6 @@
 """Tests for the consolidated report: JSON, HTML and JUnit XML."""
 import json
+from datetime import datetime
 from pathlib import Path
 from xml.etree import ElementTree  # nosec B405  # nosemgrep  # parses only XML written by this test
 
@@ -160,6 +161,14 @@ class TestJUnit:
         assert failed[0].tag == "failure"
         assert failed[0].get("message") == "status_code 500 != 200"
         assert len(passed) == 0
+
+    def test_the_timestamp_is_a_plain_utc_date_time(self):
+        root = ElementTree.fromstring(render_junit(_result()))
+        # Started at 2026-10-08T03:15:42.131Z: no fraction and no zone, as JUnit readers expect.
+        assert root[0].get("timestamp") == "2026-10-08T03:15:42"
+        assert datetime.fromisoformat(root[0].get("timestamp")).year == 2026
+        # The web runner of this result has no start time, so it has no timestamp either.
+        assert root[1].get("timestamp") is None
 
     def test_a_runner_without_a_report_is_one_test(self):
         web = ElementTree.fromstring(render_junit(_result()))[1]

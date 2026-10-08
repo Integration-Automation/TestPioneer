@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261008-12 | 2026-10-08 | JUnit timestamps are plain UTC date-times | #feature #report | [2026-10](2026-10.md) |
 | U-20261008-11 | 2026-10-08 | An artifacts pattern the runner satisfied itself is not a warning | #feature #artifacts | [2026-10](2026-10.md) |
 | U-20261008-10 | 2026-10-08 | je-mail-thunder is no longer a dependency | #done #decision #deps | [2026-10](2026-10.md) |
 | U-20261008-09 | 2026-10-08 | A record is counted only for the in-process call that produced it | #done #bugfix #report | [2026-10](2026-10.md) |
@@ -92,5 +93,5 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-10.md](2026-10.md) | 2026-10 | 16 |
+| [2026-10.md](2026-10.md) | 2026-10 | 17 |
 | [2026-09.md](2026-09.md) | 2026-09 | 13 |

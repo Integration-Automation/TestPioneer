@@ -17,6 +17,8 @@ _ALLOWED_RANGES = ((0x20, 0xD7FF), (0xE000, 0xFFFD), (0x10000, 0x10FFFF))
 # Every character outside them is invalid in XML 1.0, even escaped.
 _INVALID = re.compile(
     "[^\t\n\r" + "".join(f"{chr(first)}-{chr(last)}" for first, last in _ALLOWED_RANGES) + "]")
+# JUnit's timestamp is a date-time to the second with no zone; the result's times are UTC.
+_DATE_TIME = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}")
 # The element a status becomes inside a testcase; a passed test has none.
 _ELEMENTS = {Status.FAILED: "failure", Status.ERROR: "error", Status.CANCELLED: "skipped"}
 
@@ -31,6 +33,16 @@ def _text(value: object) -> str:
 
 def _seconds(milliseconds: int) -> str:
     return f"{milliseconds / 1000:.3f}"
+
+
+def _timestamp(moment: str) -> str:
+    """Return the ``timestamp`` attribute for a start time such as ``2026-10-08T03:15:42.131Z``.
+
+    The fraction and the ``Z`` are left out: several JUnit readers, among them
+    ``datetime.fromisoformat`` before Python 3.11, do not accept them. No start time, no attribute.
+    """
+    match = _DATE_TIME.match(moment)
+    return f' timestamp="{match.group(0)}"' if match else ""
 
 
 def _testcase(classname: str, case: Case) -> list[str]:
@@ -48,7 +60,7 @@ def _suite(name: str, classname: str, cases: list[Case], duration_ms: int, start
     lines = [(
         f'  <testsuite name="{_text(name)}" tests="{len(cases)}" failures="{counts[Status.FAILED]}"'
         f' errors="{counts[Status.ERROR]}" skipped="{counts[Status.CANCELLED]}"'
-        f' time="{_seconds(duration_ms)}" timestamp="{_text(started_at)}">'
+        f' time="{_seconds(duration_ms)}"{_timestamp(started_at)}>'
     )]
     for case in cases:
         lines += _testcase(classname, case)
