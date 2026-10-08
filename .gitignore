@@ -139,6 +139,16 @@ dmypy.json
 # Pycharm
 .idea/*
 
+# TestPioneer run output
+/artifacts/
+/report/
+
+# What the sample workflows under test/unit_test write
+/test/unit_test/output/*
+!/test/unit_test/output/.gitkeep
+/test_std.txt
+/test_err.txt
+
 # Driver
 **/.wdm/*
 /.claude/

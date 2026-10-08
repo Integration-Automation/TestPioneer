@@ -155,5 +155,5 @@ Workspace rule shared by every repository under `D:\Codes` (full text: `D:\Codes
 
 ## Dependencies
 
-Core: `je_web_runner`, `je_load_density`, `je_api_testka`, `je-mail-thunder`, `automation-file`, `psutil`, `pyyaml`
+Core: `je_web_runner`, `je_load_density`, `je_api_testka`, `automation-file`, `psutil`, `pyyaml`
 Optional GUI: `je_auto_control`

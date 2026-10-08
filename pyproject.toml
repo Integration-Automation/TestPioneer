@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "test_pioneer"
-version = "0.1.33"
+version = "0.1.37"
 authors = [
     { name = "JE-Chen", email = "jechenmailman@gmail.com" },
 ]
@@ -15,7 +15,7 @@ requires-python = ">=3.10"
 license-files = ["LICENSE"]
 dependencies = [
     "je_web_runner",
-    "je_load_density", "je_api_testka", "je-mail-thunder",
+    "je_load_density", "je_api_testka",
     "automation-file", "psutil", "pyyaml"
 ]
 classifiers = [
