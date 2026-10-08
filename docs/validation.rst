@@ -96,7 +96,7 @@ A **warning** depends on the machine the check runs on, or is a leftover that th
      - ``jobs``, ``steps``, a step ``name``, or ``runners``/``scripts`` of ``parallel_run`` is missing.
    * - ``schema-enum``
      - error
-     - A runner or a ``url_open_method`` is not one of the known values.
+     - A runner, a ``url_open_method`` or ``keep_artifacts`` is not one of the known values.
    * - ``schema-min-items``
      - error
      - ``steps``, ``runners`` or ``scripts`` is an empty list.

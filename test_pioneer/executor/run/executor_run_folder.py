@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+from test_pioneer.artifacts.session import in_process_runner
 from test_pioneer.executor.run.utils import select_with_runner
 from test_pioneer.logging.loggin_instance import step_log_check, test_pioneer_logger
 
@@ -71,5 +72,6 @@ def run_folder(step: dict, enable_logging: bool = False, mode: str = "run_folder
 
     # Execute runner with JSON files
     # 使用 runner 執行 JSON 檔案
-    execute_with([str(path) for path in sorted(json_files)])
+    with in_process_runner(runner=str(step.get("with")), script=folder_path):
+        execute_with([str(path) for path in sorted(json_files)])
     return True

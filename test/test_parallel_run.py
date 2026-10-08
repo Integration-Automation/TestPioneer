@@ -30,7 +30,7 @@ class TestParallelRun:
         result = parallel_run(step)
         assert result is False
 
-    @patch("test_pioneer.executor.run.parallel_run.subprocess.Popen")
+    @patch("test_pioneer.executor.run.runner_process.subprocess.Popen")
     @patch("test_pioneer.executor.run.parallel_run.is_installed", return_value=False)
     def test_script_not_found_skips(self, mock_installed, mock_popen, tmp_path):
         step = {
@@ -43,7 +43,7 @@ class TestParallelRun:
         assert result is True
         mock_popen.assert_not_called()
 
-    @patch("test_pioneer.executor.run.parallel_run.subprocess.Popen")
+    @patch("test_pioneer.executor.run.runner_process.subprocess.Popen")
     @patch("test_pioneer.executor.run.parallel_run.is_installed", return_value=False)
     def test_valid_parallel_run(self, mock_installed, mock_popen, tmp_path):
         script = tmp_path / "test.json"
@@ -82,7 +82,7 @@ class TestParallelRun:
         assert result is True  # Returns True after skipping unknown runner
 
 
-@patch("test_pioneer.executor.run.parallel_run.subprocess.Popen")
+@patch("test_pioneer.executor.run.runner_process.subprocess.Popen")
 @patch("test_pioneer.executor.run.parallel_run.is_installed", return_value=False)
 def test_file_runner_spawns_automation_file(mock_installed, mock_popen, tmp_path):
     script = tmp_path / "files.json"

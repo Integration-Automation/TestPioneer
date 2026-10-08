@@ -17,6 +17,20 @@
       "type": "string",
       "description": "Screen recording output path, without extension. Needs test_pioneer[gui]."
     },
+    "artifacts_path": {
+      "type": "string",
+      "description": "Directory that receives <run-id>/ with the artifacts of a run. Defaults to artifacts.",
+      "minLength": 1
+    },
+    "keep_artifacts": {
+      "type": "string",
+      "enum": [
+        "on_failure",
+        "always",
+        "never"
+      ],
+      "description": "What is kept when the run ends: only what failed (on_failure, the default), everything, or nothing."
+    },
     "jobs": {
       "type": "object",
       "description": "Container of the steps list.",

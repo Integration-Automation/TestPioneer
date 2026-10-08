@@ -16,6 +16,7 @@ A YAML-driven automation test framework for CI/CD pipelines, supporting GUI, Web
 - **YAML configuration** - Human-readable test workflows, easy to maintain and version control
 - **Workflow validation** - Check a workflow against a versioned JSON Schema and lint rules before anything runs
 - **Parallel execution** - Run multiple test scripts concurrently with different runners
+- **Run artifacts** - Every run has an ID; the output, exit code and files of each runner that fails are kept
 - **Video recording** - Built-in test session recording for debugging
 - **Process management** - Launch/terminate external programs with stdout/stderr redirection
 - **Cross-platform** - Windows, macOS, and Linux (Python 3.10+)
@@ -48,6 +49,14 @@ from test_pioneer import execute_yaml
 execute_yaml("path/to/test.yaml")
 ```
 
+### Run with a Result
+
+```bash
+python -m test_pioneer run path/to/test.yaml
+```
+
+Executes the workflow like `-e`, but exits with status 1 when the run did not pass, so a CI job fails with the tests. For a run that did not pass, `artifacts/<run-id>/` keeps each failed runner's `stdout.log`, `stderr.log` and the files it wrote, plus TestPioneer's own `execution.log` and a `manifest.json` with every step and runner. Use `--keep_artifacts always` to keep them for passing runs too. `execute_yaml()` returns the same result in Python.
+
 ### Validate a Workflow
 
 ```bash
@@ -77,6 +86,7 @@ Full documentation is available at **[testpioneer.readthedocs.io](https://testpi
 - [Getting Started](https://testpioneer.readthedocs.io/en/latest/getting-started.html)
 - [YAML Configuration](https://testpioneer.readthedocs.io/en/latest/yaml-configuration.html)
 - [Validation](https://testpioneer.readthedocs.io/en/latest/validation.html)
+- [Run IDs and Artifacts](https://testpioneer.readthedocs.io/en/latest/artifacts.html)
 - [Runners](https://testpioneer.readthedocs.io/en/latest/runners.html)
 - [Step Types](https://testpioneer.readthedocs.io/en/latest/step-types.html)
 - [Docker](https://testpioneer.readthedocs.io/en/latest/docker.html)

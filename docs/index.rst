@@ -11,6 +11,7 @@ and Load testing through pluggable runners.
    getting-started
    yaml-configuration
    validation
+   artifacts
    runners
    step-types
    docker

@@ -61,7 +61,8 @@ class TestPublishedSchema:
 class TestSchemaContent:
     def test_top_level_keys(self):
         schema = get_yaml_schema()
-        assert set(schema["properties"]) == {"pioneer_log", "recording_path", "jobs"}
+        assert set(schema["properties"]) == {
+            "pioneer_log", "recording_path", "artifacts_path", "keep_artifacts", "jobs"}
         assert schema["required"] == ["jobs"]
         assert schema["properties"]["jobs"]["required"] == ["steps"]
 

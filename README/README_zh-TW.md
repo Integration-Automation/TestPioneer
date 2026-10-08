@@ -16,6 +16,7 @@
 - **YAML 設定** - 人類可讀的測試流程，易於維護與版本控制
 - **流程驗證** - 執行前先以具版本的 JSON Schema 與 lint 規則檢查流程
 - **平行執行** - 使用不同 Runner 同時執行多個測試腳本
+- **執行產物** - 每次執行都有一個 ID；失敗的 Runner 其輸出、結束代碼與檔案都會保留
 - **影片錄製** - 內建測試過程錄影功能，方便除錯
 - **程序管理** - 啟動/終止外部程式，支援 stdout/stderr 重新導向
 - **跨平台** - 支援 Windows、macOS 及 Linux（Python 3.10+）
@@ -48,6 +49,14 @@ from test_pioneer import execute_yaml
 execute_yaml("path/to/test.yaml")
 ```
 
+### 依結果結束的執行
+
+```bash
+python -m test_pioneer run path/to/test.yaml
+```
+
+與 `-e` 一樣執行流程，但執行未通過時以狀態碼 1 結束，CI 工作會跟著測試一起失敗。未通過的執行會在 `artifacts/<run-id>/` 保留每個失敗 Runner 的 `stdout.log`、`stderr.log` 與它寫出的檔案，另外還有 TestPioneer 自己的 `execution.log`，以及列出每個步驟與 Runner 的 `manifest.json`。加上 `--keep_artifacts always` 則連通過的執行也保留。在 Python 中，`execute_yaml()` 會回傳相同的結果。
+
 ### 驗證流程
 
 ```bash
@@ -77,6 +86,7 @@ create_template_dir()
 - [快速開始](https://testpioneer.readthedocs.io/en/latest/getting-started.html)
 - [YAML 設定](https://testpioneer.readthedocs.io/en/latest/yaml-configuration.html)
 - [驗證](https://testpioneer.readthedocs.io/en/latest/validation.html)
+- [執行 ID 與產物](https://testpioneer.readthedocs.io/en/latest/artifacts.html)
 - [Runner](https://testpioneer.readthedocs.io/en/latest/runners.html)
 - [步驟類型](https://testpioneer.readthedocs.io/en/latest/step-types.html)
 - [Docker](https://testpioneer.readthedocs.io/en/latest/docker.html)

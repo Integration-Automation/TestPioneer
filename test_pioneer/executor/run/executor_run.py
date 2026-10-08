@@ -2,6 +2,7 @@ import json
 import os
 from pathlib import Path
 
+from test_pioneer.artifacts.session import in_process_runner
 from test_pioneer.executor.run.utils import select_with_runner
 from test_pioneer.logging.loggin_instance import step_log_check, test_pioneer_logger
 
@@ -71,5 +72,6 @@ def run(step: dict, enable_logging: bool = False) -> bool:
 
     # Execute with runner
     # 使用 runner 執行
-    execute_with(file_content)
+    with in_process_runner(runner=str(step.get("with")), script=file_path):
+        execute_with(file_content)
     return True

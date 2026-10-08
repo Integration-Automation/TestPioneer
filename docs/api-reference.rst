@@ -10,23 +10,41 @@ execute_yaml
 
 .. code-block:: python
 
-   from test_pioneer import execute_yaml
+   from test_pioneer import RunOptions, execute_yaml
 
-   execute_yaml(stream, yaml_type="File")
+   result = execute_yaml(stream, yaml_type="File", options=None)
 
-Execute a YAML test workflow.
+Execute a YAML test workflow and return what happened.
 
 **Parameters:**
 
 - ``stream`` (str) -- Path to a YAML file, or a YAML string.
 - ``yaml_type`` (str) -- ``"File"`` (default) to read from a file path, or ``"String"``
   to parse the stream as a YAML string directly.
+- ``options`` (RunOptions | None) -- ``RunOptions(run_id=None, artifacts_path=None,
+  keep_artifacts=None)``. A field left at ``None`` is read from the workflow
+  (``artifacts_path``, ``keep_artifacts``) and then defaulted; a run ID is generated.
+
+**Returns:** a ``RunResult`` (see :doc:`artifacts`) with these attributes:
+
+- ``run_id`` (str) and ``status`` (``Status.PASSED``, ``FAILED``, ``ERROR`` or ``CANCELLED``).
+- ``steps`` -- one ``StepResult`` per step: ``name``, ``action``, ``status``, ``message``, timing.
+- ``runners`` -- one ``RunnerResult`` per runner execution: ``runner``, ``script``, ``step``,
+  ``status``, ``exit_code``, ``message``, ``artifact_dir``, ``artifacts``, timing.
+- ``artifact_dir`` (str | None) -- the run's artifact directory when it was kept.
+- ``warnings`` -- problems with the artifacts that did not affect the run.
+- ``summary()`` and ``to_dict()`` -- counts by status, and the JSON form of the manifest.
 
 **Raises:**
 
 - ``YamlException`` -- If the YAML is invalid, missing ``jobs`` or ``steps``.
 - ``WrongInputException`` -- If ``yaml_type`` is not ``"File"`` or ``"String"``.
+- ``YamlException`` -- Also if ``artifacts_path`` or ``keep_artifacts`` has an invalid value.
+- ``WrongInputException`` -- Also if ``options.run_id`` is not a safe directory name.
 - ``ExecutorException`` -- If recording setup fails.
+
+An exception raised by a step still propagates, as before; the run is recorded as ``error``
+first.
 
 **Example:**
 
@@ -175,15 +193,20 @@ Command Line Interface
 .. code-block:: bash
 
    python -m test_pioneer -e <yaml_file>
+   python -m test_pioneer run <yaml_file>
    python -m test_pioneer validate <yaml_file>...
    python -m test_pioneer schema
 
 **Arguments:**
 
-- ``-e``, ``--execute_yaml`` -- Path to the YAML file to execute.
+- ``-e``, ``--execute_yaml`` -- Path to the YAML file to execute. The exit status is 0 unless an
+  exception is raised, whatever the steps did.
 
 **Commands:**
 
+- ``run [--run_id ID] [--artifacts_path DIR] [--keep_artifacts {on_failure,always,never}] file`` --
+  Execute a workflow, print a one-line summary, and exit with status 0 when the run passed and 1
+  when it did not. See :doc:`artifacts`.
 - ``validate [--format {text,json}] [--strict] [--base_dir DIR] [--no_file_check] files...`` --
   Check workflow files without executing them. Exits with status 1 when a file has an error.
   See :doc:`validation`.

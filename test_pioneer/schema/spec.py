@@ -9,6 +9,8 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from types import MappingProxyType
 
+from test_pioneer.artifacts.context import DEFAULT_ARTIFACTS_PATH, KEEP_ON_FAILURE, KEEP_POLICIES
+
 JsonSchema = dict[str, object]
 
 RUNNER_REF = "#/$defs/runner"
@@ -44,6 +46,14 @@ TOP_LEVEL_FIELDS: Mapping[str, Mapping[str, object]] = MappingProxyType({
     "recording_path": _text(
         "Screen recording output path, without extension. Needs test_pioneer[gui].",
         allow_empty=True),
+    "artifacts_path": _text(
+        f"Directory that receives <run-id>/ with the artifacts of a run. Defaults to {DEFAULT_ARTIFACTS_PATH}."),
+    "keep_artifacts": {
+        "type": "string",
+        "enum": list(KEEP_POLICIES),
+        "description": f"What is kept when the run ends: only what failed ({KEEP_ON_FAILURE}, the default), "
+                       "everything, or nothing.",
+    },
 })
 
 # Keys a step reads besides its name and its action key.

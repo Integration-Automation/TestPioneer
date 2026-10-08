@@ -1,7 +1,8 @@
 """Command line of ``python -m test_pioneer``.
 
-``-e/--execute_yaml`` executes a workflow. ``validate`` checks workflow files without executing
-them and ``schema`` prints the workflow JSON Schema.
+``-e/--execute_yaml`` executes a workflow and always exits 0 unless it raises, as it always has.
+``run`` executes one and exits with its result. ``validate`` checks workflow files without
+executing them and ``schema`` prints the workflow JSON Schema.
 """
 from __future__ import annotations
 
@@ -11,14 +12,18 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
+from test_pioneer.artifacts.context import KEEP_POLICIES
+from test_pioneer.artifacts.session import RunOptions
 from test_pioneer.executor.pioneer_executor import execute_yaml
 from test_pioneer.models.diagnostic import Diagnostic, ValidationResult, format_path
+from test_pioneer.models.result import RunResult, Status
 from test_pioneer.schema import SCHEMA_VERSION, get_yaml_schema
 from test_pioneer.utils.exception.exceptions import ExecutorException
 from test_pioneer.validation import LintOptions, lint_yaml
 
 EXIT_OK = 0
 EXIT_INVALID = 1
+EXIT_RUN_FAILED = 1
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -28,7 +33,18 @@ def build_parser() -> argparse.ArgumentParser:
         description="TestPioneer - Automation test framework for CI/CD",
     )
     parser.add_argument("-e", "--execute_yaml", type=str, help="choose yaml file to execute")
-    commands = parser.add_subparsers(dest="command", metavar="{validate,schema}")
+    commands = parser.add_subparsers(dest="command", metavar="{run,validate,schema}")
+
+    run = commands.add_parser(
+        "run", help="execute a workflow and exit with its result",
+        description="Execute a workflow. Exits 0 when the run passed and 1 when it did not.",
+    )
+    run.add_argument("file", help="workflow YAML file to execute")
+    run.add_argument("--run_id", help="name of this run (default: generated)")
+    run.add_argument("--artifacts_path", help="directory that receives <run-id>/ "
+                                              "(default: the workflow's artifacts_path, else artifacts)")
+    run.add_argument("--keep_artifacts", choices=KEEP_POLICIES,
+                     help="what is kept when the run ends (default: the workflow's keep_artifacts, else on_failure)")
 
     validate = commands.add_parser(
         "validate", help="check workflow files without executing them",
@@ -86,6 +102,28 @@ def _validate(args: argparse.Namespace) -> int:
     return EXIT_OK if passed else EXIT_INVALID
 
 
+def _run_summary(result: RunResult) -> str:
+    """Describe a finished run in one line."""
+    counts = result.summary()
+    line = f"Run {result.run_id} {result.status.value}: {counts['total']} runner execution(s)"
+    by_status = [f"{counts[status.value]} {status.value}" for status in Status if counts[status.value]]
+    if by_status:
+        line += f" ({', '.join(by_status)})"
+    if result.artifact_dir is not None:
+        line += f"; artifacts: {result.artifact_dir}"
+    return line
+
+
+def _run(args: argparse.Namespace) -> int:
+    options = RunOptions(run_id=args.run_id, artifacts_path=args.artifacts_path,
+                         keep_artifacts=args.keep_artifacts)
+    result = execute_yaml(args.file, options=options)
+    for warning in result.warnings:
+        print(f"warning: {warning}", file=sys.stderr)
+    print(_run_summary(result))
+    return EXIT_OK if result.status is Status.PASSED else EXIT_RUN_FAILED
+
+
 def _schema(args: argparse.Namespace) -> int:
     text = json.dumps(get_yaml_schema(), indent=2) + "\n"
     if args.output:
@@ -106,6 +144,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     """Run the command line and return the process exit code."""
     args = build_parser().parse_args(argv)
     _keep_output_printable()
+    if args.command == "run":
+        return _run(args)
     if args.command == "validate":
         return _validate(args)
     if args.command == "schema":

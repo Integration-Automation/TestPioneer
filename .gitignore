@@ -139,6 +139,10 @@ dmypy.json
 # Pycharm
 .idea/*
 
+# TestPioneer run output
+/artifacts/
+/report/
+
 # Driver
 **/.wdm/*
 /.claude/

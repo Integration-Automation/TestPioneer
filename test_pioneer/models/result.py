@@ -119,6 +119,8 @@ class RunResult:  # pylint: disable=too-many-instance-attributes  # one field pe
     finished_at: str = ""
     duration_ms: int = 0
     workflow: str | None = None
+    message: str | None = None
+    artifact_dir: str | None = None
     steps: list[StepResult] = field(default_factory=list)
     runners: list[RunnerResult] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
@@ -141,6 +143,8 @@ class RunResult:  # pylint: disable=too-many-instance-attributes  # one field pe
             "finished_at": self.finished_at,
             "duration_ms": self.duration_ms,
             "workflow": self.workflow,
+            "message": self.message,
+            "artifact_dir": self.artifact_dir,
             "summary": self.summary(),
             "steps": [step.to_dict() for step in self.steps],
             "runners": [runner.to_dict() for runner in self.runners],

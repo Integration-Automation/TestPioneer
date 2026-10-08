@@ -11,6 +11,8 @@ File Structure
 
    pioneer_log: "test_pioneer.log"       # Optional: log file path
    recording_path: "test_video"          # Optional: video recording output (requires GUI extras)
+   artifacts_path: "artifacts"           # Optional: where a run keeps its artifacts
+   keep_artifacts: on_failure            # Optional: on_failure, always or never
    jobs:
      steps:
        - name: step_name
@@ -32,6 +34,14 @@ Top-Level Keys
    * - ``recording_path``
      - No
      - Path for video recording output (without extension). Requires ``test_pioneer[gui]``.
+   * - ``artifacts_path``
+     - No
+     - Directory that receives ``<run-id>/`` with the artifacts of a run. Defaults to
+       ``artifacts``. See :doc:`artifacts`.
+   * - ``keep_artifacts``
+     - No
+     - ``on_failure`` (default) keeps the artifacts of what did not pass, ``always`` keeps
+       everything, ``never`` keeps nothing.
    * - ``jobs``
      - Yes
      - Container for the ``steps`` list.

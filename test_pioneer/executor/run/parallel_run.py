@@ -1,13 +1,15 @@
-import subprocess
+"""The ``parallel_run`` step: start one runner sub-process per script and wait for all of them."""
 import sys
 import shutil
 import time
 from pathlib import Path
 from typing import List, Optional, Tuple
 
+from test_pioneer.artifacts.session import current_session
 from test_pioneer.executor.run.process_manager import process_manager
+from test_pioneer.executor.run.runner_process import RunnerProcess, start_runner_process
 from test_pioneer.logging.loggin_instance import step_log_check, test_pioneer_logger
-from test_pioneer.runner.registry import GUI_RUNNER, OPTIONAL_RUNNERS, RUNNER_PACKAGES
+from test_pioneer.runner.registry import GUI_RUNNER, OPTIONAL_RUNNERS, RUNNER_PACKAGES, RUNNERS
 from test_pioneer.utils.package.check import is_installed
 
 
@@ -71,20 +73,27 @@ def _resolve_executor_path(executor_path: Optional[str]) -> Optional[str]:
 
 def _start_single_process(
     executor_path: str,
-    runner_package: str,
+    runner: str,
     script_path: Path,
+    part: int,
     enable_logging: bool,
-) -> None:
-    commands = [
-        executor_path,
-        "-m", runner_package,
-        "--execute_file", str(script_path),
-    ]
+) -> Optional[RunnerProcess]:
+    commands = RUNNERS[runner].command(executor_path, script_path)
     try:
-        current_process = subprocess.Popen(commands)
-        process_manager.process_list.append(current_process)
+        child = start_runner_process(commands, runner, str(script_path), part)
     except OSError as error:
         _log_error(enable_logging, f"Failed to start process for {script_path}: {error}")
+        return None
+    process_manager.process_list.append(child.process)
+    return child
+
+
+def _reject(runner: str, script: str, message: str, enable_logging: bool) -> None:
+    """Log why a script is skipped and, inside a run, record it as a runner error."""
+    _log_error(enable_logging, message)
+    session = current_session()
+    if session is not None:
+        session.reject(str(runner), str(script), message)
 
 
 def _start_processes(
@@ -93,26 +102,42 @@ def _start_processes(
     runner_command_dict: dict,
     executor_path: str,
     enable_logging: bool,
-) -> None:
-    for runner, script in zip(runner_list, script_path_list):
-        runner_package = runner_command_dict.get(runner)
-        if not runner_package:
-            _log_error(enable_logging, f"Unknown runner type: {runner}")
+) -> List[RunnerProcess]:
+    children: List[RunnerProcess] = []
+    for part, (runner, script) in enumerate(zip(runner_list, script_path_list), start=1):
+        if not runner_command_dict.get(runner):
+            _reject(runner, script, f"Unknown runner type: {runner}", enable_logging)
             continue
 
         script_path = Path(script).resolve()
         if not script_path.is_file():
-            _log_error(enable_logging, f"Script file does not exist: {script}")
+            _reject(runner, script, f"Script file does not exist: {script}", enable_logging)
             continue
 
-        _start_single_process(executor_path, runner_package, script_path, enable_logging)
+        child = _start_single_process(executor_path, runner, script_path, part, enable_logging)
+        if child is not None:
+            children.append(child)
+    return children
 
 
-def _wait_for_processes() -> None:
-    while process_manager.process_list:
-        process_manager.cleanup_finished()
-        if process_manager.process_list:
-            time.sleep(0.1)
+def _wait_for_processes(children: List[RunnerProcess]) -> None:
+    pending = list(children)
+    try:
+        while pending:
+            for child in pending:
+                child.pump()
+            finished = [child for child in pending if child.finished()]
+            for child in finished:
+                process_manager.remove_process(child.process)
+                child.close()
+            pending = [child for child in pending if child not in finished]
+            if pending:
+                time.sleep(0.1)
+    finally:
+        # Only non-empty when the wait was interrupted: do not leave runners behind.
+        for child in pending:
+            process_manager.remove_process(child.process)
+            child.cancel()
 
 
 def parallel_run(step: dict, enable_logging: bool = False) -> bool:
@@ -143,12 +168,12 @@ def parallel_run(step: dict, enable_logging: bool = False) -> bool:
 
     executor_path = _resolve_executor_path(executor_path)
 
-    _start_processes(
+    children = _start_processes(
         runner_list,
         script_path_list,
         runner_command_dict,
         executor_path,
         enable_logging,
     )
-    _wait_for_processes()
+    _wait_for_processes(children)
     return True

@@ -244,12 +244,12 @@ Keep the existing English/Traditional Chinese/Simplified Chinese README structur
 
 ### Phase 2 — Runner execution and artifacts
 
-- [ ] Introduce run ID and artifact directory management.
-- [ ] Extend parallel runner process launch with artifact context.
-- [ ] Capture process metadata and exit codes.
-- [ ] Define runner adapter interface.
-- [ ] Add artifact collection tests.
-- [ ] Verify failure artifacts are preserved.
+- [x] Introduce run ID and artifact directory management.
+- [x] Extend parallel runner process launch with artifact context.
+- [x] Capture process metadata and exit codes.
+- [x] Define runner adapter interface.
+- [x] Add artifact collection tests.
+- [x] Verify failure artifacts are preserved.
 
 ### Phase 3 — Report normalization
 

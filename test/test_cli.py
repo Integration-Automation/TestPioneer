@@ -1,7 +1,9 @@
 """Tests for test_pioneer.cli: the ``python -m test_pioneer`` command line."""
 import json
+import os
 import subprocess
 import sys
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -11,9 +13,12 @@ from test_pioneer.cli import main
 from test_pioneer.schema import SCHEMA_VERSION
 from test_pioneer.utils.exception.exceptions import ExecutorException
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
 VALID = "jobs:\n  steps:\n    - name: pause\n      wait: 1\n"
 INVALID = "jobs:\n  steps:\n    - name: pause\n      wait: soon\n"
 WARNING_ONLY = "jobs:\n  steps:\n    - name: pause\n      wait: 1\n      note: later\n"
+RUNNABLE = "jobs:\n  steps:\n    - name: pause\n      wait: 0\n"
+NOT_RUNNABLE = "jobs:\n  steps:\n    - name: page\n      open_url: https://example.com\n      url_open_method: nope\n"
 NEEDS_SCRIPT = "jobs:\n  steps:\n    - name: api\n      run: cases/a.json\n      with: api-runner\n"
 
 
@@ -122,7 +127,37 @@ class TestSchemaCommand:
         assert json.loads(target.read_text(encoding="utf-8")) == get_yaml_schema()
 
 
+class TestRunCommand:
+    def test_a_passing_run_exits_zero_and_is_summarised(self, tmp_path, capsys):
+        assert main(["run", "--run_id", "r1", _write(tmp_path, "ok.yml", RUNNABLE)]) == 0
+        assert capsys.readouterr().out == "Run r1 passed: 0 runner execution(s)\n"
+
+    def test_a_failed_run_exits_one_and_names_its_artifacts(self, tmp_path, capsys):
+        assert main(["run", "--run_id", "r1", _write(tmp_path, "bad.yml", NOT_RUNNABLE)]) == 1
+        expected = Path("artifacts") / "r1"
+        assert capsys.readouterr().out == f"Run r1 failed: 0 runner execution(s); artifacts: {expected}\n"
+        assert (expected / "testpioneer" / "manifest.json").is_file()
+
+    def test_artifact_options_are_passed_on(self, tmp_path):
+        path = _write(tmp_path, "ok.yml", RUNNABLE)
+        assert main(["run", "--run_id", "r1", "--artifacts_path", "kept", "--keep_artifacts", "always", path]) == 0
+        assert (Path("kept") / "r1" / "testpioneer" / "execution.log").is_file()
+
+    def test_an_unknown_keep_policy_is_a_usage_error(self, tmp_path):
+        with pytest.raises(SystemExit) as stopped:
+            main(["run", "--keep_artifacts", "sometimes", _write(tmp_path, "ok.yml", RUNNABLE)])
+        assert stopped.value.code == 2
+
+    def test_a_warning_goes_to_standard_error(self, tmp_path, capsys):
+        Path("blocked").write_text("a file where the directory should go", encoding="utf-8")
+        assert main(["run", "--artifacts_path", "blocked", _write(tmp_path, "ok.yml", RUNNABLE)]) == 0
+        assert capsys.readouterr().err.startswith("warning: artifacts are not collected:")
+
+
 class TestExecuteFlag:
+    def test_execute_flag_still_exits_zero_for_a_failed_run(self, tmp_path):
+        assert main(["-e", _write(tmp_path, "bad.yml", NOT_RUNNABLE)]) == 0
+
     @patch("test_pioneer.cli.execute_yaml")
     def test_short_flag_executes_the_file(self, mock_execute):
         assert main(["-e", "flow.yml"]) == 0
@@ -143,8 +178,12 @@ def test_module_entry_point_returns_the_exit_code(tmp_path):
     bad = _write(tmp_path, "bad.yml", INVALID)
     good = _write(tmp_path, "ok.yml", VALID)
     command = [sys.executable, "-m", "test_pioneer", "validate"]
-    failed = subprocess.run(command + [bad], capture_output=True, text=True, timeout=120, check=False)
-    passed = subprocess.run(command + [good], capture_output=True, text=True, timeout=120, check=False)
+    # The child starts in the test's scratch directory, so the checkout is put on its import path.
+    environment = {**os.environ, "PYTHONPATH": str(REPO_ROOT)}
+    failed = subprocess.run(command + [bad], capture_output=True, text=True, timeout=120, check=False,
+                            env=environment)
+    passed = subprocess.run(command + [good], capture_output=True, text=True, timeout=120, check=False,
+                            env=environment)
     assert failed.returncode == 1
     assert "[schema-type]" in failed.stdout
     assert passed.returncode == 0
