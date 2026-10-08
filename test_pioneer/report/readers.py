@@ -7,9 +7,10 @@ The four runners that report (web, API, load, GUI) share one layout: a pair of f
 """
 from __future__ import annotations
 
+import hashlib
 import json
 from collections.abc import Iterator
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Protocol
 
@@ -26,10 +27,15 @@ _EMPTY = (None, "", "None")
 
 @dataclass(frozen=True)
 class ParsedReport:
-    """The cases found in a runner's artifact directory and the raw report they came from."""
+    """The cases found in a runner's artifact directory and the raw report they came from.
+
+    ``keys`` holds one fingerprint per case, of the record it was made from, so that a record
+    repeated by a later report can be recognised.
+    """
 
     cases: list[CaseResult]
     source: Path
+    keys: list[str] = field(default_factory=list)
 
 
 class ReportReader(Protocol):  # pylint: disable=too-few-public-methods  # a protocol of one method
@@ -49,6 +55,11 @@ def _shorten(text: str, limit: int) -> str:
 def _malformed(path: Path, problem: str) -> ValueError:
     """Build the error for a report that does not have the expected layout."""
     return ValueError(f"{path.name}{problem}")
+
+
+def _fingerprint(record: dict[str, object]) -> str:
+    """Identify a record by its content."""
+    return hashlib.sha256(json.dumps(record, sort_keys=True, default=str).encode("utf-8")).hexdigest()
 
 
 def _load_records(path: Path) -> Iterator[tuple[str, dict[str, object]]]:
@@ -81,12 +92,12 @@ class RecordPairReader:
         successes = sorted(directory.rglob(f"*{SUCCESS_SUFFIX}"))
         if not failures and not successes:
             return None
-        cases = [self._case(key, record, Status.FAILED)
-                 for path in failures for key, record in _load_records(path)]
-        cases += [self._case(key, record, Status.PASSED)
-                  for path in successes for key, record in _load_records(path)]
+        records = [(key, record, Status.FAILED) for path in failures for key, record in _load_records(path)]
+        records += [(key, record, Status.PASSED) for path in successes for key, record in _load_records(path)]
+        cases = [self._case(key, record, status) for key, record, status in records]
         failed = any(case.status is Status.FAILED for case in cases)
-        return ParsedReport(cases, (failures if failed and failures else successes or failures)[0])
+        source = (failures if failed and failures else successes or failures)[0]
+        return ParsedReport(cases, source, [_fingerprint(record) for _key, record, _status in records])
 
     def _case(self, key: str, record: dict[str, object], status: Status) -> CaseResult:
         parts = [str(record[field]) for field in self.name_fields if record.get(field) not in _EMPTY]

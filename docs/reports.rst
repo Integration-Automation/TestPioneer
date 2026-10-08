@@ -151,12 +151,15 @@ A report that is not valid JSON, does not have the expected layout, or is larger
 not read. The runner keeps the status it had, a warning is added, and the file stays in the
 artifact directory.
 
-.. note::
-
-   A runner package keeps one list of records per process. ``run`` and ``run_folder`` steps call
-   the runner inside the TestPioneer process, so the report written by a later step of the same
-   runner also holds the records of the earlier ones, unless the script clears them. The entries
-   of a ``parallel_run`` step are separate processes and each report holds only its own records.
+A runner package keeps one list of records per process, and its report writes the whole list.
+``run`` and ``run_folder`` steps call the runner inside the TestPioneer process, so the report
+file of a later step of the same runner also holds the records of the earlier ones. TestPioneer
+counts each record once, for the step that produced it: a report that starts with the records
+already counted adds only what follows them. A failure is therefore blamed on the step it
+happened in, and not on the later ones. If a script clears its runner's records, the next report
+does not start with the earlier records and all of it counts. The raw report file is kept as the
+runner wrote it. The entries of a ``parallel_run`` step are separate processes, so each of their
+reports holds only its own records.
 
 JSON Report
 -----------

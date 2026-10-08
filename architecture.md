@@ -33,7 +33,7 @@ that result, and one consolidated report (JSON, HTML, optional JUnit XML) is wri
 | `test_pioneer/models/` | `diagnostic.py`: `Diagnostic`, `ValidationResult`, `Severity`. `result.py`: the normalized run result (`RunResult`, `StepResult`, `RunnerResult`, `Artifact`, `Status`) |
 | `test_pioneer/runner/` | `adapter.py`: the `RunnerAdapter` protocol and `ModuleRunner` (a package started as `python -m <package> --execute_file <script>`, with the reader of its report format). `registry.py`: `RUNNERS`, one adapter per `with:` tag, read by the schema, the linter, `parallel_run` and the run session; `find_runner` |
 | `test_pioneer/artifacts/` | `context.py`: the two environment variable names, the keep policies, run ID creation and checking. `store.py`: `ArtifactStore`, the directory tree of one run (runner directories, execution log, manifest, removal). `capture.py`: copies in-process output and sub-process logs without threads. `collect.py`: copies the files a step declares with `artifacts:` into its runner directory. `session.py`: `RunSession`, `RunOptions`, `current_session`, `in_process_runner` |
-| `test_pioneer/report/` | `readers.py`: `ReportReader` and `RecordPairReader`, which turn a runner's `*_success.json` / `*_failure.json` pair into `CaseResult`s. `formats.py`: format names, default location and file names. `html_report.py`, `junit_report.py`: renderers. `service.py`: `write_reports` |
+| `test_pioneer/report/` | `readers.py`: `ReportReader` and `RecordPairReader`, which turn a runner's `*_success.json` / `*_failure.json` pair into `CaseResult`s. `repeats.py`: `in_process_records`, which drops from an in-process report the records an earlier call of the same runner already reported. `formats.py`: format names, default location and file names. `html_report.py`, `junit_report.py`: renderers. `service.py`: `write_reports` |
 | `test_pioneer/executor/pioneer_executor.py` | `execute_yaml`: loads YAML (`yaml.safe_load`), opens a `RunSession`, dispatches each step through `_STEP_HANDLERS` and returns the `RunResult` |
 | `test_pioneer/executor/run/` | `executor_run.run` (one JSON file), `executor_run_folder.run_folder` (every `*.json` in a folder), `parallel_run.parallel_run` (subprocesses), `runner_process.py` (one runner sub-process: its environment, log files and exit code), `utils.select_with_runner` (maps `with:` tags to runners), `process_manager.py` (tracks parallel subprocesses) |
 | `test_pioneer/executor/file/file_processing.py` | `download_file` and `unzip_zipfile` steps, delegated to `automation_file` |
@@ -121,6 +121,7 @@ run_step → StepResult (timing; True → passed, False → failed, exception �
 begin/end (or reject) → RunnerResult + runners/<runner>/<nn>-<step>/ + the two variables
 end → collect_files (the step's artifacts: patterns, files changed since the runner started,
   copied to collected/) → find_runner(runner).report.read(directory) → RunnerResult.cases
+  (an in-process call keeps only the records that no earlier call of that runner reported)
   → a runner that ended normally but recorded a failed test becomes failed
 __exit__ → run status = worst step status → on_failure: a passed run is removed entirely, a
   failed one keeps testpioneer/ and the runners that did not pass

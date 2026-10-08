@@ -33,6 +33,7 @@ from test_pioneer.artifacts.store import ArtifactStore
 from test_pioneer.logging.loggin_instance import reset_step_log_sink, set_step_log_sink
 from test_pioneer.models.result import RunnerResult, RunResult, Status, StepResult, utc_now, worst_status
 from test_pioneer.report.formats import DEFAULT_REPORT_FORMATS, DEFAULT_REPORT_PATH, REPORT_FORMATS
+from test_pioneer.report.repeats import in_process_records
 from test_pioneer.report.service import write_reports
 from test_pioneer.runner.registry import find_runner
 from test_pioneer.schema.spec import ACTION_KEYS
@@ -74,13 +75,15 @@ class Invocation:
     """A runner execution in progress: where it may write and what its environment adds.
 
     ``patterns`` are the files the step declared with ``artifacts:``; they are collected when
-    the execution ends, if they changed after ``wall_started``.
+    the execution ends, if they changed after ``wall_started``. ``in_process`` marks a runner
+    called inside this process, whose report repeats the records of its earlier calls.
     """
 
     result: RunnerResult
     directory: Path | None
     environment: dict[str, str]
     patterns: tuple[str, ...] = ()
+    in_process: bool = False
     started: float = field(default_factory=time.monotonic)
     wall_started: float = field(default_factory=time.time)
 
@@ -321,7 +324,8 @@ class RunSession:
             self._warn(f"{label}: the runner report could not be read: {error}")
             return
         if parsed is not None:
-            record.cases = parsed.cases
+            in_process = invocation.in_process
+            record.cases = in_process_records.new_cases(record.runner, parsed) if in_process else parsed.cases
             record.report = self._store.relative(parsed.source)
 
     def reject(self, runner: str, script: str, message: str) -> None:
@@ -418,6 +422,7 @@ def in_process_runner(runner: str, script: str, artifacts: object = None) -> Ite
         yield
         return
     invocation = session.begin(runner, script, artifacts=artifacts)
+    invocation.in_process = True
     status, message = Status.PASSED, None
     try:
         with _environment(invocation.environment), tee_output(invocation.directory):
