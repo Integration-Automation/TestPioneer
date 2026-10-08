@@ -120,19 +120,19 @@ A step can also name the files its runner writes, with ``artifacts:``; they are 
 Native Support
 ^^^^^^^^^^^^^^
 
-A runner supports the contract natively when, with ``TEST_PIONEER_ARTIFACT_DIR`` set, it does
-two things. Without the variable it behaves as it always has.
+A runner supports the contract natively when it does two things.
 
-1. A report, screenshot or other file it is asked to write under a relative name is written
-   below that directory, and missing folders below it are created. An absolute name is used as
-   it is.
-2. ``python -m <package> --execute_file <script>`` exits with status 1 when an action of the
-   script failed or a failure was recorded, and with 0 otherwise.
+1. With ``TEST_PIONEER_ARTIFACT_DIR`` set, a report it is asked to write under a relative name
+   is written below that directory, and missing folders below it are created. An absolute name
+   is used as it is, and without the variable nothing changes.
+2. ``python -m <package> --execute_file <script>`` exits with a non-zero status when an action
+   of the script failed or a failure was recorded, and with 0 otherwise.
 
 TestPioneer is ready for such a runner: a non-zero exit status makes the execution ``failed``,
 its report is read from the artifact directory, and an ``artifacts:`` pattern left in the
 workflow is not reported as unmatched when the runner wrote the files itself. No runner package
-does either yet, and all of them exit with status 0 when an action fails.
+does the first yet. The second is in LoadDensity's development branch; every released package
+exits with status 0 when an action fails.
 
 A runner that does not read the variables yet is still covered:
 
@@ -236,7 +236,7 @@ the tests. It prints one line, for example::
 
 .. note::
 
-   The runner packages exit with status 0 when one of the actions in a script fails; only a
+   The released runner packages exit with status 0 when one of the actions in a script fails; only a
    script that cannot be read or is malformed makes them exit with 1. A failed action is found
    in the runner's own report instead: have the script write one and declare it with
    ``artifacts:``, as described in :doc:`reports`.

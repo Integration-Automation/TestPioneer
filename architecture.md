@@ -237,15 +237,19 @@ the step and the run `failed`.
   je_api_testka 0.0.145, je_web_runner 0.0.93, je_load_density 0.0.77, automation_file 0.0.51,
   je_auto_control 0.0.225); until one does, its directory holds only the captured output.
 - **Native support, asked of the runner packages** (`docs/artifacts.rst`, "Native Support"): with
-  the variable set, write relative output names below the directory, and exit 1 from
-  `--execute_file` when an action failed. TestPioneer already handles both. The executors of
-  APITestka, WebRunner, LoadDensity and FileAutomation are `je_action_core`'s
-  (Integration-Automation/ActionCore) on their `dev` branches, so that is where the exit status
-  belongs; the report writers are each runner's own.
-- **Runner exit codes**: `python -m <package> --execute_file` exits 0 in all five packages when
-  an action of the script fails, and 1 only for a script that is missing or malformed
-  (je_auto_control also for an unknown command or a failed `AC_assert_*`). A `failed` status
-  from an exit code therefore means only that.
+  the variable set, write a report asked for under a relative name below the directory; and
+  exit non-zero from `--execute_file` when an action failed. TestPioneer already handles both.
+  As read from the runners' `dev` branches on 2026-10-08: LoadDensity already exits non-zero
+  (its `__main__` wraps the executor's reporter for the run and counts `on_failure`), and the
+  others can do the same without a change to `je_action_core`
+  (Integration-Automation/ActionCore), whose `ExecutionReporter.on_failure` is in every release.
+  In APITestka a failed request does not raise and is only appended to
+  `test_record_instance.error_record_list`, so its count has to include that list. No runner
+  reads the artifact variable. The steps per runner are in `progress.md` #13.
+- **Runner exit codes**: in the released packages `python -m <package> --execute_file` exits 0
+  in all five when an action of the script fails, and 1 only for a script that is missing or
+  malformed (je_auto_control also for an unknown command or a failed `AC_assert_*`). A `failed`
+  status from an exit code therefore means only that.
 - **Runner report format**, relied on here and owned by the runner packages: the pair
   `<name>_success.json` / `<name>_failure.json`, each an object of `Success_TestN` /
   `Failure_TestN` records, written by `AT_generate_json_report`, `WR_generate_json_report`,

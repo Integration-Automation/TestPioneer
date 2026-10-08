@@ -144,8 +144,8 @@ execution:
 The parameters of web and GUI actions are left out of the test name, because they can hold text
 that was typed, such as a password.
 
-This is how a failed action is noticed. The runner packages exit with status 0 and raise nothing
-when an action of a script fails; the failure is only in their report. A runner execution whose
+This is how a failed action is noticed. The released runner packages exit with status 0 and
+raise nothing when an action of a script fails; the failure is only in their report. A runner execution whose
 report holds a failed test is ``failed``, with the message ``1 of 3 recorded test(s) failed``,
 and so are its step and the run.
 
