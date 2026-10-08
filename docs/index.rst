@@ -10,6 +10,7 @@ and Load testing through pluggable runners.
 
    getting-started
    yaml-configuration
+   validation
    runners
    step-types
    docker

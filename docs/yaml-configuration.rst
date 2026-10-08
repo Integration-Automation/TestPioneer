@@ -80,6 +80,9 @@ Rules
   ``parallel_run`` which launches sub-processes concurrently.
 - If any step fails, execution stops immediately.
 
+These rules, the key names and the value types can be checked without executing the
+workflow: see :doc:`validation`.
+
 Full Example
 ------------
 

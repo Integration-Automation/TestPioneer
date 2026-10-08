@@ -14,6 +14,7 @@
 
 - **多類型測試** - 透過可插拔 Runner 支援 GUI、Web、API 及負載/壓力測試
 - **YAML 設定** - 人類可讀的測試流程，易於維護與版本控制
+- **流程驗證** - 執行前先以具版本的 JSON Schema 與 lint 規則檢查流程
 - **平行執行** - 使用不同 Runner 同時執行多個測試腳本
 - **影片錄製** - 內建測試過程錄影功能，方便除錯
 - **程序管理** - 啟動/終止外部程式，支援 stdout/stderr 重新導向
@@ -47,6 +48,20 @@ from test_pioneer import execute_yaml
 execute_yaml("path/to/test.yaml")
 ```
 
+### 驗證流程
+
+```bash
+python -m test_pioneer validate path/to/test.yaml
+```
+
+在不執行任何步驟的情況下檢查 YAML 語法、流程 JSON Schema 與 lint 規則。每個問題都會附上行號與欄號；只要有錯誤，指令就以狀態碼 1 結束，讓 CI 在任何測試執行前就失敗。加上 `--format json` 可取得結構化輸出，加上 `--strict` 則把警告視為錯誤。
+
+```bash
+python -m test_pioneer schema
+```
+
+輸出流程的 JSON Schema，同一份內容也發佈於 [`schema/testpioneer.schema.json`](../schema/testpioneer.schema.json)。
+
 ### 專案範本
 
 ```python
@@ -61,6 +76,7 @@ create_template_dir()
 
 - [快速開始](https://testpioneer.readthedocs.io/en/latest/getting-started.html)
 - [YAML 設定](https://testpioneer.readthedocs.io/en/latest/yaml-configuration.html)
+- [驗證](https://testpioneer.readthedocs.io/en/latest/validation.html)
 - [Runner](https://testpioneer.readthedocs.io/en/latest/runners.html)
 - [步驟類型](https://testpioneer.readthedocs.io/en/latest/step-types.html)
 - [Docker](https://testpioneer.readthedocs.io/en/latest/docker.html)

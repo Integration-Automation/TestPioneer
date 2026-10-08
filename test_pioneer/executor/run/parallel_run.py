@@ -7,14 +7,12 @@ from typing import List, Optional, Tuple
 
 from test_pioneer.executor.run.process_manager import process_manager
 from test_pioneer.logging.loggin_instance import step_log_check, test_pioneer_logger
+from test_pioneer.runner.registry import GUI_RUNNER, OPTIONAL_RUNNERS, RUNNER_PACKAGES
 from test_pioneer.utils.package.check import is_installed
 
 
 _BASE_RUNNER_COMMANDS = {
-    "web-runner": "je_web_runner",
-    "api-runner": "je_api_testka",
-    "load-runner": "je_load_density",
-    "file-runner": "automation_file",
+    runner: package for runner, package in RUNNER_PACKAGES.items() if runner not in OPTIONAL_RUNNERS
 }
 
 
@@ -50,14 +48,15 @@ def _build_runner_command_dict(
     enable_logging: bool,
 ) -> Optional[dict]:
     """Return the runner→package map, or None if a required dependency is missing."""
-    gui_installed = is_installed("je_auto_control")
-    if "gui-runner" in runner_list and not gui_installed:
-        _log_error(enable_logging, "Please install gui-runner: je_auto_control")
+    gui_package = RUNNER_PACKAGES[GUI_RUNNER]
+    gui_installed = is_installed(gui_package)
+    if GUI_RUNNER in runner_list and not gui_installed:
+        _log_error(enable_logging, f"Please install {GUI_RUNNER}: {gui_package}")
         return None
 
     runner_command_dict = dict(_BASE_RUNNER_COMMANDS)
     if gui_installed:
-        runner_command_dict["gui-runner"] = "je_auto_control"
+        runner_command_dict[GUI_RUNNER] = gui_package
     return runner_command_dict
 
 

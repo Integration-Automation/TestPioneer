@@ -1,0 +1,175 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/Integration-Automation/TestPioneer/main/schema/testpioneer.schema.json",
+  "title": "TestPioneer workflow",
+  "description": "A YAML workflow executed by test_pioneer.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "jobs"
+  ],
+  "properties": {
+    "pioneer_log": {
+      "type": "string",
+      "description": "Log file path. When set, step execution is logged to this file."
+    },
+    "recording_path": {
+      "type": "string",
+      "description": "Screen recording output path, without extension. Needs test_pioneer[gui]."
+    },
+    "jobs": {
+      "type": "object",
+      "description": "Container of the steps list.",
+      "required": [
+        "steps"
+      ],
+      "properties": {
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/step"
+          },
+          "description": "Steps, run in order. A failed step stops the ones after it."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "runner": {
+      "type": "string",
+      "enum": [
+        "gui-runner",
+        "web-runner",
+        "api-runner",
+        "load-runner",
+        "file-runner"
+      ],
+      "description": "Runner that executes a JSON action file."
+    },
+    "step": {
+      "type": "object",
+      "description": "One step: a name plus exactly one action key and that action's fields.",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Unique step name. close_program refers to an open_program step by it."
+        },
+        "run": {
+          "type": "string",
+          "description": "JSON action file to run, relative to the working directory.",
+          "minLength": 1
+        },
+        "run_folder": {
+          "type": "string",
+          "description": "Folder whose *.json files are all run, in name order.",
+          "minLength": 1
+        },
+        "open_url": {
+          "type": "string",
+          "description": "URL to open in the default browser.",
+          "minLength": 1
+        },
+        "download_file": {
+          "type": "string",
+          "description": "URL of the file to download.",
+          "minLength": 1
+        },
+        "wait": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Seconds to wait."
+        },
+        "open_program": {
+          "type": "string",
+          "description": "Program or command line to start. Close it by step name.",
+          "minLength": 1
+        },
+        "close_program": {
+          "type": "string",
+          "description": "Name of the open_program step whose program is closed.",
+          "minLength": 1
+        },
+        "unzip_zipfile": {
+          "description": "Marks an unzip step. The archive is named by zip_file_path."
+        },
+        "parallel_run": {
+          "$ref": "#/$defs/parallel_run"
+        },
+        "with": {
+          "$ref": "#/$defs/runner"
+        },
+        "url_open_method": {
+          "type": "string",
+          "enum": [
+            "open",
+            "open_new",
+            "open_new_tab"
+          ],
+          "description": "How the browser opens the URL. Defaults to open."
+        },
+        "file_path": {
+          "type": "string",
+          "description": "Local path the downloaded file is saved to.",
+          "minLength": 1
+        },
+        "redirect_stdout": {
+          "type": "string",
+          "description": "File the program's standard output is written to."
+        },
+        "redirect_stderr": {
+          "type": "string",
+          "description": "File the program's standard error is written to."
+        },
+        "zip_file_path": {
+          "type": "string",
+          "description": "Path of the zip archive to extract.",
+          "minLength": 1
+        },
+        "password": {
+          "type": "string",
+          "description": "Password of an encrypted archive."
+        },
+        "extract_path": {
+          "type": "string",
+          "description": "Directory to extract into. Defaults to the working directory."
+        }
+      }
+    },
+    "parallel_run": {
+      "type": "object",
+      "description": "Scripts started together as sub-processes, one runner per script.",
+      "required": [
+        "runners",
+        "scripts"
+      ],
+      "properties": {
+        "runners": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/runner"
+          },
+          "description": "Runner of each script. Same length as scripts."
+        },
+        "scripts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "JSON action file of each runner. Same length as runners."
+        },
+        "executor_path": {
+          "type": "string",
+          "description": "Python executable that starts the runners. Defaults to this one."
+        }
+      }
+    }
+  }
+}

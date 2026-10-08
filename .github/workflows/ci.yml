@@ -30,11 +30,15 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      # jsonschema is the reference validator that the built-in schema validator is compared with.
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip wheel
-          pip install pytest
+          pip install pytest jsonschema
           pip install -e .
+
+      - name: Validate the bundled workflows
+        run: python -m test_pioneer validate docker_gui_test/test_run_multi_time.yml docker_non_gui_test/test_run_multi_time.yml
 
       - name: Run unit tests
         run: python -m pytest test/ --ignore=test/unit_test -v --tb=short --junitxml=test-results.xml

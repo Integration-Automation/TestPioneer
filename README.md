@@ -14,6 +14,7 @@ A YAML-driven automation test framework for CI/CD pipelines, supporting GUI, Web
 
 - **Multi-type testing** - GUI, Web, API, and Load/Stress testing via pluggable runners
 - **YAML configuration** - Human-readable test workflows, easy to maintain and version control
+- **Workflow validation** - Check a workflow against a versioned JSON Schema and lint rules before anything runs
 - **Parallel execution** - Run multiple test scripts concurrently with different runners
 - **Video recording** - Built-in test session recording for debugging
 - **Process management** - Launch/terminate external programs with stdout/stderr redirection
@@ -47,6 +48,20 @@ from test_pioneer import execute_yaml
 execute_yaml("path/to/test.yaml")
 ```
 
+### Validate a Workflow
+
+```bash
+python -m test_pioneer validate path/to/test.yaml
+```
+
+Checks the YAML syntax, the workflow JSON Schema and the lint rules without executing anything. Each problem is reported with its line and column, and the command exits with status 1 on an error, so CI can fail before any test runs. Add `--format json` for structured output and `--strict` to treat warnings as errors.
+
+```bash
+python -m test_pioneer schema
+```
+
+Prints the workflow JSON Schema, also published as [`schema/testpioneer.schema.json`](schema/testpioneer.schema.json).
+
 ### Project Template
 
 ```python
@@ -61,6 +76,7 @@ Full documentation is available at **[testpioneer.readthedocs.io](https://testpi
 
 - [Getting Started](https://testpioneer.readthedocs.io/en/latest/getting-started.html)
 - [YAML Configuration](https://testpioneer.readthedocs.io/en/latest/yaml-configuration.html)
+- [Validation](https://testpioneer.readthedocs.io/en/latest/validation.html)
 - [Runners](https://testpioneer.readthedocs.io/en/latest/runners.html)
 - [Step Types](https://testpioneer.readthedocs.io/en/latest/step-types.html)
 - [Docker](https://testpioneer.readthedocs.io/en/latest/docker.html)

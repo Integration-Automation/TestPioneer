@@ -1,7 +1,8 @@
 # TestPioneer Architecture
 
 > Short overview for people and agents.
-> Last verified: 2026-09-22 against `dfe9eaa` on `dev`.
+> Last verified: 2026-10-08 against `d76ad27` plus the validation change, on
+> `feature/testpioneer-platform-improvements`.
 
 ## 1. Purpose
 
@@ -14,14 +15,21 @@ lists named `jobs.steps`, and each step does one of two things:
 - perform a utility action: download or unzip a file, open a URL, start or stop a program, wait, or
   run scripts in parallel.
 
-File logging and screen recording are optional.
+File logging and screen recording are optional. A workflow can also be checked without executing
+it: against a versioned JSON Schema and a set of lint rules, with diagnostics located by line and
+column.
 
 ## 2. Layers and directories
 
 | Path | Responsibility |
 | --- | --- |
-| `test_pioneer/__init__.py` | Facade: `execute_yaml`, `create_template_dir` |
-| `test_pioneer/__main__.py` | CLI: `python -m test_pioneer -e/--execute_yaml <file>` |
+| `test_pioneer/__init__.py` | Facade: `execute_yaml`, `create_template_dir`, `validate_yaml`, `lint_yaml`, `load_yaml`, `get_yaml_schema` |
+| `test_pioneer/__main__.py`, `test_pioneer/cli.py` | CLI: `cli.main(argv)` returns the exit code of `python -m test_pioneer` (`-e/--execute_yaml <file>`, `validate`, `schema`) |
+| `test_pioneer/schema/` | The workflow contract. `spec.py`: top-level keys, step types (`ACTIONS`, in dispatch order) and their fields. `definition.py`: builds the JSON Schema from `spec.py` and holds `SCHEMA_VERSION`. `get_yaml_schema()` returns it |
+| `schema/testpioneer.schema.json` | The same schema, published for editors and other tools. Written by `python -m test_pioneer schema -o`; `test/test_schema.py` keeps it identical to the built one |
+| `test_pioneer/validation/` | `yaml_loader.load_yaml` (safe parse that keeps the line and column of every key and value), `schema_validator.check_schema` (built-in validator for the keywords the schema uses), `linter.run_lint_rules` (semantic rules), `api.validate_yaml` / `lint_yaml` |
+| `test_pioneer/models/` | `diagnostic.py`: `Diagnostic`, `ValidationResult`, `Severity`. `result.py`: the normalized run result (`RunResult`, `StepResult`, `RunnerResult`, `Artifact`, `Status`) |
+| `test_pioneer/runner/registry.py` | `RUNNER_PACKAGES`: each `with:` tag and the package behind it. Read by the schema, the linter and `parallel_run` |
 | `test_pioneer/executor/pioneer_executor.py` | `execute_yaml`: loads YAML (`yaml.safe_load`), validates it, and dispatches each step through `_STEP_HANDLERS` |
 | `test_pioneer/executor/run/` | `executor_run.run` (one JSON file), `executor_run_folder.run_folder` (every `*.json` in a folder), `parallel_run.parallel_run` (subprocesses), `utils.select_with_runner` (maps `with:` tags to runners), `process_manager.py` (tracks parallel subprocesses) |
 | `test_pioneer/executor/file/file_processing.py` | `download_file` and `unzip_zipfile` steps, delegated to `automation_file` |
@@ -41,16 +49,24 @@ File logging and screen recording are optional.
 
 - **Python**: `from test_pioneer import execute_yaml, create_template_dir`. Call
   `execute_yaml(stream, yaml_type="File")` with a path, or with `yaml_type="String"` and inline YAML.
+  `validate_yaml` (syntax and schema) and `lint_yaml` (the same plus the lint rules) take the same
+  two arguments and return a `ValidationResult`; `load_yaml` returns the parsed `YamlDocument` and
+  `get_yaml_schema` the schema as a dict.
 - **CLI**:
-  - `python -m test_pioneer -e <file.yml>` (`--execute_yaml`) is the only flag;
-  - without it, the CLI raises `ExecutorException`;
+  - `python -m test_pioneer -e <file.yml>` (`--execute_yaml`) executes a workflow;
+  - `python -m test_pioneer validate [--format {text,json}] [--strict] [--base_dir DIR]
+    [--no_file_check] <file.yml>...` checks workflows without executing them and exits 1 on an
+    error (or on a warning with `--strict`);
+  - `python -m test_pioneer schema [-o FILE]` prints or writes the JSON Schema;
+  - with neither `-e` nor a command, the CLI raises `ExecutorException`;
   - no `-d`, `-c` or `--execute_str`, and no console script is declared.
 - **YAML contract**:
   - optional top-level keys `pioneer_log` (log file path) and `recording_path` (needs `je_auto_control`);
   - required `jobs.steps`, a list where each step has a unique `name` and one of `run`, `run_folder`,
     `open_url`, `download_file` (+ `file_path`), `wait`, `open_program`, `close_program`,
     `unzip_zipfile` or `parallel_run` (`runners`, `scripts`, optional `executor_path`);
-  - `run` and `run_folder` need `with:` set to `web-runner`, `api-runner`, `load-runner`, `file-runner` or `gui-runner`.
+  - `run` and `run_folder` need `with:` set to `web-runner`, `api-runner`, `load-runner`, `file-runner` or `gui-runner`;
+  - the same contract is published as a JSON Schema, `schema/testpioneer.schema.json`.
 - There is no MCP server, LSP, socket server, pytest plugin or GUI of its own.
 
 ## 4. Main flows
@@ -64,6 +80,20 @@ python -m test_pioneer -e file.yml → execute_yaml → _load_yaml (yaml.safe_lo
   → _run_steps → _dispatch_step (first matching key in _STEP_HANDLERS) → handler(step) -> bool
   → a False result stops the remaining steps → recorder stopped in finally
 ```
+
+**Validation (nothing is executed)**
+
+```
+python -m test_pioneer validate file.yml → lint_yaml → load_yaml (yaml.SafeLoader; position index;
+  syntax errors and duplicate keys become diagnostics)
+  → check_schema (get_yaml_schema: type, required, enum, minItems, minLength, minimum)
+  → run_lint_rules (duplicate names, missing/conflicting actions, required fields,
+    runners/scripts length, unknown keys, runner packages, referenced files)
+  → ValidationResult, sorted by line and column → text or JSON → exit 0 / 1
+```
+
+`execute_yaml` does not call the validator: a workflow runs exactly as it did before, whether or
+not it would pass `validate`.
 
 **`run` step (in-process)**
 
@@ -88,14 +118,29 @@ _BASE_RUNNER_COMMANDS (+ gui-runner → je_auto_control) → for each (runner, s
      return `False`.
   2. Add its YAML key to `_STEP_HANDLERS` in `executor/pioneer_executor.py`. Order matters: the
      first key present in the step wins.
-  3. Add `test/test_<area>.py`.
-  4. Document it in `docs/api-reference.rst`.
+  3. Describe it in `ACTIONS` (`schema/spec.py`) at the same position, with its value schema and
+     its required and optional fields; add new fields to `STEP_FIELDS`. `test/test_schema.py`
+     fails while the two tables differ.
+  4. Bump `SCHEMA_VERSION` (`schema/definition.py`) and regenerate the published schema:
+     `python -m test_pioneer schema -o schema/testpioneer.schema.json`.
+  5. Add `test/test_<area>.py`.
+  6. Document it in `docs/step-types.rst`.
 - **New runner (`with:` tag)**:
-  1. Import it lazily in `_build_runner_dict` (`executor/run/utils.py`).
-  2. Add its package to `_BASE_RUNNER_COMMANDS` (`executor/run/parallel_run.py`).
+  1. Add the tag and its package to `RUNNER_PACKAGES` (`runner/registry.py`); `parallel_run`, the
+     schema's runner enum and the linter read it. Add it to `OPTIONAL_RUNNERS` when the package
+     comes from an extra.
+  2. Import it lazily in `_build_runner_dict` (`executor/run/utils.py`).
   3. Declare the dependency in `pyproject.toml` and `dev.toml` (in `dependencies`, or in an extra
      like `gui`).
-  4. Extend `test/test_run_utils.py` and `test/test_parallel_run.py`.
+  4. Bump `SCHEMA_VERSION` and regenerate the published schema, as for a step type.
+  5. Extend `test/test_run_utils.py` and `test/test_parallel_run.py`.
+- **New lint rule**: add a method to `_Linter` (`validation/linter.py`), register it in `_rules`
+  when it belongs to one step type, list its code in `docs/validation.rst`, and test it in
+  `test/test_linter.py`. Errors are for what the executor stops on or can never run; anything that
+  depends on the machine is a warning.
+- **New schema keyword**: the built-in validator implements only `CONSTRAINT_KEYWORDS`
+  (`validation/schema_validator.py`). Implement the keyword there before the schema uses it;
+  `test/test_schema.py` fails otherwise.
 - **Project template**: edit `project/template/template.py` and `project/create_template_structure.py`.
 
 ## 6. Cross-project boundaries
@@ -118,6 +163,17 @@ _BASE_RUNNER_COMMANDS (+ gui-runner → je_auto_control) → for each (runner, s
     (`PyBreeze/pybreeze/extend/process_executor/test_pioneer/test_pioneer_process_manager.py`);
   - it imports `create_template_dir`
     (`pybreeze/pybreeze_ui/menu/automation_menu/test_pioneer_menu/build_test_pioneer_menu.py`).
+- **Validation contract**, offered to editors and UIs (PyBreeze is the intended consumer):
+  - `schema/testpioneer.schema.json`, at that path and under the `$id` URL it declares. Its
+    `version` follows `SCHEMA_VERSION`: a minor bump adds something, a major bump is for a
+    workflow that used to validate and no longer does;
+  - `python -m test_pioneer validate --format json`: an object with `schema_version`, `ok` and
+    `files[]`, each file with `source`, `ok`, `errors`, `warnings` and `diagnostics[]` of
+    `severity`, `code`, `message`, `path`, `pointer`, `line`, `column`, `source`. Exit status 0,
+    1 (problems) or 2 (usage);
+  - the diagnostic codes listed in `docs/validation.rst`;
+  - `validate_yaml`, `lint_yaml`, `load_yaml`, `get_yaml_schema` in `test_pioneer`, and
+    `LintOptions` in `test_pioneer.validation`.
 
 ## 7. Design constraints
 
@@ -143,8 +199,9 @@ _BASE_RUNNER_COMMANDS (+ gui-runner → je_auto_control) → for each (runner, s
 ## 8. When to update this file
 
 - A step type, YAML key or `with:` runner tag is added, removed or renamed.
-- The CLI flag, the `execute_yaml` / `create_template_dir` facade, or the packaging (`pyproject.toml`,
-  `dev.toml`) changes.
+- The CLI flags or commands, the facade in `test_pioneer/__init__.py`, or the packaging
+  (`pyproject.toml`, `dev.toml`) changes.
+- The schema version, the `validate --format json` output or a diagnostic code changes.
 - A sibling package's entry point that TestPioneer depends on changes: `execute_action`,
   `execute_files`, `--execute_file`, `download_file`, `unzip_all`, `RecordingThread`.
 - The dependency list or the `gui` extra changes.

@@ -236,11 +236,11 @@ Keep the existing English/Traditional Chinese/Simplified Chinese README structur
 
 ### Phase 1 — Contracts and validation
 
-- [ ] Define run/artifact/result data models.
-- [ ] Add versioned JSON Schema.
-- [ ] Add YAML validator/linter API.
-- [ ] Add validation CLI.
-- [ ] Add unit tests for schema and semantic lint rules.
+- [x] Define run/artifact/result data models.
+- [x] Add versioned JSON Schema.
+- [x] Add YAML validator/linter API.
+- [x] Add validation CLI.
+- [x] Add unit tests for schema and semantic lint rules.
 
 ### Phase 2 — Runner execution and artifacts
 
