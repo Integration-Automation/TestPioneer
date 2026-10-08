@@ -12,8 +12,11 @@ import re
 from test_pioneer.models.result import RunnerResult, RunResult, Status
 
 _RUNNER_ACTIONS = ("run", "run_folder", "parallel_run")
-# Characters that XML 1.0 does not allow, even escaped.
-_INVALID = re.compile("[^\t\n\r -퟿-�\U00010000-\U0010ffff]")
+# The code point ranges XML 1.0 allows besides tab, line feed and carriage return.
+_ALLOWED_RANGES = ((0x20, 0xD7FF), (0xE000, 0xFFFD), (0x10000, 0x10FFFF))
+# Every character outside them is invalid in XML 1.0, even escaped.
+_INVALID = re.compile(
+    "[^\t\n\r" + "".join(f"{chr(first)}-{chr(last)}" for first, last in _ALLOWED_RANGES) + "]")
 # The element a status becomes inside a testcase; a passed test has none.
 _ELEMENTS = {Status.FAILED: "failure", Status.ERROR: "error", Status.CANCELLED: "skipped"}
 

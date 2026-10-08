@@ -216,4 +216,4 @@ Command Line Interface
 - ``validate [--format {text,json}] [--strict] [--base_dir DIR] [--no_file_check] files...`` --
   Check workflow files without executing them. Exits with status 1 when a file has an error.
   See :doc:`validation`.
-- ``schema [-o FILE]`` -- Print the workflow JSON Schema, or write it to ``FILE``.
+- ``schema`` -- Print the workflow JSON Schema.

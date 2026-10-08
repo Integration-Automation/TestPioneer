@@ -1,7 +1,6 @@
 """Tests for test_pioneer.cli: the ``python -m test_pioneer`` command line."""
 import json
-import os
-import subprocess
+import runpy
 import sys
 from pathlib import Path
 from unittest.mock import patch
@@ -13,7 +12,6 @@ from test_pioneer.cli import main
 from test_pioneer.schema import SCHEMA_VERSION
 from test_pioneer.utils.exception.exceptions import ExecutorException
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
 VALID = "jobs:\n  steps:\n    - name: pause\n      wait: 1\n"
 INVALID = "jobs:\n  steps:\n    - name: pause\n      wait: soon\n"
 WARNING_ONLY = "jobs:\n  steps:\n    - name: pause\n      wait: 1\n      note: later\n"
@@ -120,11 +118,10 @@ class TestSchemaCommand:
         assert main(["schema"]) == 0
         assert json.loads(capsys.readouterr().out) == get_yaml_schema()
 
-    def test_schema_is_written_to_a_file(self, tmp_path, capsys):
-        target = tmp_path / "workflow.schema.json"
-        assert main(["schema", "-o", str(target)]) == 0
-        assert capsys.readouterr().out == ""
-        assert json.loads(target.read_text(encoding="utf-8")) == get_yaml_schema()
+    def test_schema_takes_no_output_path(self):
+        with pytest.raises(SystemExit) as stopped:
+            main(["schema", "-o", "workflow.schema.json"])
+        assert stopped.value.code == 2
 
 
 class TestRunCommand:
@@ -162,8 +159,9 @@ class TestRunCommand:
 
     @pytest.mark.parametrize("value", ["pdf", "json,pdf", "", ","])
     def test_an_unknown_report_format_is_a_usage_error(self, tmp_path, value):
+        arguments = ["run", "--report_formats", value, _write(tmp_path, "ok.yml", RUNNABLE)]
         with pytest.raises(SystemExit) as stopped:
-            main(["run", "--report_formats", value, _write(tmp_path, "ok.yml", RUNNABLE)])
+            main(arguments)
         assert stopped.value.code == 2
 
     def test_artifact_options_are_passed_on(self, tmp_path):
@@ -172,8 +170,9 @@ class TestRunCommand:
         assert (Path("kept") / "r1" / "testpioneer" / "execution.log").is_file()
 
     def test_an_unknown_keep_policy_is_a_usage_error(self, tmp_path):
+        arguments = ["run", "--keep_artifacts", "sometimes", _write(tmp_path, "ok.yml", RUNNABLE)]
         with pytest.raises(SystemExit) as stopped:
-            main(["run", "--keep_artifacts", "sometimes", _write(tmp_path, "ok.yml", RUNNABLE)])
+            main(arguments)
         assert stopped.value.code == 2
 
     def test_a_warning_goes_to_standard_error(self, tmp_path, capsys):
@@ -201,17 +200,10 @@ class TestExecuteFlag:
             main([])
 
 
-def test_module_entry_point_returns_the_exit_code(tmp_path):
-    """``python -m test_pioneer validate`` exits 1 for an invalid workflow and 0 for a valid one."""
-    bad = _write(tmp_path, "bad.yml", INVALID)
-    good = _write(tmp_path, "ok.yml", VALID)
-    command = [sys.executable, "-m", "test_pioneer", "validate"]
-    # The child starts in the test's scratch directory, so the checkout is put on its import path.
-    environment = {**os.environ, "PYTHONPATH": str(REPO_ROOT)}
-    failed = subprocess.run(command + [bad], capture_output=True, text=True, timeout=120, check=False,
-                            env=environment)
-    passed = subprocess.run(command + [good], capture_output=True, text=True, timeout=120, check=False,
-                            env=environment)
-    assert failed.returncode == 1
-    assert "[schema-type]" in failed.stdout
-    assert passed.returncode == 0
+@pytest.mark.parametrize("workflow, status", [(INVALID, 1), (VALID, 0)])
+def test_module_entry_point_exits_with_the_command_status(tmp_path, monkeypatch, workflow, status):
+    """``python -m test_pioneer`` exits with what the command returned."""
+    monkeypatch.setattr(sys, "argv", ["test_pioneer", "validate", _write(tmp_path, "flow.yml", workflow)])
+    with pytest.raises(SystemExit) as stopped:
+        runpy.run_module("test_pioneer", run_name="__main__")
+    assert stopped.value.code == status

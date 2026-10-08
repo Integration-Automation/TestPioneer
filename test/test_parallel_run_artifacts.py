@@ -76,7 +76,8 @@ class TestOneFailsOneSucceeds:
             "fake-runner", "together", Status.PASSED, 0, None)
         assert (bad.status, bad.exit_code, bad.message) == (Status.FAILED, 3, "exit code 3")
         assert (good.script, bad.script) == ("good.json", "bad.json")
-        assert bad.duration_ms >= 0 and bad.started_at <= bad.finished_at
+        assert bad.duration_ms >= 0
+        assert bad.started_at <= bad.finished_at
 
     def test_the_step_and_the_run_fail_but_later_steps_still_run(self, result):
         assert [(step.name, step.status) for step in result.steps] == [
@@ -170,10 +171,11 @@ class TestInterruption:
         def interrupt(_seconds):
             raise KeyboardInterrupt
 
-        script = _script("slow.json", sleep=60)
+        text = _workflow(_script("slow.json", sleep=60))
+        options = RunOptions(run_id="r1")
         monkeypatch.setattr(parallel_run_module.time, "sleep", interrupt)
         with pytest.raises(KeyboardInterrupt):
-            execute_yaml(_workflow(script), "String", RunOptions(run_id="r1"))
+            execute_yaml(text, "String", options)
         manifest = _manifest("r1")
         (runner,) = manifest["runners"]
         assert (runner["status"], runner["message"]) == ("cancelled", "interrupted")

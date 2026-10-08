@@ -1,7 +1,7 @@
 """Build the versioned JSON Schema of a TestPioneer workflow.
 
 ``schema/testpioneer.schema.json`` in the repository is this schema written to disk; a test keeps
-the two identical. Regenerate the file with ``python -m test_pioneer schema -o <path>``.
+the two identical. Regenerate the file with ``python -m test_pioneer schema > <path>``.
 """
 from __future__ import annotations
 

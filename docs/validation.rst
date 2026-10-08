@@ -214,7 +214,7 @@ Print or save the schema of the installed version:
 .. code-block:: bash
 
    python -m test_pioneer schema
-   python -m test_pioneer schema -o testpioneer.schema.json
+   python -m test_pioneer schema > testpioneer.schema.json
 
 An editor with a YAML language server completes keys and runner names from it. Point the file at
 the schema with a comment on its first line:

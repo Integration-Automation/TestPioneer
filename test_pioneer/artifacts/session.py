@@ -418,15 +418,17 @@ def in_process_runner(runner: str, script: str, artifacts: object = None) -> Ite
         yield
         return
     invocation = session.begin(runner, script, artifacts=artifacts)
+    status, message = Status.PASSED, None
     try:
         with _environment(invocation.environment), tee_output(invocation.directory):
             yield
     except KeyboardInterrupt:
-        session.end(invocation, Status.CANCELLED)
+        status = Status.CANCELLED
         raise
     except Exception as error:
         # The runners report a failed action in their own records, not by raising, so an
         # exception here means the call could not be completed.
-        session.end(invocation, Status.ERROR, message=repr(error))
+        status, message = Status.ERROR, repr(error)
         raise
-    session.end(invocation, Status.PASSED)
+    finally:
+        session.end(invocation, status, message=message)

@@ -43,7 +43,7 @@ def _types(schema: dict) -> list:
 
 class TestPublishedSchema:
     def test_checked_in_file_matches_the_built_schema(self):
-        # Regenerate with: python -m test_pioneer schema -o schema/testpioneer.schema.json
+        # Regenerate with: python -m test_pioneer schema > schema/testpioneer.schema.json
         assert json.loads(PUBLISHED_SCHEMA.read_text(encoding="utf-8")) == get_yaml_schema()
 
     def test_schema_is_versioned(self):

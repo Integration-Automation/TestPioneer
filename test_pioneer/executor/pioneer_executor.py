@@ -46,14 +46,16 @@ def _stop_recorder(recording: bool, recorder) -> None:
 def _load_yaml(stream: str, yaml_type: str) -> dict:
     """Load and validate YAML data from file or string."""
     if yaml_type == "File":
-        yaml_data = yaml.safe_load(Path(stream).read_text(encoding="utf-8"))
+        # Reading the file that the caller names is what this function is for, so the path is not
+        # confined to a directory. The content is parsed with the safe loader and never echoed.
+        yaml_data = yaml.safe_load(Path(stream).read_text(encoding="utf-8"))  # NOSONAR
     elif yaml_type == "String":
         yaml_data = yaml.safe_load(stream=stream)
     else:
         raise WrongInputException("Wrong input: " + repr(stream))
 
     if not isinstance(yaml_data, dict):
-        raise YamlException(f"Not a dict: {yaml_data}")
+        raise YamlException(f"Not a dict: got {type(yaml_data).__name__}")
     return yaml_data
 
 

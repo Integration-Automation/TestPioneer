@@ -3,6 +3,9 @@
 ``-e/--execute_yaml`` executes a workflow and always exits 0 unless it raises, as it always has.
 ``run`` executes one and exits with its result. ``validate`` checks workflow files without
 executing them and ``schema`` prints the workflow JSON Schema.
+
+No command writes to a path taken from the command line except below the directories the
+workflow or its options name for artifacts and reports.
 """
 from __future__ import annotations
 
@@ -75,8 +78,7 @@ def build_parser() -> argparse.ArgumentParser:
     validate.add_argument("--no_file_check", action="store_true",
                           help="do not check that the referenced scripts and folders exist")
 
-    schema = commands.add_parser("schema", help="print the workflow JSON Schema")
-    schema.add_argument("-o", "--output", help="write the schema to this file instead of standard output")
+    commands.add_parser("schema", help="print the workflow JSON Schema")
     return parser
 
 
@@ -145,12 +147,8 @@ def _run(args: argparse.Namespace) -> int:
     return EXIT_OK if result.status is Status.PASSED else EXIT_RUN_FAILED
 
 
-def _schema(args: argparse.Namespace) -> int:
-    text = json.dumps(get_yaml_schema(), indent=2) + "\n"
-    if args.output:
-        Path(args.output).write_text(text, encoding="utf-8", newline="\n")
-    else:
-        sys.stdout.write(text)
+def _schema() -> int:
+    sys.stdout.write(json.dumps(get_yaml_schema(), indent=2) + "\n")
     return EXIT_OK
 
 
@@ -170,7 +168,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "validate":
         return _validate(args)
     if args.command == "schema":
-        return _schema(args)
+        return _schema()
     if args.execute_yaml:
         execute_yaml(args.execute_yaml)
         return EXIT_OK

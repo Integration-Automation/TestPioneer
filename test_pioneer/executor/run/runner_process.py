@@ -115,8 +115,10 @@ def _spawn(commands: list[str], environment: Mapping[str, str] | None = None,
     The command is an argument list, never a shell string.
     """
     stdout, stderr = logs if logs else (None, None)
+    # commands is [python, "-m", <package of a registered runner>, "--execute_file", <script>]:
+    # no shell reads it, and the package name comes from the registry, not from the workflow.
     # The caller waits for the process and closes its streams, so it is not used as a context manager.
-    return subprocess.Popen(  # nosec B603  # pylint: disable=consider-using-with
+    return subprocess.Popen(  # nosec B603  # nosemgrep  # pylint: disable=consider-using-with
         commands, stdout=stdout, stderr=stderr, env=environment)
 
 

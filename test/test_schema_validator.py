@@ -301,6 +301,7 @@ class TestHelpers:
         assert list(_SchemaChecker({}, document).check(3, {"type": "number"}, ())) == []
 
     def test_reference_outside_the_schema_is_rejected(self):
-        document = load_yaml("a: 1", "String")
+        problems = _SchemaChecker({}, load_yaml("a: 1", "String")).check(
+            {}, {"$ref": "https://example.com/other.json"}, ())
         with pytest.raises(ValueError, match="unsupported schema reference"):
-            list(_SchemaChecker({}, document).check({}, {"$ref": "https://example.com/other.json"}, ()))
+            next(problems)

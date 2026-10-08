@@ -1,7 +1,7 @@
 # TestPioneer Architecture
 
 > Short overview for people and agents.
-> Last verified: 2026-10-08 against `c6192e0` plus the consolidated-report change, on
+> Last verified: 2026-10-08 against `658470c` plus the static-analysis fixes, on
 > `feature/testpioneer-platform-improvements`.
 
 ## 1. Purpose
@@ -28,7 +28,7 @@ that result, and one consolidated report (JSON, HTML, optional JUnit XML) is wri
 | `test_pioneer/__init__.py` | Facade: `execute_yaml`, `RunOptions`, `create_template_dir`, `validate_yaml`, `lint_yaml`, `load_yaml`, `get_yaml_schema` |
 | `test_pioneer/__main__.py`, `test_pioneer/cli.py` | CLI: `cli.main(argv)` returns the exit code of `python -m test_pioneer` (`-e/--execute_yaml <file>`, `run`, `validate`, `schema`) |
 | `test_pioneer/schema/` | The workflow contract. `spec.py`: top-level keys, step types (`ACTIONS`, in dispatch order) and their fields. `definition.py`: builds the JSON Schema from `spec.py` and holds `SCHEMA_VERSION`. `get_yaml_schema()` returns it |
-| `schema/testpioneer.schema.json` | The same schema, published for editors and other tools. Written by `python -m test_pioneer schema -o`; `test/test_schema.py` keeps it identical to the built one |
+| `schema/testpioneer.schema.json` | The same schema, published for editors and other tools. Written with `python -m test_pioneer schema > schema/testpioneer.schema.json`; `test/test_schema.py` keeps it identical to the built one |
 | `test_pioneer/validation/` | `yaml_loader.load_yaml` (safe parse that keeps the line and column of every key and value), `schema_validator.check_schema` (built-in validator for the keywords the schema uses), `linter.run_lint_rules` (semantic rules), `api.validate_yaml` / `lint_yaml` |
 | `test_pioneer/models/` | `diagnostic.py`: `Diagnostic`, `ValidationResult`, `Severity`. `result.py`: the normalized run result (`RunResult`, `StepResult`, `RunnerResult`, `Artifact`, `Status`) |
 | `test_pioneer/runner/` | `adapter.py`: the `RunnerAdapter` protocol and `ModuleRunner` (a package started as `python -m <package> --execute_file <script>`, with the reader of its report format). `registry.py`: `RUNNERS`, one adapter per `with:` tag, read by the schema, the linter, `parallel_run` and the run session; `find_runner` |
@@ -67,7 +67,7 @@ that result, and one consolidated report (JSON, HTML, optional JUnit XML) is wri
   - `python -m test_pioneer validate [--format {text,json}] [--strict] [--base_dir DIR]
     [--no_file_check] <file.yml>...` checks workflows without executing them and exits 1 on an
     error (or on a warning with `--strict`);
-  - `python -m test_pioneer schema [-o FILE]` prints or writes the JSON Schema;
+  - `python -m test_pioneer schema` prints the JSON Schema;
   - with neither `-e` nor a command, the CLI raises `ExecutorException`;
   - no `-d`, `-c` or `--execute_str`, and no console script is declared.
 - **YAML contract**:
@@ -169,7 +169,7 @@ the step and the run `failed`.
      its required and optional fields; add new fields to `STEP_FIELDS`. `test/test_schema.py`
      fails while the two tables differ.
   4. Bump `SCHEMA_VERSION` (`schema/definition.py`) and regenerate the published schema:
-     `python -m test_pioneer schema -o schema/testpioneer.schema.json`.
+     `python -m test_pioneer schema > schema/testpioneer.schema.json`.
   5. Add `test/test_<area>.py`.
   6. Document it in `docs/step-types.rst`.
 - **New runner (`with:` tag)**:

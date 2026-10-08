@@ -84,7 +84,7 @@ class TestArtifactStore:
         assert store.relative(first) == "runners/api-runner/01-login"
         assert store.relative(second) == "runners/api-runner/02-login"
         assert store.relative(third) == "runners/web-runner/03-escape"
-        assert first.is_dir() and second.is_dir() and third.is_dir()
+        assert [directory.is_dir() for directory in (first, second, third)] == [True, True, True]
 
     def test_collect_lists_files_with_kind_and_size(self, tmp_path):
         store = ArtifactStore(tmp_path, "run-1")
@@ -176,14 +176,16 @@ class TestTeeOutput:
         before = sys.stdout, sys.stderr
         with tee_output(tmp_path):
             assert sys.stdout is not before[0]
-        assert (sys.stdout, sys.stderr) == before
+        assert sys.stdout is before[0]
+        assert sys.stderr is before[1]
 
     def test_streams_are_restored_after_an_exception(self, tmp_path):
         before = sys.stdout, sys.stderr
         with pytest.raises(RuntimeError), tee_output(tmp_path):
             print("before the failure")
             raise RuntimeError("boom")
-        assert (sys.stdout, sys.stderr) == before
+        assert sys.stdout is before[0]
+        assert sys.stderr is before[1]
         assert (tmp_path / "stdout.log").read_text(encoding="utf-8") == "before the failure\n"
 
     def test_a_log_that_received_nothing_is_removed(self, tmp_path):

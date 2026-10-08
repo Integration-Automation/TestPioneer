@@ -4,7 +4,7 @@ import os
 import time
 from pathlib import Path
 from unittest.mock import patch
-from xml.etree import ElementTree
+from xml.etree import ElementTree  # nosec B405  # nosemgrep  # parses only XML written by this test
 
 import pytest
 
@@ -99,7 +99,8 @@ class TestReportFiles:
         result = execute_yaml("report_path: blocked\n" + PASSING, "String")
         assert result.status is Status.PASSED
         assert result.reports == []
-        assert len(result.warnings) == 1 and result.warnings[0].startswith("the report was not written:")
+        (warning,) = result.warnings
+        assert warning.startswith("the report was not written:")
 
     def test_the_manifest_names_the_reports(self):
         result = execute_yaml("keep_artifacts: always\n" + PASSING, "String", RunOptions(run_id="r1"))
@@ -193,8 +194,9 @@ class TestDeclaredArtifacts:
                                                             encoding="utf-8")
             raise RuntimeError("driver crashed")
 
+        options = RunOptions(run_id="r1")
         with patch(SELECT, return_value=(True, execute)), pytest.raises(RuntimeError):
-            execute_yaml(RUN_STEP, "String", RunOptions(run_id="r1"))
+            execute_yaml(RUN_STEP, "String", options)
         runner = _report()["runners"][0]
         assert (runner["status"], runner["message"]) == ("error", "RuntimeError('driver crashed')")
         assert [case["status"] for case in runner["cases"]] == ["failed"]

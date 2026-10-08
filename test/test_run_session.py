@@ -84,8 +84,9 @@ class TestResult:
         assert execute_yaml(PASSING, "String", RunOptions(run_id="nightly-7")).run_id == "nightly-7"
 
     def test_an_unsafe_run_id_is_refused(self):
+        options = RunOptions(run_id="../elsewhere")
         with pytest.raises(WrongInputException):
-            execute_yaml(PASSING, "String", RunOptions(run_id="../elsewhere"))
+            execute_yaml(PASSING, "String", options)
 
 
 class TestKeepPolicy:
@@ -151,9 +152,11 @@ class TestFailuresDoNotMaskTheRun:
         assert result.warnings[0].startswith("artifacts are not collected:")
 
     def test_an_exception_is_raised_as_before_and_recorded(self):
+        text = PASSING + "    - name: after\n      wait: 0\n"
+        options = RunOptions(run_id="r1")
         with patch(f"{EXECUTOR}.blocked_wait", side_effect=RuntimeError("boom")), \
                 pytest.raises(RuntimeError, match="boom"):
-            execute_yaml(PASSING + "    - name: after\n      wait: 0\n", "String", RunOptions(run_id="r1"))
+            execute_yaml(text, "String", options)
         manifest = _manifest("r1")
         assert manifest["status"] == "error"
         assert manifest["message"] == "RuntimeError('boom')"
@@ -161,8 +164,9 @@ class TestFailuresDoNotMaskTheRun:
             ("pause", "error"), ("after", "cancelled")]
 
     def test_a_workflow_without_jobs_raises_and_is_recorded(self):
+        options = RunOptions(run_id="r1")
         with pytest.raises(YamlException, match="No jobs tag"):
-            execute_yaml("key: value", "String", RunOptions(run_id="r1"))
+            execute_yaml("key: value", "String", options)
         manifest = _manifest("r1")
         assert manifest["status"] == "error"
         assert manifest["steps"] == []
@@ -221,9 +225,10 @@ class TestInProcessRunner:
 
     def test_a_runner_that_raises_keeps_what_it_printed(self):
         execute, _seen = _fake_runner("last words", error=ValueError("bad action list"))
+        options = RunOptions(run_id="r1")
         with patch("test_pioneer.executor.run.executor_run.select_with_runner", return_value=(True, execute)), \
                 pytest.raises(ValueError, match="bad action list"):
-            execute_yaml(RUN_STEP, "String", RunOptions(run_id="r1"))
+            execute_yaml(RUN_STEP, "String", options)
         manifest = _manifest("r1")
         (runner,) = manifest["runners"]
         assert (runner["status"], runner["message"]) == ("error", "ValueError('bad action list')")

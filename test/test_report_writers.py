@@ -1,7 +1,7 @@
 """Tests for the consolidated report: JSON, HTML and JUnit XML."""
 import json
 from pathlib import Path
-from xml.etree import ElementTree
+from xml.etree import ElementTree  # nosec B405  # nosemgrep  # parses only XML written by this test
 
 import pytest
 
@@ -61,8 +61,9 @@ class TestWriteReports:
         assert result.reports == []
 
     def test_an_unknown_format_is_refused_before_anything_is_written(self, tmp_path):
+        result = _result()
         with pytest.raises(ValueError, match="unknown report format: pdf"):
-            write_reports(_result(), tmp_path / "report", ["json", "pdf"])
+            write_reports(result, tmp_path / "report", ["json", "pdf"])
         assert not (tmp_path / "report").exists()
 
     def test_text_outside_utf8_does_not_stop_the_report(self, tmp_path):
