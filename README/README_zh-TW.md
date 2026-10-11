@@ -199,6 +199,8 @@ print(result.status.value, result.summary())
 
 通過的執行不會在 `artifacts/` 下留下任何東西。`--keep_artifacts always`，或在流程中寫 `keep_artifacts: always`，會全部保留；`artifacts_path` 與 `report_path` 可改變這兩個資料夾的位置。
 
+若 `<artifacts_path>/<run-id>/` 已存在，會在錄製或執行步驟前拒絕此次執行。保留先前證據時請使用新的 `--run_id`；兩次同時執行不能取得同一目錄。清理只會移除此執行擁有的目錄。
+
 ### 7. 在 CI 中執行
 
 ```yaml

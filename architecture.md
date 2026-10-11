@@ -114,7 +114,9 @@ python -m test_pioneer -e file.yml → execute_yaml → _load_yaml (yaml.safe_lo
 **Run session**
 
 ```
-RunSession.__enter__ → ArtifactStore.create (<artifacts_path>/<run-id>/testpioneer/execution.log)
+RunSession.__enter__ → ArtifactStore.create (atomic claim of a new <artifacts_path>/<run-id>/)
+  → reject an existing run directory before recording or executing steps
+  → create testpioneer/execution.log; cleanup requires the claimed directory identity
   → current_session() set + step log sink set (every step_log_check message → execution.log)
 run_step → StepResult (timing; True → passed, False → failed, exception → error and re-raised)
   → the step takes the worst status of itself and the runner executions recorded during it
@@ -129,7 +131,8 @@ __exit__ → run status = worst step status → on_failure: a passed run is remo
   → manifest.json
 ```
 
-An artifact or report problem (`OSError`, or `ValueError` for a malformed runner report) becomes
+An existing run directory raises `YamlException` before recording or executing steps. Other
+artifact or report problems (`OSError`, or `ValueError` for a malformed runner report) become
 an entry of `RunResult.warnings`; it never changes the outcome. A handler called outside
 `execute_yaml` finds no session and behaves as before.
 

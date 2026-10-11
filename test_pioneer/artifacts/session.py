@@ -4,8 +4,8 @@
 their runner executions to it; a handler called on its own, outside ``execute_yaml``, finds no
 session and behaves as it always did.
 
-Nothing here may break a run: a directory that cannot be created or a file that cannot be
-written becomes a warning on the result, never an exception.
+Unavailable artifact storage or report writes become warnings. An existing run directory is
+rejected before workflow execution so evidence from another run cannot be overwritten or deleted.
 """
 from __future__ import annotations
 
@@ -29,7 +29,7 @@ from test_pioneer.artifacts.context import (
     checked_run_id,
     new_run_id,
 )
-from test_pioneer.artifacts.store import ArtifactStore
+from test_pioneer.artifacts.store import ArtifactStore, RunDirectoryExistsError
 from test_pioneer.logging.loggin_instance import reset_step_log_sink, set_step_log_sink
 from test_pioneer.models.result import RunnerResult, RunResult, Status, StepResult, utc_now, worst_status
 from test_pioneer.report.formats import DEFAULT_REPORT_FORMATS, DEFAULT_REPORT_PATH, REPORT_FORMATS
@@ -178,6 +178,10 @@ class RunSession:
             return
         try:
             self._store.create()
+        except RunDirectoryExistsError as error:
+            raise YamlException(
+                f"run directory already exists: {self._store.run_dir}; choose a new run_id"
+            ) from error
         except OSError as error:
             self._warn(f"artifacts are not collected: {error}")
             self._store = None

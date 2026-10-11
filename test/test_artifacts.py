@@ -3,6 +3,8 @@ import io
 import json
 import re
 import sys
+from concurrent.futures import ThreadPoolExecutor
+from threading import Barrier
 
 import pytest
 
@@ -67,6 +69,57 @@ class TestArtifactKind:
 
 
 class TestArtifactStore:
+    def test_competing_claims_have_one_owner_and_preserve_its_evidence(self, tmp_path):
+        stores = [ArtifactStore(tmp_path / "artifacts", "same-run") for _ in range(2)]
+        barrier = Barrier(2)
+
+        def claim(store):
+            barrier.wait(timeout=5)
+            try:
+                store.create()
+            except FileExistsError:
+                return False
+            return True
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            claimed = list(pool.map(claim, stores))
+        assert sorted(claimed) == [False, True]
+        owner = stores[claimed.index(True)]
+        rejected = stores[claimed.index(False)]
+        owner.log("retained evidence")
+        owner.close_log()
+        with pytest.raises(PermissionError, match="not claimed"):
+            rejected.remove_run()
+        with pytest.raises(PermissionError, match="not claimed"):
+            rejected.new_runner_dir("api-runner", "overwrite")
+        with pytest.raises(PermissionError, match="not claimed"):
+            rejected.write_manifest(RunResult(run_id="same-run"))
+        assert owner.execution_log.read_text(encoding="utf-8") == "retained evidence\n"
+
+    def test_cleanup_cannot_delete_a_later_claim_of_the_same_id(self, tmp_path):
+        first = ArtifactStore(tmp_path, "same-run")
+        first.create()
+        first.remove_run()
+        second = ArtifactStore(tmp_path, "same-run")
+        second.create()
+        second.log("new evidence")
+        second.close_log()
+        with pytest.raises(PermissionError, match="not claimed"):
+            first.remove_run()
+        assert second.execution_log.read_text(encoding="utf-8") == "new evidence\n"
+
+    def test_cleanup_refuses_a_replaced_directory(self, tmp_path):
+        store = ArtifactStore(tmp_path, "same-run")
+        store.create()
+        store.close_log()
+        store.run_dir.rename(tmp_path / "original")
+        store.run_dir.mkdir()
+        marker = store.run_dir / "other-evidence.txt"
+        marker.write_text("keep", encoding="utf-8")
+        with pytest.raises(PermissionError, match="replaced"):
+            store.remove_run()
+        assert marker.read_text(encoding="utf-8") == "keep"
+
     def test_layout(self, tmp_path):
         store = ArtifactStore(tmp_path / "artifacts", "run-1")
         store.create()

@@ -8,7 +8,7 @@ import yaml
 from test_pioneer.artifacts.session import RunOptions, RunSession
 from test_pioneer.executor.browser.url import open_url
 from test_pioneer.executor.file.file_processing import download_single_file, unzip_zipfile
-from test_pioneer.executor.program.external_program import open_program, close_program
+from test_pioneer.executor.program.external_program import close_program, open_program
 from test_pioneer.executor.run.executor_run import run
 from test_pioneer.executor.run.executor_run_folder import run_folder
 from test_pioneer.executor.run.parallel_run import parallel_run
@@ -24,11 +24,13 @@ from test_pioneer.utils.package.check import is_installed
 # 步驟類型對應的處理函式
 _STEP_HANDLERS = {
     "run": lambda step, name, enable_logging: run(step=step, enable_logging=enable_logging),
-    "run_folder": lambda step, name, enable_logging: run_folder(step=step, enable_logging=enable_logging, mode="run_folder"),
+    "run_folder": lambda step, name, enable_logging: run_folder(
+        step=step, enable_logging=enable_logging, mode="run_folder"),
     "open_url": lambda step, name, enable_logging: open_url(step=step, enable_logging=enable_logging),
     "download_file": lambda step, name, enable_logging: download_single_file(step=step, enable_logging=enable_logging),
     "wait": lambda step, name, enable_logging: blocked_wait(step=step, enable_logging=enable_logging),
-    "open_program": lambda step, name, enable_logging: open_program(step=step, name=name, enable_logging=enable_logging),
+    "open_program": lambda step, name, enable_logging: open_program(
+        step=step, name=name, enable_logging=enable_logging),
     "close_program": lambda step, name, enable_logging: close_program(step=step, enable_logging=enable_logging),
     "unzip_zipfile": lambda step, name, enable_logging: unzip_zipfile(step=step, enable_logging=enable_logging),
     "parallel_run": lambda step, name, enable_logging: parallel_run(step=step, enable_logging=enable_logging),
@@ -159,10 +161,11 @@ def execute_yaml(stream: str, yaml_type: str = "File", options: Optional[RunOpti
 
     enable_logging = set_logger(yaml_data=yaml_data)
     session = RunSession(yaml_data, options, workflow=stream if yaml_type == "File" else None)
-    recording, recorder = _setup_recorder(yaml_data)
+    recording, recorder = False, None
 
     try:
         with session:
+            recording, recorder = _setup_recorder(yaml_data)
             _run_workflow(yaml_data, enable_logging, session)
     finally:
         _stop_recorder(recording, recorder)

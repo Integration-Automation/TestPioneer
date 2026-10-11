@@ -50,6 +50,25 @@ def script():
 
 
 class TestResult:
+    @pytest.mark.parametrize("workflow", [PASSING, FAILING])
+    @pytest.mark.parametrize("keep", ["on_failure", "always", "never"])
+    def test_existing_run_is_refused_before_execution_and_keeps_evidence(self, workflow, keep):
+        directory = Path("artifacts/same-run/testpioneer")
+        directory.mkdir(parents=True)
+        marker = directory / "execution.log"
+        marker.write_bytes(b"previous evidence\n")
+        report = Path("report/testpioneer-report.json")
+        report.parent.mkdir()
+        report.write_bytes(b"previous report\n")
+        with patch(f"{EXECUTOR}._dispatch_step") as dispatch, patch(f"{EXECUTOR}._setup_recorder") as recorder:
+            with pytest.raises(YamlException, match="run directory already exists"):
+                execute_yaml(workflow, "String", RunOptions(run_id="same-run", keep_artifacts=keep))
+            dispatch.assert_not_called()
+            recorder.assert_not_called()
+        assert marker.read_bytes() == b"previous evidence\n"
+        assert report.read_bytes() == b"previous report\n"
+        assert current_session() is None
+
     def test_a_passing_run_returns_its_result(self):
         result = execute_yaml(PASSING, "String")
         assert result.status is Status.PASSED
