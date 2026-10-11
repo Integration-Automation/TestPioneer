@@ -199,6 +199,8 @@ print(result.status.value, result.summary())
 
 A run that passed leaves nothing under `artifacts/`. `--keep_artifacts always`, or `keep_artifacts: always` in the workflow, keeps everything; `artifacts_path` and `report_path` move the two folders.
 
+An existing `<artifacts_path>/<run-id>/` is refused before recording or executing steps. Choose a new `--run_id` when keeping earlier evidence; two simultaneous runs cannot claim the same directory. Cleanup only removes directories owned by the current execution.
+
 ### 7. Run in CI
 
 ```yaml

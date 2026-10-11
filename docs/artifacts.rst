@@ -25,6 +25,13 @@ runner. You can choose it yourself:
 A run ID is 1 to 64 letters, digits, ``.``, ``_`` or ``-``. It starts with a letter or digit and
 does not end with ``.``.
 
+The run directory is claimed atomically before recording or executing workflow steps. If
+``<artifacts_path>/<run-id>/`` already exists (including a file or a link at that path), the run
+raises ``YamlException`` without changing earlier artifacts or reports. Choose a new ID when
+keeping previous evidence. Of two simultaneous claims of the same ID, only one can succeed.
+Cleanup checks that the directory is still the one claimed by this execution; an unclaimed,
+replaced or already-released directory cannot be removed by that store.
+
 Artifact Directory
 ------------------
 
