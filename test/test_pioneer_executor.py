@@ -41,6 +41,11 @@ class TestValidateSteps:
         steps = [{"name": "dup"}, {"name": "dup"}]
         assert _validate_steps(steps, enable_logging=False) is False
 
+    def test_names_of_an_earlier_run_can_be_used_again(self):
+        steps = [{"name": "step1"}, {"name": "step2"}]
+        assert _validate_steps(steps, enable_logging=False) is True
+        assert _validate_steps(steps, enable_logging=False) is True
+
 
 class TestExecuteYaml:
     @patch("test_pioneer.executor.pioneer_executor.set_logger", return_value=False)
@@ -146,6 +151,16 @@ class TestExecuteYaml:
         yaml_str = "jobs:\n  steps:\n    - name: folder_test\n      run_folder: ./test\n      with: api-runner"
         execute_yaml(yaml_str, yaml_type="String")
         mock_run_folder.assert_called_once()
+
+    @patch("test_pioneer.executor.pioneer_executor.blocked_wait", return_value=True)
+    @patch("test_pioneer.executor.pioneer_executor.set_logger", return_value=False)
+    @patch("test_pioneer.executor.pioneer_executor.is_installed", return_value=False)
+    def test_the_same_workflow_runs_twice_in_one_process(self, mock_installed, mock_logger, mock_wait):
+        yaml_str = "jobs:\n  steps:\n    - name: wait_test\n      wait: 5"
+        first = execute_yaml(yaml_str, yaml_type="String")
+        second = execute_yaml(yaml_str, yaml_type="String")
+        assert (first.status.value, second.status.value) == ("passed", "passed")
+        assert mock_wait.call_count == 2
 
     @patch("test_pioneer.executor.pioneer_executor.set_logger", return_value=False)
     @patch("test_pioneer.executor.pioneer_executor.is_installed", return_value=False)

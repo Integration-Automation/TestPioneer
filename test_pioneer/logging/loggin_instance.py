@@ -1,11 +1,34 @@
 import logging
+from contextvars import ContextVar, Token
 from logging.handlers import RotatingFileHandler
-from typing import Optional
+from typing import Callable, Optional
 
 # Create a named logger (avoid setting root logger level to prevent global side effects)
 # 建立名為 "TestPioneer" 的 logger（避免設定 root logger 等級以防止全域副作用）
 test_pioneer_logger = logging.getLogger("TestPioneer")
 test_pioneer_logger.setLevel(logging.DEBUG)
+
+# Receives every step message as (level, message), whether or not pioneer_log is set.
+# The run session uses it to write the run's own execution log.
+# 接收每一則步驟訊息 (level, message)，不論是否設定 pioneer_log；run session 用它寫入該次執行的 log。
+StepLogSink = Callable[[str, str], None]
+_step_log_sink: ContextVar[Optional[StepLogSink]] = ContextVar("test_pioneer_step_log_sink", default=None)
+
+
+def set_step_log_sink(sink: StepLogSink) -> Token:
+    """
+    Send every step message to ``sink`` as well; returns the token that undoes it.
+    將每一則步驟訊息也送給 ``sink``；回傳用來還原的 token。
+    """
+    return _step_log_sink.set(sink)
+
+
+def reset_step_log_sink(token: Token) -> None:
+    """
+    Undo ``set_step_log_sink``.
+    還原 ``set_step_log_sink``。
+    """
+    _step_log_sink.reset(token)
 
 # Define log format
 # 定義日誌格式
@@ -64,3 +87,6 @@ def step_log_check(enable_logging: bool = False, logger: Optional[logging.Logger
         }.get(level)
         if logger_level:
             logger_level(message)
+    sink = _step_log_sink.get()
+    if sink is not None and message:
+        sink(level, message)

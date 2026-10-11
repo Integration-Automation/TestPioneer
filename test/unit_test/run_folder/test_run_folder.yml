@@ -1,7 +1,6 @@
 pioneer_log: "test_pioneer.log"
-recording_path: "test_video"
 jobs:
     steps:
-        - name: run_folder_1
-          run_folder: /test/unit_test/run_folder/test
-          with: gui-runner
+        - name: run_folder_scripts
+          run_folder: test/unit_test/run_folder/test
+          with: file-runner

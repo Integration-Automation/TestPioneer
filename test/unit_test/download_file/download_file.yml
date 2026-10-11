@@ -2,5 +2,5 @@ pioneer_log: "test_pioneer.log"
 jobs:
   steps:
     - name: download_test_file
-      download_file: "http://212.183.159.230/512MB.zip"
-      file_name: "test_512MB.zip"
+      download_file: "https://raw.githubusercontent.com/Integration-Automation/TestPioneer/main/LICENSE"
+      file_path: "test/unit_test/output/downloaded_LICENSE"

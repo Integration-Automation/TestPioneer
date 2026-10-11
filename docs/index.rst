@@ -10,8 +10,12 @@ and Load testing through pluggable runners.
 
    getting-started
    yaml-configuration
+   validation
+   artifacts
+   reports
    runners
    step-types
    docker
    api-reference
+   migration
    changelog

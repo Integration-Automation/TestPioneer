@@ -44,9 +44,16 @@ def download_single_file(step: dict, enable_logging: bool = False) -> bool:
         )
         return False
 
-    # Perform download
-    # 執行下載
-    download_file(file_url=file_url, file_name=file_path)
+    # Perform download; download_file reports a refused URL or a failed transfer by returning False
+    # 執行下載；URL 被拒絕或傳輸失敗時 download_file 會回傳 False
+    if not download_file(file_url=file_url, file_name=file_path):
+        step_log_check(
+            enable_logging=enable_logging,
+            logger=test_pioneer_logger,
+            level="error",
+            message=f"Download failed: {file_url}"
+        )
+        return False
     return True
 
 

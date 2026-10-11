@@ -27,6 +27,12 @@ class TestDownloadSingleFile:
             file_url="https://example.com/f.zip", file_name="f.zip"
         )
 
+    def test_a_download_that_fails_fails_the_step(self, monkeypatch):
+        # download_file returns False for a URL it refuses and for a transfer that fails.
+        monkeypatch.setattr(mock_automation_file.download_file, "return_value", False)
+        result = download_single_file({"download_file": "https://example.com/f.zip", "file_path": "f.zip"})
+        assert result is False
+
     def test_missing_url_returns_false(self):
         result = download_single_file({"file_path": "f.zip"})
         assert result is False
