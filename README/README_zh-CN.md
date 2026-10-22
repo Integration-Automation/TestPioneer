@@ -289,6 +289,10 @@ create_template_dir()
 
 如需可视化编辑体验，请参阅 [PyBreeze](https://github.com/Integration-Automation/PyBreeze)。
 
+## 安全
+
+请私下报告漏洞。政策、支持版本与操作者注意事项见 [SECURITY.md](../SECURITY.md)。
+
 ## 许可证
 
 [MIT](../LICENSE)

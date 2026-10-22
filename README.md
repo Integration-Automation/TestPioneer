@@ -289,6 +289,10 @@ Full documentation is available at **[testpioneer.readthedocs.io](https://testpi
 
 For a visual editing experience, see [PyBreeze](https://github.com/Integration-Automation/PyBreeze).
 
+## Security
+
+Report vulnerabilities privately. The policy, supported versions, and operator notes are in [SECURITY.md](SECURITY.md).
+
 ## License
 
 [MIT](LICENSE)
