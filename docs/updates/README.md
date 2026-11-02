@@ -60,6 +60,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 |---|---|---|---|---|
 | U-20261101-01 | 2026-11-01 | Patch the dependencies named in Dependabot security alerts | #bugfix #deps #security #ci | [2026-11](2026-11.md) |
 | U-20261102-01 | 2026-11-02 | Move Pillow to 13.0.0 through je_auto_control 1.1.0 | #done #deps #security | [2026-11](2026-11.md) |
+| U-20261102-02 | 2026-11-02 | Require Python 3.11 so every install gets Pillow 13 | #done #deps #security #ci | [2026-11](2026-11.md) |
 | U-20261011-01 | 2026-10-11 | Claim run directories before execution and preserve prior evidence | #done #bugfix #artifacts | [2026-10](2026-10.md) |
 | U-20261008-17 | 2026-10-08 | The runner pull requests for native support are open | #artifacts #decision | [2026-10](2026-10.md) |
 | U-20261008-16 | 2026-10-08 | Runner survey: LoadDensity already fails its CLI, ActionCore needs no change | #docs #artifacts | [2026-10](2026-10.md) |
@@ -101,6 +102,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 2 |
+| [2026-11.md](2026-11.md) | 2026-11 | 3 |
 | [2026-10.md](2026-10.md) | 2026-10 | 23 |
 | [2026-09.md](2026-09.md) | 2026-09 | 13 |

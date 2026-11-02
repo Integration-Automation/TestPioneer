@@ -76,6 +76,6 @@ CI/CD Integration
 -----------------
 
 The project includes GitHub Actions CI that runs both unit and integration tests on
-Python 3.10, 3.11, and 3.12. See ``.github/workflows/ci.yml`` for the full configuration.
+Python 3.11 to 3.14. See ``.github/workflows/ci.yml`` for the full configuration.
 
 Test artifacts (videos and logs) are uploaded automatically on each CI run.

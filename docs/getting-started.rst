@@ -12,12 +12,12 @@ Features
 - **One report** -- The results of every runner are merged into a single JSON and HTML report, with optional JUnit XML
 - **Video recording** -- Built-in test session recording for debugging (requires GUI extras)
 - **Process management** -- Launch/terminate external programs with stdout/stderr redirection
-- **Cross-platform** -- Windows, macOS, and Linux (Python 3.10+)
+- **Cross-platform** -- Windows, macOS, and Linux (Python 3.11+)
 
 Requirements
 ------------
 
-- Python 3.10 or higher
+- Python 3.11 or higher
 
 Installation
 ------------
