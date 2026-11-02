@@ -20,7 +20,7 @@
 - **單一報告** - 所有 Runner 的結果合併成一份 JSON 與 HTML 報告，並可選擇輸出 JUnit XML
 - **影片錄製** - 內建測試過程錄影功能，方便除錯
 - **程序管理** - 啟動/終止外部程式，支援 stdout/stderr 重新導向
-- **跨平台** - 支援 Windows、macOS 及 Linux（Python 3.10+）
+- **跨平台** - 支援 Windows、macOS 及 Linux（Python 3.11+）
 
 ## 安裝
 
