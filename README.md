@@ -20,7 +20,7 @@ A YAML-driven automation test framework for CI/CD pipelines, supporting GUI, Web
 - **One report** - The results of every runner are merged into a single JSON and HTML report, with optional JUnit XML
 - **Video recording** - Built-in test session recording for debugging
 - **Process management** - Launch/terminate external programs with stdout/stderr redirection
-- **Cross-platform** - Windows, macOS, and Linux (Python 3.10+)
+- **Cross-platform** - Windows, macOS, and Linux (Python 3.11+)
 
 ## Installation
 

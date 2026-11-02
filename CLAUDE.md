@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-TestPioneer is a YAML-driven automation test framework for CI/CD pipelines (Python 3.10+).
+TestPioneer is a YAML-driven automation test framework for CI/CD pipelines (Python 3.11+).
 Supports GUI, Web, API, and Load testing through pluggable runners.
 
 - **Package**: `test_pioneer` (PyPI)
